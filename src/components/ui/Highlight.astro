@@ -30,13 +30,13 @@ const { type = '1', classes, colorFrom, colorTo } = Astro.props
 		@apply relative inline-block before:absolute before:-bottom-1 before:-left-1 before:-right-1 before:-top-1 before:z-[-1];
 	}
 	.highlight--1 {
-		@apply bg-gradient-to-r from-primary-400 via-primary-500 to-primary-700 bg-clip-text text-transparent;
+		@apply text-primary-500;
 	}
 	.highlight--2 {
-		@apply px-4 text-white before:bg-maroon-linear before:from-primary-700 before:to-primary-500;
+		@apply px-4 text-white before:bg-primary-500;
 	}
 	.highlight--3 {
-		@apply px-4 text-white before:-rotate-2 before:bg-gradient-to-r before:from-primary-700 before:via-primary-500 before:to-primary-800 lg:before:-bottom-2 lg:before:-top-2;
+		@apply px-4 text-white before:-rotate-2 before:bg-primary-500 lg:before:-bottom-2 lg:before:-top-2;
 	}
 	.highlight--4 {
 		@apply bg-gradient-to-r bg-clip-text text-transparent;

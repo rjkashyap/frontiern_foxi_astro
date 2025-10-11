@@ -46,7 +46,7 @@
 		@apply fixed bottom-4 right-4 z-50;
 	}
 	.toast__container {
-		@apply flex max-h-[95vh] w-80 max-w-full translate-y-4 flex-col overflow-hidden rounded bg-gradient-to-r from-primary-800/80 via-primary-600/80 to-primary-900/80 px-4 py-3 text-sm text-white opacity-0 shadow-lg shadow-primary-700/25 ring-1 ring-inset ring-primary-700 backdrop-blur-sm transition-all duration-500 dark:ring-primary-400 [.toast--show_&]:animate-fadeUp;
+		@apply flex max-h-[95vh] w-80 max-w-full translate-y-4 flex-col overflow-hidden rounded bg-primary-500/80 px-4 py-3 text-sm text-white opacity-0 shadow-lg shadow-primary-400/20 ring-1 ring-inset ring-primary-700 backdrop-blur-sm transition-all duration-500 dark:ring-primary-400 [.toast--show_&]:animate-fadeUp;
 	}
 	.toast__heading {
 		@apply mb-0 flex items-center gap-4;
@@ -55,7 +55,7 @@
 		@apply mb-0 flex-1 text-base font-semibold text-white;
 	}
 	.toast__close-button {
-		@apply inline-flex h-8 items-center justify-center gap-2 justify-self-center whitespace-nowrap rounded-full bg-gradient-to-br from-primary-700 via-primary-600 to-primary-800 px-4 text-xs font-medium tracking-wide text-white transition duration-300 hover:from-primary-600 hover:via-primary-500 hover:to-primary-700 hover:text-primary-50 focus:from-primary-600 focus:via-primary-500 focus:to-primary-700 focus:text-primary-50 focus-visible:outline-none disabled:cursor-not-allowed disabled:text-primary-400 disabled:from-primary-400 disabled:via-primary-300 disabled:to-primary-500 disabled:shadow-none disabled:hover:bg-transparent;
+		@apply inline-flex h-8 items-center justify-center gap-2 justify-self-center whitespace-nowrap rounded-full px-4 text-xs font-medium tracking-wide text-white transition duration-300 hover:bg-primary-50 hover:text-primary-600 focus:bg-primary-100 focus:text-primary-700 focus-visible:outline-none disabled:cursor-not-allowed disabled:text-primary-600 disabled:shadow-none disabled:hover:bg-transparent;
 	}
 	.toast__close-button-icon {
 		@apply relative only:-mx-4;

@@ -59,11 +59,6 @@ export default {
           950: "#090808",
         },
       },
-      backgroundImage: {
-        "maroon-linear":
-          "linear-gradient(90deg, var(--tw-gradient-from), var(--tw-gradient-to))",
-        "maroon-radial": "radial-gradient(var(--tw-gradient-stops))",
-      },
       cursor: {
         fancy: "url(https://www.svgrepo.com/show/269/color-picker.svg)",
       },
