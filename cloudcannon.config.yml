@@ -1,0 +1,17 @@
+paths:
+  static: public
+  uploads: public/uploads
+
+collections_config:
+  pages:
+    path: src/pages
+    output: true
+    _editing:
+      content: true
+      front_matter: true
+
+editable_regions:
+  - selector: "main, h1, h2, h3, p, li, span"
+    type: text
+  - selector: "img"
+    type: image
