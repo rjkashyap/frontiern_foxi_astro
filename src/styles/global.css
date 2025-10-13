@@ -3,7 +3,7 @@ html {
 	@apply scroll-smooth antialiased;
 }
 body {
-	@apply bg-white text-neutral-500 has-[.header\_\_menu--open]:overflow-hidden lg:has-[.header\_\_menu--open]:overflow-auto dark:bg-neutral-950 dark:text-neutral-400 [.dark_&]:text-neutral-400 [.light_&]:text-neutral-500;
+	@apply bg-white text-neutral-500 has-[.header\_\_menu--open]:overflow-hidden lg:has-[.header\_\_menu--open]:overflow-auto dark:bg-neutral-950 dark:text-white [.dark_&]:text-white [.light_&]:text-neutral-500;
 }
 
 /* Main typography */
@@ -68,7 +68,7 @@ main a {
 	@apply text-primary-500;
 }
 .small {
-	@apply text-sm font-normal text-neutral-400 dark:text-neutral-500;
+	@apply text-sm font-normal text-neutral-500 dark:text-white;
 }
 /* Global basic styling */
 .basic-text {

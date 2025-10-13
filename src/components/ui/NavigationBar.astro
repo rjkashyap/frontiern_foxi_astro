@@ -122,7 +122,7 @@ const savedNavActions = navActions.map((action) => ({
 		@apply sticky top-0 z-20 w-full animate-fadeInShadowLight [animation-range:0%_20rem] [animation-timeline:scroll()] before:absolute after:absolute after:left-0 after:top-full after:z-10 after:block after:h-px after:w-full lg:after:hidden dark:animate-fadeInShadowDark dark:[animation-range:0%_20rem] dark:[animation-timeline:scroll()];
 	}
 	.header:before {
-		@apply block h-full w-full bg-white/90 lg:backdrop-blur-sm dark:bg-neutral-900/90;
+		@apply block h-full w-full bg-white lg:backdrop-blur-sm dark:bg-neutral-900;
 	}
 	.header__container {
 		@apply container relative mx-auto px-6;
@@ -134,7 +134,7 @@ const savedNavActions = navActions.map((action) => ({
 		@apply flex h-[5.5rem] items-stretch gap-6 font-medium text-neutral-700 lg:justify-between dark:text-neutral-50;
 	}
 	.header__menu {
-		@apply invisible absolute left-0 top-0 z-[-1] ml-auto h-dvh w-full justify-center overflow-hidden overflow-y-auto overscroll-contain bg-white/90 px-8 py-[6rem] font-medium opacity-0 transition-[opacity,visibility] duration-300 lg:visible lg:relative lg:top-0 lg:z-0 lg:flex lg:h-full lg:w-auto lg:items-stretch lg:overflow-visible lg:bg-white/0 lg:px-0 lg:py-0 lg:pt-0 lg:opacity-100 dark:bg-neutral-900/90 dark:lg:bg-transparent;
+		@apply invisible absolute left-0 top-0 z-[-1] ml-auto h-dvh w-full justify-center overflow-hidden overflow-y-auto overscroll-contain bg-white px-8 py-[6rem] font-medium opacity-0 transition-[opacity,visibility] duration-300 lg:visible lg:relative lg:top-0 lg:z-0 lg:flex lg:h-full lg:w-auto lg:items-stretch lg:overflow-visible lg:bg-transparent lg:px-0 lg:py-0 lg:pt-0 lg:opacity-100 dark:bg-neutral-900 dark:lg:bg-transparent;
 	}
 	.header__menu--open {
 		@apply visible opacity-100 backdrop-blur-sm;
@@ -149,7 +149,7 @@ const savedNavActions = navActions.map((action) => ({
 		@apply h-4 w-4 transition-transform [.header\_\_menu-item.open_&]:rotate-180;
 	}
 	.header__submenu {
-		@apply left-0 top-full hidden animate-dropdown rounded bg-neutral-300/10 px-4 lg:absolute lg:min-w-48 lg:rounded-t-none lg:bg-white/90 lg:p-0 lg:shadow-lg lg:shadow-neutral-700/5 lg:backdrop-blur-sm dark:bg-neutral-500/10 lg:dark:bg-neutral-900/90 lg:dark:shadow-neutral-950/50 [.header\_\_menu-item.open_&]:block;
+		@apply left-0 top-full hidden animate-dropdown rounded bg-neutral-300 px-4 lg:absolute lg:min-w-48 lg:rounded-t-none lg:bg-white lg:p-0 lg:shadow-lg lg:shadow-black lg:backdrop-blur-sm dark:bg-neutral-500 lg:dark:bg-neutral-900 lg:dark:shadow-black [.header\_\_menu-item.open_&]:block;
 	}
 	.header__submenu-item {
 		@apply hidden [.header\_\_menu-item.open_&]:block;
