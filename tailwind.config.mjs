@@ -33,19 +33,19 @@ export default {
     extend: {
       colors: {
         transparent: "transparent",
-        // Keep base colour; restore darker hover shades.
+        // Taxi yellow base, darker hover tones desaturated to avoid “dirty” look.
         primary: {
           50:  "#FFF7E6",
           100: "#FFECC7",
           200: "#FFE092",
           300: "#FFD055",
           400: "#FFBF1F",
-          500: "#FFB300",  // base (unchanged)
-          600: "#E3A400",  // darker than 500 (good for hover)
-          700: "#C28F00",  // even darker hover
-          800: "#996F00",
-          900: "#6A4A00",
-          950: "#2A1A00",
+          500: "#FFB300",  // base (NY taxi yellow)
+          600: "#D9A200",  // slightly darker, lower saturation (hover)
+          700: "#B38600",  // deeper gold (strong hover)
+          800: "#8C6B00",
+          900: "#5C4600",
+          950: "#2E2300",
           DEFAULT: "#FFB300",
         },
         neutral: {
