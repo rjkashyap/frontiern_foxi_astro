@@ -1,0 +1,1 @@
+src/layouts/Layout.astro:34:<html lang="en" class="scroll-animation mode-auto relative">

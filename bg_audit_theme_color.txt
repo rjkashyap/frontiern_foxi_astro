@@ -1,0 +1,1 @@
+src/components/blocks/head/Header.astro:49:	<meta name="theme-color" content="#134e4a" />
