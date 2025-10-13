@@ -143,7 +143,7 @@ const savedNavActions = navActions.map((action) => ({
 		@apply relative flex cursor-pointer flex-col items-stretch lg:flex-row;
 	}
 	.header__menu-link {
-		@apply relative flex items-center gap-1 py-4 transition-colors duration-300 hover:text-neutral-900 focus:text-neutral-800 focus:outline-none focus-visible:outline-none lg:px-6 [&.active]:text-neutral-900 dark:hover:text-neutral-200 dark:focus:text-neutral-300 dark:[&.active]:text-neutral-100;
+		@apply relative flex items-center gap-1 py-4 transition-colors duration-300 hover:text-primary-500 focus:text-primary-600 focus:outline-none focus-visible:outline-none lg:px-6 [&.active]:text-primary-500;
 	}
 	.header__menu-chevron {
 		@apply h-4 w-4 transition-transform [.header\_\_menu-item.open_&]:rotate-180;
@@ -155,7 +155,7 @@ const savedNavActions = navActions.map((action) => ({
 		@apply hidden [.header\_\_menu-item.open_&]:block;
 	}
 	.header__submenu-link {
-		@apply px-8 py-4 hover:text-neutral-900 dark:hover:text-neutral-200 [.header\_\_menu-item.open_&]:flex;
+		@apply px-8 py-4 hover:text-primary-500 [.header\_\_menu-item.open_&]:flex;
 	}
 	.header__toggle {
 		@apply relative order-10 block h-10 w-10 self-center lg:hidden [&--open]:visible [&--open]:opacity-100;
