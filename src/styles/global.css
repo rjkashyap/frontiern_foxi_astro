@@ -78,11 +78,6 @@ main a {
 	@apply text-lg leading-relaxed [&_blockquote]:text-xl [&_blockquote]:leading-loose;
 }
 
-:root {
-	--brand-hover: #64748B; /* slate-500 */
-	--brand-active: #475569; /* slate-600 */
-}
-
 /* Scroll animations */
 /* To disable scroll animations remove the class "sroll-animation" from root html in the layout file */
 .scroll-animation .col {
