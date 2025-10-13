@@ -37,12 +37,15 @@ const { type = 'top-icon', title, icon = 'rocket', iconStyle, align, classes } =
 >
 	<Icon
 		name=`${icon}`
-		class:list={[
-			'shrink-0',
-			{ [`size-6 text-primary-500`]: iconStyle != 'square' },
-			{ [`size-10 rounded bg-primary-500 p-2 text-white`]: iconStyle === 'square' }
-		]}
-	/>
+	class:list={[
+		'shrink-0',
+		{ [`size-6 text-neutral-900 dark:text-neutral-100`]: iconStyle != 'square' },
+		{
+			[`size-10 rounded bg-neutral-900 p-2 text-white dark:bg-neutral-100 dark:text-black`]:
+				iconStyle === 'square'
+		}
+	]}
+/>
 	<div class="feature__body">
 		{
 			title && (

@@ -11,6 +11,7 @@ import Toast from '../components/ui/Toast.astro'
 import Scriprs from '../components/scripts/LocalScripts.astro'
 import GoogleTagManagerBody from '../components/scripts/googleTagManagerBody.astro'
 // Styles
+import '../styles/base.css'
 import '../styles/global.css'
 // Fonts
 import '@fontsource-variable/inter'
@@ -28,10 +29,13 @@ type Props = {
 }
 // Page Metadata
 const { title, description, ogImage, noindex, classes } = Astro.props
+
+const theme =
+	configData.mode === 'dark' ? 'dark' : configData.mode === 'light' ? 'light' : undefined
 ---
 
 <!doctype html>
-<html lang="en" class="scroll-animation mode-auto relative">
+<html lang="en" class:list={['relative', theme === 'dark' && 'dark']}>
 	<Header title={title} description={description} ogImage={ogImage} noindex={noindex} />
 	<body
 		class:list={[
@@ -49,5 +53,12 @@ const { title, description, ogImage, noindex, classes } = Astro.props
 		<Modal />
 		<Toast />
 		<Scriprs />
+		<script>
+			const userPref = localStorage.getItem('theme');
+			const systemPref = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			if (userPref === 'dark' || (!userPref && systemPref)) {
+				document.documentElement.classList.add('dark');
+			}
+		</script>
 	</body>
 </html>
