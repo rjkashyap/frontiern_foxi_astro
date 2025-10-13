@@ -26,7 +26,7 @@ export const configData: Config = {
 		'Foxi is a design and development agency that specializes in creating beautiful and functional websites.',
 	ogImage: '/og.jpg',
 	logo: {
-		src: '/logo.svg',
+		src: '/fnlogo.svg',
 		alt: 'Foxi. logo'
 	},
 	canonical: true,

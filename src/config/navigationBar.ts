@@ -33,7 +33,7 @@ export interface NavData {
 
 export const navigationBarData: NavData = {
 	logo: {
-		src: '/logo.svg',
+		src: '/fnlogo.svg',
 		alt: 'The tailwind astro theme',
 		text: 'Foxi.'
 	},
