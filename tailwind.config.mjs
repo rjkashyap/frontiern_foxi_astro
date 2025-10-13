@@ -33,7 +33,7 @@ export default {
     extend: {
       colors: {
         transparent: "transparent",
-        // Taxi yellow base, darker hover tones desaturated to avoid “dirty” look.
+        // Yellow base; slate hover (complimentary neutral shift)
         primary: {
           50:  "#FFF7E6",
           100: "#FFECC7",
@@ -41,11 +41,11 @@ export default {
           300: "#FFD055",
           400: "#FFBF1F",
           500: "#FFB300",  // base (NY taxi yellow)
-          600: "#D9A200",  // slightly darker, lower saturation (hover)
-          700: "#B38600",  // deeper gold (strong hover)
-          800: "#8C6B00",
-          900: "#5C4600",
-          950: "#2E2300",
+          600: "#64748B",  // hover: slate-500
+          700: "#475569",  // strong hover/focus: slate-600
+          800: "#334155",
+          900: "#1E293B",
+          950: "#0F172A",
           DEFAULT: "#FFB300",
         },
         neutral: {
