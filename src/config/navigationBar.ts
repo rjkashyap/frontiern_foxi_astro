@@ -35,7 +35,7 @@ export const navigationBarData: NavData = {
 	logo: {
 		src: '/fnlogo.svg',
 		alt: 'The tailwind astro theme',
-		text: 'Foxi.'
+		text: 'Frontier Nations'
 	},
 	navItems: [
 		{ name: 'Home', link: '/' },

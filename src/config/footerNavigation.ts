@@ -35,13 +35,13 @@ export interface FooterData {
 
 export const footerNavigationData: FooterData = {
   footerAbout: {
-    title: 'Foxi.',
+    title: 'Frontier Nations',
     aboutText:
       'Expertly made, responsive, accessible components in React and HTML ready to be used on your website or app. Just copy and paste them on your Tailwind CSS project.',
     logo: {
       src: '/fnlogo.svg',
       alt: 'The tailwind astro theme',
-      text: 'Foxi.'
+      text: 'Frontier Nations'
     }
   },
 
