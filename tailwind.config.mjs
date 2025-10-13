@@ -33,21 +33,19 @@ export default {
     extend: {
       colors: {
         transparent: "transparent",
-        // PRIMARY is a clean taxi yellow shifted slightly toward orange.
-        // NOTE: 600/700 are intentionally BRIGHTER than 500 so common hover
-        // classes (hover:bg-primary-600/700) will lighten instead of darken.
+        // Keep base colour; restore darker hover shades.
         primary: {
           50:  "#FFF7E6",
           100: "#FFECC7",
           200: "#FFE092",
           300: "#FFD055",
           400: "#FFBF1F",
-          500: "#FFB300",   // base (NYC taxi vibe)
-          600: "#FFC533",   // brighter (for hover)
-          700: "#FFDB57",   // even brighter (for stronger hover states)
-          800: "#E3A400",
-          900: "#B88200",
-          950: "#6A4A00",
+          500: "#FFB300",  // base (unchanged)
+          600: "#E3A400",  // darker than 500 (good for hover)
+          700: "#C28F00",  // even darker hover
+          800: "#996F00",
+          900: "#6A4A00",
+          950: "#2A1A00",
           DEFAULT: "#FFB300",
         },
         neutral: {
