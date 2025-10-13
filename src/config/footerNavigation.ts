@@ -78,6 +78,6 @@ export const footerNavigationData: FooterData = {
   ],
 
   subFooter: {
-    copywriteText: '© Foxi 2024.'
+    copywriteText: '© Frontier Nations - NZ Charity No. CC62618'
   }
 }

@@ -24,7 +24,7 @@ export const configData: Config = {
 	siteTitle: 'Frontier Nations Tailwind CSS Astro Starter Kit by Oxygenna',
 	siteDescription:
 		'Foxi is a design and development agency that specializes in creating beautiful and functional websites.',
-	ogImage: '/og.jpg',
+	ogImage: '/fnog.jpg',
 	logo: {
 		src: '/fnlogo.svg',
 		alt: 'Frontier Nations logo'
