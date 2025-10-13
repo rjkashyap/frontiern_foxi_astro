@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import defaultTheme from "tailwindcss/defaultTheme";
+
 export default {
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
   darkMode: ["selector"],
@@ -32,18 +33,20 @@ export default {
     extend: {
       colors: {
         transparent: "transparent",
+        // Replaced pink-ish primary with NY taxi yellow scale
         primary: {
-          50: "#fdf2f8",
-          100: "#fce7f3",
-          200: "#fbcfe8",
-          300: "#f9a8d4",
-          400: "#f472b6",
-          500: "#E2187D",
-          600: "#db2777",
-          700: "#be185d",
-          800: "#9d174d",
-          900: "#831843",
-          950: "#500724",
+          50:  "#FFFBEA",
+          100: "#FFF3C4",
+          200: "#FCE588",
+          300: "#FADB5F",
+          400: "#F7C948",
+          500: "#FFCD00", // New York taxi yellow
+          600: "#E6B800",
+          700: "#B38600",
+          800: "#805F00",
+          900: "#4D3900",
+          950: "#332600",
+          DEFAULT: "#FFCD00",
         },
         neutral: {
           50: "#f8fafc",
