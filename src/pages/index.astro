@@ -22,7 +22,7 @@ try {
     const data = await res.json()
     const rows = Array.isArray(data?.results) ? data.results : []
 
-    // Use actual field IDs from your JSON:
+    // Your field IDs from the JSON:
     // field_5880894 = Key, field_5881992 = HeroImage, field_5881993 = HeroAlt, field_5881994 = Published
     const heroRow =
       rows.find((r: any) => r?.field_5880894 === 'hero' && r?.field_5881994 === true) ||
@@ -30,8 +30,16 @@ try {
       null
 
     if (heroRow) {
-      heroUrl = heroRow?.field_5881992?.[0]?.url ?? undefined
-      heroAlt = heroRow?.field_5881993 || 'Hero'
+      const img = heroRow?.field_5881992?.[0] // first attachment object
+      // Prefer the original file URL; fall back to a reasonable thumbnail if missing
+      const original = img?.url as string | undefined
+      const thumb =
+        img?.thumbnails?.card_cover?.url ??
+        img?.thumbnails?.small?.url ??
+        img?.thumbnails?.tiny?.url
+
+      heroUrl = (original || thumb) ?? undefined
+      heroAlt = (heroRow?.field_5881993 as string | undefined) || 'Hero'
     }
   }
 } catch (err) {
@@ -45,7 +53,6 @@ const SEO = {
     'Foxi is a powerful productivity toolkit designed to enhance your workflow and boost your productivity. With features like analytics, security, and integrations, Foxi is the perfect solution for your business.'
 }
 ---
-
 <Layout title={SEO.title} description={SEO.description}>
   <Hero heroUrl={heroUrl} heroAlt={heroAlt} />
   {/* <Features /> */}
