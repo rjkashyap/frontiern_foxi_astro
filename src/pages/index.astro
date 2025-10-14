@@ -9,21 +9,45 @@ import Hero from '../components/blocks/hero/HomeCTA.astro'
 // import HighlightBlocks from '../components/blocks/highlights/HightlightRows.astro'
 // import CTA from '../components/blocks/CTA/BasicDark.astro'
 
-// Content
-// - Testimonial background
-// import testimonialBackground from '../assets/testimonial-bg-01.webp'
+// Baserow public JSON (rows) for your SiteContent view — using user field names
+const BASEROW_VIEW =
+  'https://api.baserow.io/api/database/views/grid/2Rygf6nl75LDEqc2FtBZ-L4W3uUpreJ3BtiMSVjRtro/public/rows/?user_field_names=true'
+
+let heroUrl: string | null = null
+let heroAlt: string = 'Hero'
+
+try {
+  const res = await fetch(BASEROW_VIEW)
+  if (res.ok) {
+    const data = await res.json()
+    // Prefer the row where Key === 'hero' and Published === true
+    const rows = Array.isArray(data?.results) ? data.results : []
+    const heroRow =
+      rows.find((r: any) => r?.Key === 'hero' && r?.Published === true) ||
+      rows[0] ||
+      null
+
+    if (heroRow) {
+      heroUrl = heroRow?.HeroImage?.[0]?.url ?? null
+      heroAlt = heroRow?.HeroAlt || 'Hero'
+    }
+  }
+} catch (err) {
+  console.error('Error fetching Baserow hero:', err)
+}
+
 // - SEO
 const SEO = {
-	title: 'Foxi | Your Productivity Toolkit',
-	description:
-		'Foxi is a powerful productivity toolkit designed to enhance your workflow and boost your productivity. With features like analytics, security, and integrations, Foxi is the perfect solution for your business.'
+  title: 'Foxi | Your Productivity Toolkit',
+  description:
+    'Foxi is a powerful productivity toolkit designed to enhance your workflow and boost your productivity. With features like analytics, security, and integrations, Foxi is the perfect solution for your business.'
 }
 ---
 
 <Layout title={SEO.title} description={SEO.description}>
-	<Hero />
-	{/* <Features /> */}
-	{/* <Testimonial bg={testimonialBackground} bgPosition="right" /> */}
-	{/* <HighlightBlocks /> */}
-	{/* <CTA /> */}
+  <Hero heroUrl={heroUrl} heroAlt={heroAlt} />
+  {/* <Features /> */}
+  {/* <Testimonial bg={testimonialBackground} bgPosition="right" /> */}
+  {/* <HighlightBlocks /> */}
+  {/* <CTA /> */}
 </Layout>
