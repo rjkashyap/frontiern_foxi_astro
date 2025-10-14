@@ -37,7 +37,7 @@ export const footerNavigationData: FooterData = {
   footerAbout: {
     title: 'Frontier Nations',
     aboutText:
-      'Expertly made, responsive, accessible components in React and HTML ready to be used on your website or app. Just copy and paste them on your Tailwind CSS project.',
+      'Equipping believers to go with the gospel and multiply disciples, churches, and leaders until there is no place left.',
     logo: {
       src: '/fnlogo.svg',
       alt: 'The tailwind astro theme',
