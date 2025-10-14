@@ -9,7 +9,7 @@ import Hero from '../components/blocks/hero/HomeCTA.astro'
 // import HighlightBlocks from '../components/blocks/highlights/HightlightRows.astro'
 // import CTA from '../components/blocks/CTA/BasicDark.astro'
 
-// Baserow public JSON (rows) for your SiteContent view — using user field names
+// Baserow public JSON (rows) for your SiteContent view
 const BASEROW_VIEW =
   'https://api.baserow.io/api/database/views/grid/2Rygf6nl75LDEqc2FtBZ-L4W3uUpreJ3BtiMSVjRtro/public/rows/?user_field_names=true'
 
@@ -20,16 +20,18 @@ try {
   const res = await fetch(BASEROW_VIEW)
   if (res.ok) {
     const data = await res.json()
-    // Prefer the row where Key === 'hero' and Published === true
     const rows = Array.isArray(data?.results) ? data.results : []
+
+    // Use actual field IDs from your JSON:
+    // field_5880894 = Key, field_5881992 = HeroImage, field_5881993 = HeroAlt, field_5881994 = Published
     const heroRow =
-      rows.find((r: any) => r?.Key === 'hero' && r?.Published === true) ||
+      rows.find((r: any) => r?.field_5880894 === 'hero' && r?.field_5881994 === true) ||
       rows[0] ||
       null
 
     if (heroRow) {
-      heroUrl = heroRow?.HeroImage?.[0]?.url ?? undefined
-      heroAlt = heroRow?.HeroAlt || 'Hero'
+      heroUrl = heroRow?.field_5881992?.[0]?.url ?? undefined
+      heroAlt = heroRow?.field_5881993 || 'Hero'
     }
   }
 } catch (err) {
