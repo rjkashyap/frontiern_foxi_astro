@@ -13,7 +13,7 @@ import Hero from '../components/blocks/hero/HomeCTA.astro'
 const BASEROW_VIEW =
   'https://api.baserow.io/api/database/views/grid/2Rygf6nl75LDEqc2FtBZ-L4W3uUpreJ3BtiMSVjRtro/public/rows/?user_field_names=true'
 
-let heroUrl: string | null = null
+let heroUrl: string | undefined = undefined
 let heroAlt: string = 'Hero'
 
 try {
@@ -28,7 +28,7 @@ try {
       null
 
     if (heroRow) {
-      heroUrl = heroRow?.HeroImage?.[0]?.url ?? null
+      heroUrl = heroRow?.HeroImage?.[0]?.url ?? undefined
       heroAlt = heroRow?.HeroAlt || 'Hero'
     }
   }
