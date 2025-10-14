@@ -62,7 +62,7 @@ const avatars = [
         id="hero-image"
         src={heroUrl ?? heroImage.src}
         alt={heroAlt}
-        class="shadow-2xl shadow-neutral-200 dark:shadow-neutral-950 w-full h-auto max-h-[70vh] object-contain"
+        class="w-full h-auto max-h-[70vh] object-contain bg-transparent mix-blend-normal shadow-none"
         loading="eager"
         fetchpriority="high"
         decoding="async"
@@ -83,7 +83,6 @@ const avatars = [
       const data = await res.json();
       const rows = Array.isArray(data?.results) ? data.results : [];
 
-      // Field IDs from your JSON:
       // field_5880894 = Key, field_5881992 = HeroImage, field_5881993 = HeroAlt, field_5881994 = Published
       const heroRow =
         rows.find(r => r?.field_5880894 === 'hero' && r?.field_5881994 === true) ||
@@ -93,17 +92,19 @@ const avatars = [
       if (!heroRow) return;
 
       const img = heroRow?.field_5881992?.[0];
-      const src =
-        img?.url ||
-        img?.thumbnails?.card_cover?.url ||
-        img?.thumbnails?.small?.url ||
-        img?.thumbnails?.tiny?.url;
+
+      // ⚠️ Use ONLY the original file URL to preserve transparency (thumbnails may be flattened).
+      const src = img?.url || null;
       const alt = heroRow?.field_5881993 || 'Hero';
 
       const el = document.getElementById('hero-image');
       if (el && src) {
         el.src = src;
         el.alt = alt;
+        // ensure no accidental tint from CSS
+        el.style.backgroundColor = 'transparent';
+        el.style.mixBlendMode = 'normal';
+        el.style.boxShadow = 'none';
       }
     } catch (e) {
       console.error('Client fetch failed:', e);
