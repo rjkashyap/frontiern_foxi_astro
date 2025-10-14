@@ -1,7 +1,7 @@
 ---
 // Home page CTA Section
 // ------------
-// Description: A centered call to action section that contains: a title, text, a user review snippet, a button and a image.
+// Description: A centered call to action section that contains: a title, text, a user review snippet, a button and an image.
 
 // Components
 // - Layout
@@ -62,7 +62,7 @@ const avatars = [
         id="hero-image"
         src={heroUrl ?? heroImage.src}
         alt={heroAlt}
-        class="translate-y-8 shadow-2xl shadow-neutral-200 dark:shadow-neutral-950 w-full h-auto"
+        class="shadow-2xl shadow-neutral-200 dark:shadow-neutral-950 w-full h-auto max-h-[70vh] object-contain"
         loading="eager"
         fetchpriority="high"
         decoding="async"
