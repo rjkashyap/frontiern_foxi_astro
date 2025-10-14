@@ -59,6 +59,7 @@ const avatars = [
     <Col span="2" />
     <Col span="8">
       <img
+        id="hero-image"
         src={heroUrl ?? heroImage.src}
         alt={heroAlt}
         class="translate-y-8 shadow-2xl shadow-neutral-200 dark:shadow-neutral-950 w-full h-auto"
@@ -70,3 +71,45 @@ const avatars = [
     <Col span="2" />
   </Row>
 </Section>
+
+<script is:inline>
+  const BASEROW_VIEW =
+    'https://api.baserow.io/api/database/views/grid/2Rygf6nl75LDEqc2FtBZ-L4W3uUpreJ3BtiMSVjRtro/public/rows/?user_field_names=true';
+
+  async function updateHeroImage() {
+    try {
+      const res = await fetch(BASEROW_VIEW, { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      const rows = Array.isArray(data?.results) ? data.results : [];
+
+      // Field IDs from your JSON:
+      // field_5880894 = Key, field_5881992 = HeroImage, field_5881993 = HeroAlt, field_5881994 = Published
+      const heroRow =
+        rows.find(r => r?.field_5880894 === 'hero' && r?.field_5881994 === true) ||
+        rows[0] ||
+        null;
+
+      if (!heroRow) return;
+
+      const img = heroRow?.field_5881992?.[0];
+      const src =
+        img?.url ||
+        img?.thumbnails?.card_cover?.url ||
+        img?.thumbnails?.small?.url ||
+        img?.thumbnails?.tiny?.url;
+      const alt = heroRow?.field_5881993 || 'Hero';
+
+      const el = document.getElementById('hero-image');
+      if (el && src) {
+        el.src = src;
+        el.alt = alt;
+      }
+    } catch (e) {
+      console.error('Client fetch failed:', e);
+    }
+  }
+
+  // Run on load
+  updateHeroImage();
+</script>
