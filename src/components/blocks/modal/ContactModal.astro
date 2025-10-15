@@ -11,17 +11,15 @@ type Props = { classes?: string }
 const { classes } = Astro.props
 ---
 
-// Width & spacing are passed via `classes` to your shared Modal component.
-// We also cap height and enable scrolling so long forms never overflow.
 <Modal
   id="contact"
   title="Contact Us"
   classes="
-    w-[92vw] max-w-sm           /* phones */
-    sm:w-[88vw] sm:max-w-md     /* small tablets */
-    md:w-[80vw] md:max-w-lg     /* tablets */
-    lg:w-[70vw] lg:max-w-2xl    /* laptops */
-    xl:w-[60vw] xl:max-w-3xl    /* desktops */
+    w-[92vw] max-w-sm
+    sm:w-[88vw] sm:max-w-md
+    md:w-[80vw] md:max-w-lg
+    lg:w-[70vw] lg:max-w-2xl
+    xl:w-[60vw] xl:max-w-3xl
     max-h-[88vh] overflow-y-auto
     rounded-2xl
   "
