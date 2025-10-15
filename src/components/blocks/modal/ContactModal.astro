@@ -1,18 +1,32 @@
 ---
-// Contact Modal (responsive)
-// Uses shared Modal + sizes per breakpoint.
-// - Mobile: almost full-screen with safe margins
-// - Tablet: medium dialog
-// - Desktop: wider dialog
+// Contact Modal (matches Signup modal structure)
 import Modal from '../../ui/Modal.astro'
-import BasicForm from '../contact/BasicForm.astro'
+import Form from '../../ui/forms/Form.astro'
+import FormField from '../../ui/forms/partials/FormField.astro'
+import InputField from '../../ui/forms/form-elements/InputField.astro'
+import TextArea from '../../ui/forms/form-elements/TextArea.astro'
+import Button from '../../ui/Button.astro'
 
 type Props = { classes?: string }
 const { classes } = Astro.props
 ---
 
-<Modal id="contact" title="Contact Us" classes="w-[92vw] max-w-sm sm:w-[88vw] sm:max-w-md md:w-[80vw] md:max-w-lg lg:w-[70vw] lg:max-w-2xl xl:w-[60vw] xl:max-w-3xl max-h-[88vh] overflow-y-auto rounded-2xl"> </Modal>
-  <div class="p-4 sm:p-6">
-    <BasicForm classes="max-w-none"></BasicForm>
-  </div>
+<Modal id="contact" classes={classes} title="Contact Us">
+  <p class="mb-4">Tell us a bit about your enquiry and we’ll get back to you.</p>
+  <Form>
+    <FormField>
+      <InputField type="text" id="firstName" label="First Name" />
+      <InputField type="text" id="lastName" label="Last Name" />
+    </FormField>
+    <FormField>
+      <InputField type="email" id="email" label="Email" required />
+    </FormField>
+    <FormField>
+      <InputField type="tel" id="phone" label="Phone Number" />
+    </FormField>
+    <FormField>
+      <TextArea id="message" label="Your Message" rows="4" />
+    </FormField>
+    <Button style="primary" type="submit" classes="w-full" size="lg">Send Message</Button>
+  </Form>
 </Modal>
