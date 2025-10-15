@@ -11,19 +11,7 @@ type Props = { classes?: string }
 const { classes } = Astro.props
 ---
 
-<Modal
-  id="contact"
-  title="Contact Us"
-  classes="
-    w-[92vw] max-w-sm
-    sm:w-[88vw] sm:max-w-md
-    md:w-[80vw] md:max-w-lg
-    lg:w-[70vw] lg:max-w-2xl
-    xl:w-[60vw] xl:max-w-3xl
-    max-h-[88vh] overflow-y-auto
-    rounded-2xl
-  "
->
+<Modal id="contact" title="Contact Us" classes="w-[92vw] max-w-sm sm:w-[88vw] sm:max-w-md md:w-[80vw] md:max-w-lg lg:w-[70vw] lg:max-w-2xl xl:w-[60vw] xl:max-w-3xl max-h-[88vh] overflow-y-auto rounded-2xl"> </Modal>
   <div class="p-4 sm:p-6">
     <BasicForm classes="max-w-none" />
   </div>
