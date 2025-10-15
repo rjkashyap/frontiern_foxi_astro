@@ -14,8 +14,7 @@ export interface NavSubItem {
 
 export interface NavItem {
 	name: string
-	link?: string
-	modal?: string
+	link: string
 	submenu?: NavSubItem[]
 }
 
