@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🔎 Running Astro syntax check…"
+npx astro check
+
+echo "✅ Syntax OK"
