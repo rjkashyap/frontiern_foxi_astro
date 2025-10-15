@@ -1,5 +1,6 @@
 ---
-// Final Modal (theme-consistent, full overlay, no scroll, square corners)
+// Enhanced Modal (Foxi-compatible)
+// Covers full viewport with frosted overlay and adds responsive sizing, padding, and scroll.
 import Button from './Button.astro'
 import { Icon } from 'astro-icon/components'
 
@@ -14,15 +15,16 @@ const { id, title, classes } = Astro.props
 <div
   {...(id ? { id } : {})}
   class:list={[
-    'modal fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50 transition-all duration-300',
+    'modal',
+    'fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/40 backdrop-blur-sm transition-all duration-300',
     { [`${classes}`]: classes },
   ]}
 >
-  <!-- Safe vertical padding -->
-  <div class="relative w-full h-full flex items-center justify-center p-4 sm:p-6">
-    <!-- Modal box -->
+  <!-- Outer container provides top/bottom breathing space -->
+  <div class="relative my-8 w-full px-4 sm:px-6">
+    <!-- Modal popup -->
     <div
-      class="modal__popup mx-auto w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-xl shadow-neutral-700/10 dark:shadow-neutral-950/40 overflow-hidden"
+      class="modal__popup mx-auto w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-2xl shadow-xl shadow-neutral-700/10 dark:shadow-neutral-950/40 overflow-hidden"
     >
       <div class="modal__header flex items-center justify-between gap-6 border-b border-neutral-100 dark:border-neutral-800 px-6 py-3 text-lg font-medium">
         {title && <h2 class="modal__title mb-0 truncate text-lg text-neutral-900 dark:text-neutral-50">{title}</h2>}
@@ -40,19 +42,10 @@ const { id, title, classes } = Astro.props
 </div>
 
 <style>
-  .modal {
-    @apply hidden [&.open]:flex;
-  }
-
-  .modal__popup {
-    @apply rounded-none; /* square corners */
-  }
-
-  .modal__close {
-    @apply !rounded-full !px-2.5;
-  }
-
-  body.modal-open {
-    overflow: hidden;
-  }
+.modal {
+  @apply hidden [&.open]:flex;
+}
+.modal__close {
+  @apply !rounded-full !px-2.5;
+}
 </style>
