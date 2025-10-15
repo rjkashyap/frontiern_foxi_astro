@@ -1,32 +1,17 @@
 ---
-// Contact Modal (responsive)
-// Uses shared Modal + sizes per breakpoint.
-// - Mobile: almost full-screen with safe margins
-// - Tablet: medium dialog
-// - Desktop: wider dialog
+// Contact Modal
+// ---------------
+// Reuses the existing BasicForm inside the shared Modal component.
+// Opens from any element with modal="contact".
+
 import Modal from '../../ui/Modal.astro'
 import BasicForm from '../contact/BasicForm.astro'
 
+// Props
 type Props = { classes?: string }
 const { classes } = Astro.props
 ---
 
-// Width & spacing are passed via `classes` to your shared Modal component.
-// We also cap height and enable scrolling so long forms never overflow.
-<Modal
-  id="contact"
-  title="Contact Us"
-  classes="
-    w-[92vw] max-w-sm           /* phones */
-    sm:w-[88vw] sm:max-w-md     /* small tablets */
-    md:w-[80vw] md:max-w-lg     /* tablets */
-    lg:w-[70vw] lg:max-w-2xl    /* laptops */
-    xl:w-[60vw] xl:max-w-3xl    /* desktops */
-    max-h-[88vh] overflow-y-auto
-    rounded-2xl
-  "
->
-  <div class="p-4 sm:p-6">
-    <BasicForm classes="max-w-none" />
-  </div>
+<Modal id="contact" classes={classes} title="Contact Us">
+  <BasicForm classes="max-w-none" />
 </Modal>
