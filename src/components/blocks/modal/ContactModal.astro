@@ -1,5 +1,5 @@
 ---
-// Contact Modal (matches Signup modal structure)
+// Contact Modal (matches Signup modal structure, capped form width)
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
 import FormField from '../../ui/forms/partials/FormField.astro'
@@ -11,32 +11,33 @@ type Props = { classes?: string }
 const { classes } = Astro.props
 ---
 
-<Modal
-  id="contact"
-  title="Contact Us"
-  classes="mx-auto my-6 sm:my-10 w-[92vw] sm:w-[88vw] md:w-[80vw] lg:w-[72vw] xl:w-[60vw] max-w-5xl max-h-[calc(100vh-5rem)] overflow-y-auto rounded-2xl"
->
-  <p class="mb-4">Tell us a bit about your enquiry and we'll get back to you.</p>
-  <Form>
-    <FormField>
-      <InputField type="text" id="firstName" label="First Name" />
-      <InputField type="text" id="lastName" label="Last Name" />
-    </FormField>
+<Modal id="contact" classes={classes} title="Contact Us">
+  <!-- Cap inner content width so the form isn’t too wide -->
+  <div class="mx-auto w-full max-w-xl">
+    <p class="mb-4">Tell us a bit about your enquiry and we'll get back to you.</p>
 
-    <FormField>
-      <InputField type="email" id="email" label="Email" required />
-    </FormField>
+    <Form>
+      <FormField>
+        <InputField type="text" id="firstName" label="First Name" />
+        <InputField type="text" id="lastName" label="Last Name" />
+      </FormField>
 
-    <FormField>
-      <InputField type="tel" id="phone" label="Phone Number" />
-    </FormField>
+      <FormField>
+        <InputField type="email" id="email" label="Email" required />
+      </FormField>
 
-    <FormField>
-      <TextArea id="message" label="Your Message" />
-    </FormField>
+      <FormField>
+        <InputField type="tel" id="phone" label="Phone Number" />
+      </FormField>
 
-    <Button style="primary" type="submit" classes="w-full" size="lg">
-      Send Message
-    </Button>
-  </Form>
+      <FormField>
+        <TextArea id="message" label="Your Message" />
+      </FormField>
+
+      <!-- Remove w-full so the button isn’t full-width -->
+      <Button style="primary" type="submit" size="lg">
+        Send Message
+      </Button>
+    </Form>
+  </div>
 </Modal>
