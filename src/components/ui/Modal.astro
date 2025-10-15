@@ -1,5 +1,7 @@
 ---
-// Final Modal (theme-consistent, full overlay, no scroll, square corners)
+// Modal (final fusion)
+// Keeps improved layout + square corners + scrolling behavior,
+// but restores original frosted overlay style exactly.
 import Button from './Button.astro'
 import { Icon } from 'astro-icon/components'
 
@@ -14,45 +16,41 @@ const { id, title, classes } = Astro.props
 <div
   {...(id ? { id } : {})}
   class:list={[
-    'modal fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50 transition-all duration-300',
+    'modal fixed left-0 top-0 z-30 flex h-0 w-full items-center justify-center overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50 transition-all duration-500',
     { [`${classes}`]: classes },
   ]}
 >
-  <!-- Safe vertical padding -->
-  <div class="relative w-full h-full flex items-center justify-center p-4 sm:p-6">
-    <!-- Modal box -->
-    <div
-      class="modal__popup mx-auto w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-xl shadow-neutral-700/10 dark:shadow-neutral-950/40 overflow-hidden"
-    >
-      <div class="modal__header flex items-center justify-between gap-6 border-b border-neutral-100 dark:border-neutral-800 px-6 py-3 text-lg font-medium">
-        {title && <h2 class="modal__title mb-0 truncate text-lg text-neutral-900 dark:text-neutral-50">{title}</h2>}
-        <Button size="sm" style="neutral" classes="modal__close" variation="link">
-          <Icon name="x-mark" class="dark:text-neutral-50" />
-          <span class="sr-only">Close</span>
-        </Button>
-      </div>
+  <div class="modal__popup m-6 flex w-80 max-w-full translate-y-6 flex-col overflow-hidden border border-neutral-100 bg-white text-neutral-500 opacity-0 shadow-xl shadow-neutral-700/5 transition-all duration-500 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50 [.open_&]:translate-y-0 [.open_&]:opacity-100">
+    <div class="modal__header flex items-center justify-between gap-6 border-b border-neutral-100 px-6 py-3 text-lg font-medium dark:border-neutral-800">
+      {title && <h2 class="modal__title mb-0 truncate text-lg text-neutral-900 dark:text-neutral-50">{title}</h2>}
+      <Button size="sm" style="neutral" classes="modal__close" variation="link">
+        <Icon name="x-mark" class="dark:text-neutral-50" />
+        <span class="sr-only">Close</span>
+      </Button>
+    </div>
 
-      <div class="modal__body max-h-[80vh] overflow-y-auto p-6">
-        <slot />
-      </div>
+    <div class="modal__body max-h-[80vh] overflow-y-auto p-6">
+      <slot />
     </div>
   </div>
 </div>
 
 <style>
-  .modal {
-    @apply hidden [&.open]:flex;
-  }
+	/* Frosted overlay restored from original */
+	.modal {
+		@apply fixed left-0 top-0 z-30 flex h-0 w-full items-center justify-center overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50 [&.open]:h-full;
+	}
 
-  .modal__popup {
-    @apply rounded-none; /* square corners */
-  }
+	/* Updated popup styling */
+	.modal__popup {
+		@apply rounded-none; /* square corners */
+	}
 
-  .modal__close {
-    @apply !rounded-full !px-2.5;
-  }
+	.modal__close {
+		@apply !rounded-full !px-2.5;
+	}
 
-  body.modal-open {
-    overflow: hidden;
-  }
+	body.modal-open {
+		overflow: hidden;
+	}
 </style>
