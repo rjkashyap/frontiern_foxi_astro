@@ -1,9 +1,0 @@
-build:
-  environment:
-    NODE_ENV: production
-  install_command: npm install
-  build_command: npm run build
-  output_path: dist
-editor:
-  src_dir: src
-  site_url: /
