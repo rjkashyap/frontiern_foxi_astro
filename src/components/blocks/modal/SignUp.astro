@@ -1,6 +1,7 @@
 ---
 // Signup Modal (Repurposed as Contact Form)
-// Keeps Foxi modal overlay, centering, animation, and scroll lock.
+// Keeps Foxi modal overlay, centering, animation.
+// Adds scroll lock from THIS file only.
 
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
@@ -47,21 +48,48 @@ const { classes } = Astro.props
 </Modal>
 
 <style>
-  /* Match Foxi's clean modal form spacing */
-  .modal__body form {
-    @apply space-y-4;
-  }
+  /* Keep Foxi’s tidy spacing */
+  .modal__body form { @apply space-y-4; }
+  .modal__body h2 { @apply text-2xl mb-4; }
+  .modal__body p { @apply text-neutral-600 dark:text-neutral-300; }
 
-  .modal__body h2 {
-    @apply text-2xl mb-4;
-  }
-
-  .modal__body p {
-    @apply text-neutral-600 dark:text-neutral-300;
-  }
-
-  /* Smooth the popup transition (same as Foxi signup feel) */
-  .modal__popup {
-    @apply transition-transform duration-500 ease-out;
-  }
+  /* Smooth popup motion (same feel as Foxi signup) */
+  .modal__popup { @apply transition-transform duration-500 ease-out; }
 </style>
+
+<style is:global>
+  /* Scroll lock when modal is open (set from this file) */
+  body.modal-open { overflow: hidden; width: 100%; position: relative; }
+</style>
+
+<script is:inline>
+  // Add/remove body.modal-open when THIS modal opens/closes.
+  // Works alongside Foxi’s existing open/close logic (which toggles .open on .modal).
+  document.addEventListener('astro:page-load', () => {
+    const modal = document.getElementById('signup') || document.currentScript?.closest('.modal');
+
+    const updateLock = () => {
+      if (modal?.classList.contains('open')) {
+        document.body.classList.add('modal-open');
+      } else {
+        // Only remove if no other modals are open
+        const anyOpen = document.querySelector('.modal.open');
+        if (!anyOpen) document.body.classList.remove('modal-open');
+      }
+    };
+
+    // Observe class changes on the modal (.open added/removed by Foxi scripts)
+    if (modal) {
+      updateLock(); // set initial state if already open
+      const obs = new MutationObserver(updateLock);
+      obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+      // Safety: on navigation swaps, ensure unlock and disconnect
+      const cleanup = () => {
+        document.body.classList.remove('modal-open');
+        obs.disconnect();
+      };
+      document.addEventListener('astro:after-swap', cleanup, { once: true });
+    }
+  });
+</script>
