@@ -1,12 +1,5 @@
 ---
-// Modal
-// Description: the modal component is a ui element that displays a dialog box that appears on top of the current page.
-// Properties:
-// - Id: the id of the modal (use this id in the "modal" prop of the button)
-// - Title: the title of the modal
-// - classes: additional classes
-// Reference: https://wind-ui.com/components/modals/
-
+// Modal (Foxi overlay + scroll lock + your layout)
 import Button from './Button.astro'
 import { Icon } from 'astro-icon/components'
 
@@ -21,46 +14,65 @@ const { id, title, classes } = Astro.props
 <div {...(id ? { id } : {})} class:list={['modal', { [`${classes}`]: classes }]}>
   <div class="modal__popup">
     <div class="modal__header">
-      {title && <h2 class="modal__title">{title}</h2>}
+      {title && (
+        <h2 class="modal__title mb-0 truncate text-lg text-neutral-900 dark:text-neutral-50">
+          {title}
+        </h2>
+      )}
       <Button size="sm" style="neutral" classes="modal__close" variation="link">
         <Icon name="x-mark" class="dark:text-neutral-50" />
         <span class="sr-only">Close</span>
       </Button>
     </div>
+
     <div class="modal__body">
       <slot />
     </div>
   </div>
+
+  <!-- Scroll lock logic -->
+  <script is:inline>
+    const modal = document.currentScript.closest('.modal');
+    const closeBtn = modal.querySelector('.modal__close');
+    const toggleScroll = (lock) => {
+      document.body.style.overflow = lock ? 'hidden' : '';
+    };
+
+    const closeModal = () => {
+      modal.classList.remove('open');
+      toggleScroll(false);
+    };
+
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeModal();
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    const observer = new MutationObserver(() => {
+      toggleScroll(modal.classList.contains('open'));
+    });
+    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  </script>
 </div>
 
 <style>
-  /* --- Overlay --- */
+  /* === Foxi overlay === */
   .modal {
-    @apply fixed inset-0 z-50 flex items-center justify-center overflow-hidden 
-           bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50;
-    display: none; /* hidden by default */
-  }
-  .modal.open {
-    display: flex; /* show when opened */
+    @apply fixed left-0 top-0 z-50 flex h-0 w-full items-center justify-center overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50 [&.open]:h-full;
   }
 
-  /* --- Popup --- */
+  /* === Your modal popup === */
   .modal__popup {
-    @apply relative flex w-[90vw] max-w-2xl flex-col overflow-y-auto border 
-           border-neutral-100 bg-white text-neutral-500 shadow-xl 
-           shadow-neutral-700/5 transition-all duration-300 
-           dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50;
+    @apply m-6 flex w-full max-w-5xl flex-col overflow-hidden rounded-none border border-neutral-100 bg-white text-neutral-500 opacity-0 shadow-xl shadow-neutral-700/5 transition-all duration-500 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50 
+    [.open_&]:translate-y-0 [.open_&]:opacity-100;
   }
 
-  /* square corners */
-  .modal__popup {
-    border-radius: 0;
-  }
-
-  /* --- Header --- */
   .modal__header {
-    @apply flex items-center justify-between gap-6 border-b border-neutral-100 
-           px-6 py-3 text-lg font-medium dark:border-neutral-800;
+    @apply flex items-center justify-between gap-6 border-b border-neutral-100 px-6 py-3 text-lg font-medium dark:border-neutral-800;
   }
 
   .modal__close {
@@ -71,29 +83,7 @@ const { id, title, classes } = Astro.props
     @apply mb-0 truncate text-lg;
   }
 
-  /* --- Body --- */
   .modal__body {
     @apply p-6 max-h-[80vh] overflow-y-auto;
   }
-
-  /* --- Scroll lock when modal open --- */
-  body.modal-open {
-    overflow: hidden;
-  }
 </style>
-
-<script is:inline>
-  // Lock body scroll when modal is open
-  document.addEventListener('astro:page-load', () => {
-    const modals = document.querySelectorAll('.modal')
-    modals.forEach((modal) => {
-      modal.addEventListener('transitionend', () => {
-        if (modal.classList.contains('open')) {
-          document.body.classList.add('modal-open')
-        } else {
-          document.body.classList.remove('modal-open')
-        }
-      })
-    })
-  })
-</script>
