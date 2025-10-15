@@ -14,9 +14,15 @@ const { classes } = Astro.props
 <Modal
   id="contact"
   title="Contact Us"
-  classes="mx-auto my-6 sm:my-10 w-[92vw] sm:w-[88vw] md:w-[80vw] lg:w-[72vw] xl:w-[60vw] max-w-5xl max-h-[calc(100vh-5rem)] overflow-y-auto rounded-2xl"
+  classes="
+    mx-auto my-6 sm:my-10
+    w-[92vw] sm:w-[88vw] md:w-[80vw] lg:w-[72vw] xl:w-[60vw]
+    max-w-5xl
+    max-h-[calc(100vh-5rem)] overflow-y-auto
+    rounded-2xl
+  "
 >
-  <p class="mb-4">Tell us a bit about your enquiry and we'll get back to you.</p>
+  <p class="mb-4">Tell us a bit about your enquiry and we’ll get back to you.</p>
   <Form>
     <FormField>
       <InputField type="text" id="firstName" label="First Name" />
