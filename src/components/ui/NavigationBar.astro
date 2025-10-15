@@ -70,7 +70,7 @@ const savedNavActions = navActions.map((action) => ({
                     href="#"
                     role="menuitem"
                     class="header__menu-link"
-                    {...({ modal: item.modal } as Record<string, any>)}
+                    modal={item.modal}
                   >
                     {item.name}
                   </a>
@@ -103,7 +103,7 @@ const savedNavActions = navActions.map((action) => ({
                           href="#"
                           role="menuitem"
                           class="header__menu-link"
-                          {...({ modal: subItem.modal } as Record<string, any>)}
+                          modal={subItem.modal}
                         >
                           {subItem.name}
                         </a>
