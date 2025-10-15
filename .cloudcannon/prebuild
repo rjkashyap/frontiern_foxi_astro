@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ensure CloudCannon knows which folder to sync/deploy
-export SYNC_PATHS="${SYNC_PATHS:-dist}"
-
 echo "🔎 Running Astro syntax check…"
 npx astro check
 
-echo "✅ Syntax OK (and SYNC_PATHS=${SYNC_PATHS})"
+echo "✅ Syntax OK"
