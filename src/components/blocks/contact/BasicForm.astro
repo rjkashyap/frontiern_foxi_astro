@@ -1,82 +1,44 @@
 ---
-// Basic Contact Form (standalone, no external UI deps)
-// Drop-in replacement that renders reliably inside the modal.
-// Accepts optional `classes` prop for extra wrappers (kept for compatibility).
+// Basic Contact Form
+// ------------
+// Description: A basic contact form with fields for first name, last name, email, phone number and message.
+// Properties:
+// - classes: Additional classes to be added to the block
+// ------------
 
-type Props = { classes?: string }
-const { classes = '' } = Astro.props
+// Components
+// - UI
+import Card from '../../ui/cards/partials/Card.astro'
+import CardBody from '../../ui/cards/partials/CardBody.astro'
+import Form from '../../ui/forms/Form.astro'
+import FormField from '../../ui/forms/partials/FormField.astro'
+import InputField from '../../ui/forms/form-elements/InputField.astro'
+import TextArea from '../../ui/forms/form-elements/TextArea.astro'
+import Button from '../../ui/Button.astro'
+
+// Props
+type Props = {
+	classes?: string
+}
+const { classes } = Astro.props
 ---
 
-<div class={`rounded-2xl bg-white p-4 sm:p-6 shadow-md ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-800 ${classes}`}>
-  <h2 class="mb-4 text-2xl font-semibold text-neutral-900 dark:text-neutral-50">Get in Touch</h2>
-
-  <form class="space-y-4" method="post" novalidate>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div>
-        <label for="firstName" class="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-200">First Name</label>
-        <input
-          id="firstName"
-          name="firstName"
-          type="text"
-          autocomplete="given-name"
-          class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:focus:ring-neutral-700"
-          required
-        />
-      </div>
-
-      <div>
-        <label for="lastName" class="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-200">Last Name</label>
-        <input
-          id="lastName"
-          name="lastName"
-          type="text"
-          autocomplete="family-name"
-          class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:focus:ring-neutral-700"
-          required
-        />
-      </div>
-    </div>
-
-    <div>
-      <label for="email" class="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-200">Email</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        autocomplete="email"
-        placeholder="name@youremail.com"
-        class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:focus:ring-neutral-700"
-        required
-      />
-    </div>
-
-    <div>
-      <label for="phone" class="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-200">Phone Number</label>
-      <input
-        id="phone"
-        name="phone"
-        type="tel"
-        autocomplete="tel"
-        class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:focus:ring-neutral-700"
-      />
-    </div>
-
-    <div>
-      <label for="message" class="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-200">Your Message</label>
-      <textarea
-        id="message"
-        name="message"
-        rows="4"
-        class="w-full resize-y rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:focus:ring-neutral-700"
-        required
-      ></textarea>
-    </div>
-
-    <button
-      type="submit"
-      class="inline-flex w-full items-center justify-center rounded-md bg-primary-500 px-4 py-2 text-base font-semibold text-neutral-900 transition hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:text-neutral-900"
-    >
-      Submit
-    </button>
-  </form>
-</div>
+<Card classes={classes}>
+	<CardBody>
+		<Form>
+			<h2 class="text-2xl">Get in Touch</h2>
+			<FormField>
+				<InputField type="text" id="firstName" label="First Name" />
+				<InputField type="text" id="lastName" label="Last Name" />
+			</FormField>
+			<FormField>
+				<InputField type="email" id="email" label="Email" required value="name@youremail.com" />
+			</FormField>
+			<FormField>
+				<InputField type="tel" id="phone" label="phone number" />
+			</FormField>
+			<FormField><TextArea id="message" label="Your Message" /></FormField>
+			<Button style="primary" type="submit">Submit</Button>
+		</Form>
+	</CardBody>
+</Card>
