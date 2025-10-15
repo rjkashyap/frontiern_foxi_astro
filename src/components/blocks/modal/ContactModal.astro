@@ -28,15 +28,21 @@ const { classes } = Astro.props
       <InputField type="text" id="firstName" label="First Name" />
       <InputField type="text" id="lastName" label="Last Name" />
     </FormField>
+
     <FormField>
       <InputField type="email" id="email" label="Email" required />
     </FormField>
+
     <FormField>
       <InputField type="tel" id="phone" label="Phone Number" />
     </FormField>
+
     <FormField>
       <TextArea id="message" label="Your Message" />
     </FormField>
-    <Button style="primary" type="submit" classes="w-full" size="lg">Send Message</Button>
+
+    <Button style="primary" type="submit" classes="w-full" size="lg">
+      Send Message
+    </Button>
   </Form>
 </Modal>
