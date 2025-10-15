@@ -1,7 +1,7 @@
 ---
 // Signup Modal (Contact Form version)
-// Keeps Foxi overlay, blur, centering, and animation
-// Adds background scroll lock when modal is open
+// Foxi overlay, blur, centering, animation preserved
+// Adds scroll lock, improved spacing, responsive width, and Foxi-style scrollbar
 
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
@@ -15,9 +15,9 @@ const { classes } = Astro.props
 ---
 
 <Modal id="signup" classes={classes} title="Contact Us">
-  <!-- Form container inside the modal (not overlay) -->
-  <div class="mx-auto w-full max-w-3xl py-6 sm:py-10 max-h-[calc(100vh-4rem)] overflow-y-auto">
-    <p class="mb-6 text-base leading-relaxed">
+  <!-- Wider, padded, scrollable inner container -->
+  <div class="mx-auto w-full max-w-5xl my-8 sm:my-10 px-4 sm:px-8 max-h-[calc(100vh-6rem)] overflow-y-auto">
+    <p class="mb-6 text-base leading-relaxed text-neutral-600 dark:text-neutral-300">
       Tell us a bit about your enquiry and we'll get back to you.
     </p>
 
@@ -49,38 +49,40 @@ const { classes } = Astro.props
 </Modal>
 
 <style>
-  /* Consistent form spacing and style */
+  /* Keep Foxi typography and form rhythm */
   .modal__body form {
     @apply space-y-4;
-  }
-
-  .modal__body p {
-    @apply text-neutral-600 dark:text-neutral-300;
   }
 
   .modal__popup {
     @apply transition-transform duration-500 ease-out;
   }
 
-  /* Smooth, subtle scrollbar inside modal body */
+  /* --- Modern Foxi scrollbar (matches global style) --- */
   .modal__body::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
   .modal__body::-webkit-scrollbar-thumb {
-    @apply bg-neutral-300 dark:bg-neutral-700 rounded;
+    @apply bg-neutral-200 dark:bg-neutral-700 rounded-full;
+  }
+  .modal__body::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-300 dark:bg-neutral-600;
+  }
+  .modal__body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(180, 180, 180, 0.5) transparent;
   }
 
-  /* When modal is open, lock the page scroll */
+  /* --- Scroll lock when modal is open --- */
   body.modal-open {
     overflow: hidden;
   }
 </style>
 
 <script is:inline>
-  // Locks background scroll when modal opens/closes
+  // Lock background scroll while modal is open
   document.addEventListener('astro:page-load', () => {
     const modals = document.querySelectorAll('.modal');
-
     modals.forEach((modal) => {
       const observer = new MutationObserver(() => {
         if (modal.classList.contains('open')) {
@@ -89,7 +91,6 @@ const { classes } = Astro.props
           document.body.classList.remove('modal-open');
         }
       });
-
       observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
     });
   });
