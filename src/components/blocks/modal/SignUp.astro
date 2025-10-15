@@ -1,41 +1,67 @@
 ---
-// Signup Modal
-// ------------
-// Description: A modal with a form to sign up.
+// Signup Modal (Repurposed as Contact Form)
+// Keeps Foxi modal overlay, centering, animation, and scroll lock.
 
-// Components
-// - UI
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
 import FormField from '../../ui/forms/partials/FormField.astro'
 import InputField from '../../ui/forms/form-elements/InputField.astro'
+import TextArea from '../../ui/forms/form-elements/TextArea.astro'
 import Button from '../../ui/Button.astro'
-import { Icon } from 'astro-icon/components'
 
-// Props
-type Props = {
-	classes?: string
-}
+type Props = { classes?: string }
 const { classes } = Astro.props
 ---
 
-<Modal id="signup" classes={classes} title="Sign up">
-	<p class="mb-0">Enter your email bellow to get started with Foxi.</p>
-	<Form>
-		<FormField>
-			<InputField type="email" id="email" label="Your Email" />
-		</FormField>
-		<Button style="primary" type="submit" classes="w-full" size="lg">Sign up</Button>
-		<div class="my-2 text-center">or</div>
-		<Button
-			style="primary"
-			type="submit"
-			classes="w-full"
-			size="lg"
-			classes="!bg-white w-full !text-neutral-500 border border-neutral-100"
-		>
-			<Icon name="google-logo" class="h-6 w-6" />
-			Signup with Google
-		</Button>
-	</Form>
+<Modal id="signup" classes={classes} title="Contact Us">
+  <div class="mx-auto w-full max-w-xl">
+    <p class="mb-6 text-base leading-relaxed">
+      Tell us a bit about your enquiry and we'll get back to you.
+    </p>
+
+    <Form>
+      <FormField>
+        <InputField type="text" id="firstName" label="First Name" />
+        <InputField type="text" id="lastName" label="Last Name" />
+      </FormField>
+
+      <FormField>
+        <InputField type="email" id="email" label="Email" required value="name@youremail.com" />
+      </FormField>
+
+      <FormField>
+        <InputField type="tel" id="phone" label="Phone Number" />
+      </FormField>
+
+      <FormField>
+        <TextArea id="message" label="Your Message" />
+      </FormField>
+
+      <div class="mt-6 text-center">
+        <Button style="primary" type="submit" size="lg">
+          Send Message
+        </Button>
+      </div>
+    </Form>
+  </div>
 </Modal>
+
+<style>
+  /* Match Foxi's clean modal form spacing */
+  .modal__body form {
+    @apply space-y-4;
+  }
+
+  .modal__body h2 {
+    @apply text-2xl mb-4;
+  }
+
+  .modal__body p {
+    @apply text-neutral-600 dark:text-neutral-300;
+  }
+
+  /* Smooth the popup transition (same as Foxi signup feel) */
+  .modal__popup {
+    @apply transition-transform duration-500 ease-out;
+  }
+</style>
