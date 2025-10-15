@@ -11,17 +11,7 @@ type Props = { classes?: string }
 const { classes } = Astro.props
 ---
 
-<Modal
-  id="contact"
-  title="Contact Us"
-  classes="
-    mx-auto my-6 sm:my-10
-    w-[92vw] sm:w-[88vw] md:w-[80vw] lg:w-[72vw] xl:w-[60vw]
-    max-w-5xl
-    max-h-[calc(100vh-5rem)] overflow-y-auto
-    rounded-2xl
-  "
->
+<Modal id="contact" classes={classes} title="Contact Us">
   <p class="mb-4">Tell us a bit about your enquiry and we’ll get back to you.</p>
   <Form>
     <FormField>
@@ -35,7 +25,7 @@ const { classes } = Astro.props
       <InputField type="tel" id="phone" label="Phone Number" />
     </FormField>
     <FormField>
-      <TextArea id="message" label="Your Message" />
+      <TextArea id="message" label="Your Message"/>
     </FormField>
     <Button style="primary" type="submit" classes="w-full" size="lg">Send Message</Button>
   </Form>
