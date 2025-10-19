@@ -45,9 +45,9 @@ const { id, title, classes } = Astro.props
            [&.open]:h-full;
   }
 
-  /* Popup: width 80vw on phones, 50vw from md+; fixed 80vh height */
+  /* Popup: width 80vw on phones, 50vw from md+; cap height at 80vh (shrinks if content is shorter) */
   .modal__popup {
-    @apply m-6 flex w-[80vw] md:w-[50vw] max-w-full h-[80vh]
+    @apply m-6 flex w-[80vw] md:w-[50vw] max-w-full max-h-[80vh]
            translate-y-6 flex-col overflow-hidden rounded border border-neutral-100
            bg-white text-neutral-500 opacity-0 shadow-xl shadow-neutral-700/5
            transition-all duration-500
@@ -63,9 +63,9 @@ const { id, title, classes } = Astro.props
     @apply mb-0 truncate text-lg text-neutral-900 dark:text-neutral-50;
   }
 
-  /* Scroll area: 10% top/bottom padding, themed scrollbar */
+  /* Scroll area: 10% top/bottom padding, themed scrollbar; no flex-1 so modal can shrink */
   .modal__body {
-    @apply flex-1 overflow-y-auto px-6 py-[10%];
+    @apply overflow-y-auto px-6 py-[10%];
   }
 
   /* Custom scrollbar (neutral — works in light & dark) */
