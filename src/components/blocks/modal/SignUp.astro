@@ -1,13 +1,12 @@
 ---
 // Signup Modal (Repurposed as Contact Form)
 // Keeps Foxi modal overlay, centering, animation.
-// Adds scroll lock from THIS file only.
+// Adds disabled submit until required fields valid.
 
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
 import FormField from '../../ui/forms/partials/FormField.astro'
 import InputField from '../../ui/forms/form-elements/InputField.astro'
-import TextArea from '../../ui/forms/form-elements/TextArea.astro'
 import Button from '../../ui/Button.astro'
 
 type Props = { classes?: string }
@@ -20,14 +19,15 @@ const { classes } = Astro.props
       Tell us a bit about your enquiry and we'll get back to you.
     </p>
 
-    <Form>
+    <!-- 1) Give the form a stable id -->
+    <Form id="contactForm">
       <FormField>
-        <InputField type="text" id="firstName" label="First Name" />
+        <!-- Mark whichever fields you want as required -->
+        <InputField type="text" id="firstName" label="First Name" required />
         <InputField type="text" id="lastName" label="Last Name" />
       </FormField>
 
       <FormField>
-        <!-- Removed placeholder (not supported) and removed default value -->
         <InputField type="email" id="email" label="Email" required />
       </FormField>
 
@@ -36,7 +36,8 @@ const { classes } = Astro.props
       </FormField>
 
       <div class="mt-6 text-center">
-        <Button style="primary" type="submit" size="lg">
+        <!-- 2) Start disabled; we’ll enable when valid -->
+        <Button id="submitBtn" style="primary" type="submit" size="lg" disabled>
           Send Message
         </Button>
       </div>
@@ -52,39 +53,35 @@ const { classes } = Astro.props
 
   /* Smooth popup motion (same feel as Foxi signup) */
   .modal__popup { @apply transition-transform duration-500 ease-out; }
-</style>
 
-<style is:global>
-  /* Scroll lock when modal is open (set from this file) */
-  body.modal-open { overflow: hidden; width: 100%; position: relative; }
+  /* Optional: a subtle disabled state */
+  #submitBtn:disabled { @apply opacity-50 pointer-events-none; }
 </style>
 
 <script is:inline>
-  // Add/remove body.modal-open when THIS modal opens/closes.
-  // Works alongside Foxi’s existing open/close logic (which toggles .open on .modal).
+  // 3) Toggle the submit button based on form validity
   document.addEventListener('astro:page-load', () => {
-    const modal = document.getElementById('signup') || document.currentScript?.closest('.modal');
+    const form = document.getElementById('contactForm');
+    const btn  = document.getElementById('submitBtn');
+    if (!form || !btn) return;
 
-    const updateLock = () => {
-      if (modal?.classList.contains('open')) {
-        document.body.classList.add('modal-open');
-      } else {
-        // Only remove if no other modals are open
-        const anyOpen = document.querySelector('.modal.open');
-        if (!anyOpen) document.body.classList.remove('modal-open');
-      }
+    const toggle = () => {
+      const valid = form.checkValidity();
+      btn.disabled = !valid;
+      btn.setAttribute('aria-disabled', String(!valid));
     };
 
-    if (modal) {
-      updateLock();
-      const obs = new MutationObserver(updateLock);
-      obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    // Run once, then on every change
+    toggle();
+    form.addEventListener('input', toggle);
+    form.addEventListener('change', toggle);
 
-      const cleanup = () => {
-        document.body.classList.remove('modal-open');
-        obs.disconnect();
-      };
-      document.addEventListener('astro:after-swap', cleanup, { once: true });
-    }
+    // Extra safety: prevent submit and show native messages if invalid
+    form.addEventListener('submit', (e) => {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        form.reportValidity();
+      }
+    });
   });
 </script>
