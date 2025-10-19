@@ -38,22 +38,40 @@ const { id, title, classes } = Astro.props
 </div>
 
 <style>
+	/* Frosted overlay unchanged, plus 10% top/bottom safe space */
 	.modal {
-		@apply fixed left-0 top-0 z-30 flex h-0 w-full items-center justify-center overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50 [&.open]:h-full;
+		@apply fixed left-0 top-0 z-30 flex h-0 w-full items-start justify-center overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50 py-[10vh] [&.open]:h-full;
 	}
+
+	/* Modal box is exactly 80% viewport height; no outer margin so the 10% padding controls spacing */
 	.modal__popup {
-		@apply m-6 flex w-80 max-w-full translate-y-6 flex-col overflow-hidden rounded border border-neutral-100 bg-white text-neutral-500 opacity-0 shadow-xl shadow-neutral-700/5 transition-all duration-500 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50 [.open_&]:translate-y-0 [.open_&]:opacity-100;
+		@apply m-0 flex w-80 max-w-full translate-y-6 flex-col overflow-hidden rounded border border-neutral-100 bg-white text-neutral-500 opacity-0 shadow-xl shadow-neutral-700/5 transition-all duration-500 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50 h-[80vh] [.open_&]:translate-y-0 [.open_&]:opacity-100;
 	}
+
 	.modal__header {
 		@apply flex items-center justify-between gap-6 border-b border-neutral-100 px-6 py-2 text-lg font-medium dark:border-neutral-800;
 	}
+
 	.modal__close {
 		@apply !rounded-full !px-2.5;
 	}
+
 	.modal__title {
 		@apply mb-0 truncate text-lg;
 	}
+
+	/* Body scrolls inside the fixed-height modal */
 	.modal__body {
-		@apply p-6;
+		@apply p-6 flex-1 overflow-y-auto;
 	}
+
+	/* Themed scrollbar (subtle, matches Foxi feel) */
+	.modal__body::-webkit-scrollbar { width: 8px; }
+	.modal__body::-webkit-scrollbar-track { background: transparent; }
+	.modal__body::-webkit-scrollbar-thumb { background-color: rgb(163 163 163 / 0.5); border-radius: 9999px; }
+	.dark .modal__body::-webkit-scrollbar-thumb { background-color: rgb(82 82 82 / 0.6); }
+
+	/* Firefox */
+	.modal__body { scrollbar-width: thin; scrollbar-color: rgba(163,163,163,0.5) transparent; }
+	.dark .modal__body { scrollbar-color: rgba(82,82,82,0.6) transparent; }
 </style>
