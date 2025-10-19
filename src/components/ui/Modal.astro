@@ -87,3 +87,46 @@ const { id, title, classes } = Astro.props
     @apply !rounded-full !px-2.5;
   }
 </style>
+
+<script is:inline>
+  // Back-button close + scroll lock, without changing Foxi’s overlay logic
+  document.addEventListener('astro:page-load', () => {
+    const modals = document.querySelectorAll('.modal');
+
+    modals.forEach((modal) => {
+      let pushedForThisOpen = false;
+
+      const onClassChange = () => {
+        const isOpen = modal.classList.contains('open');
+
+        // Body scroll lock
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+
+        // History push on open (once)
+        if (isOpen && !pushedForThisOpen) {
+          history.pushState({ modalOpen: true }, '');
+          pushedForThisOpen = true;
+        }
+
+        // If user closes the modal (via close button or clicking overlay in LocalScripts),
+        // and we had pushed a state for it, pop that state so Back behaves normally.
+        if (!isOpen && pushedForThisOpen && history.state && history.state.modalOpen) {
+          pushedForThisOpen = false;
+          // Pop only our dummy state; stays on the same page
+          history.back();
+        }
+      };
+
+      // Observe changes to the modal's class attribute (open/close).
+      const observer = new MutationObserver(onClassChange);
+      observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+      // Close modal on browser Back
+      window.addEventListener('popstate', () => {
+        if (modal.classList.contains('open')) {
+          modal.classList.remove('open');
+        }
+      });
+    });
+  });
+</script>
