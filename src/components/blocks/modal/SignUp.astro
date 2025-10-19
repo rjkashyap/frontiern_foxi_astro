@@ -1,7 +1,7 @@
 ---
 // Signup Modal (Repurposed as Contact Form)
 // Keeps Foxi modal overlay, centering, animation.
-// Disables submit until required fields are valid (without using a disabled prop).
+// Adds delayed (post-interaction) validation + friendly disabled message.
 
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
@@ -19,7 +19,7 @@ const { classes } = Astro.props
       Tell us a bit about your enquiry and we'll get back to you.
     </p>
 
-    <Form id="contactForm">
+    <Form id="contactForm" novalidate>
       <FormField>
         <InputField type="text" id="firstName" label="First Name" required />
         <InputField type="text" id="lastName" label="Last Name" />
@@ -34,7 +34,6 @@ const { classes } = Astro.props
       </FormField>
 
       <div class="mt-6 text-center">
-        <!-- Start visually/interaction disabled via classes; no unsupported props -->
         <Button
           class:list={['js-submit','pointer-events-none','opacity-50']}
           style="primary"
@@ -43,6 +42,10 @@ const { classes } = Astro.props
         >
           Send Message
         </Button>
+        <!-- Small feedback text area -->
+        <p id="formMsg" class="mt-3 text-sm text-red-500 hidden">
+          Please fill all required fields correctly.
+        </p>
       </div>
     </Form>
   </div>
@@ -54,20 +57,24 @@ const { classes } = Astro.props
   .modal__body h2 { @apply text-2xl mb-4; }
   .modal__body p { @apply text-neutral-600 dark:text-neutral-300; }
 
-  /* Smooth popup motion (same feel as Foxi signup) */
   .modal__popup { @apply transition-transform duration-500 ease-out; }
+
+  /* Progressive validation feedback */
+  input.user-touched:invalid {
+    @apply border-red-500 text-red-600 focus:border-red-500 focus:ring-red-500;
+  }
+  input.user-touched:valid {
+    @apply border-green-500 focus:border-green-500 focus:ring-green-500;
+  }
 </style>
 
 <script is:inline>
-  // Enable the submit button only when the form is valid.
   document.addEventListener('astro:page-load', () => {
     const form = document.getElementById('contactForm');
     if (!form) return;
 
-    const btn =
-      form.querySelector('.js-submit') ||
-      form.querySelector('button[type="submit"]');
-
+    const btn = form.querySelector('.js-submit');
+    const msg = document.getElementById('formMsg');
     if (!btn) return;
 
     const disableBtn = () => {
@@ -83,16 +90,32 @@ const { classes } = Astro.props
       form.checkValidity() ? enableBtn() : disableBtn();
     };
 
-    // Initial state + live updates
-    syncState();
-    form.addEventListener('input', syncState);
-    form.addEventListener('change', syncState);
+    // mark field as 'touched' when user interacts
+    form.querySelectorAll('input, textarea').forEach((el) => {
+      el.addEventListener('blur', () => el.classList.add('user-touched'));
+      el.addEventListener('input', syncState);
+      el.addEventListener('change', syncState);
+    });
 
-    // Prevent invalid submits (including Enter key)
+    syncState();
+
     form.addEventListener('submit', (e) => {
       if (!form.checkValidity()) {
         e.preventDefault();
+        msg.classList.remove('hidden');
+        msg.textContent = 'Please fill all required fields correctly.';
         form.reportValidity();
+      } else {
+        msg.classList.add('hidden');
+      }
+    });
+
+    // also show feedback if disabled button is clicked
+    btn.addEventListener('click', (e) => {
+      if (btn.classList.contains('pointer-events-none')) {
+        e.preventDefault();
+        msg.classList.remove('hidden');
+        msg.textContent = 'Please fill all required fields correctly.';
       }
     });
   });
