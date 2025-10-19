@@ -19,7 +19,8 @@ const { classes } = Astro.props
       Tell us a bit about your enquiry and we'll get back to you.
     </p>
 
-    <Form id="contactForm" novalidate>
+    <!-- Note: no 'novalidate' prop here, since Form.astro doesn't support it -->
+    <Form id="contactForm">
       <FormField>
         <InputField type="text" id="firstName" label="First Name" required />
         <InputField type="text" id="lastName" label="Last Name" />
@@ -42,7 +43,6 @@ const { classes } = Astro.props
         >
           Send Message
         </Button>
-        <!-- Small feedback text area -->
         <p id="formMsg" class="mt-3 text-sm text-red-500 hidden">
           Please fill all required fields correctly.
         </p>
@@ -59,12 +59,12 @@ const { classes } = Astro.props
 
   .modal__popup { @apply transition-transform duration-500 ease-out; }
 
-  /* Progressive validation feedback */
+  /* Progressive validation feedback (only after interaction) */
   input.user-touched:invalid {
-    @apply border-red-500 text-red-600 focus:border-red-500 focus:ring-red-500;
+    @apply border-red-500 text-red-600 focus:border-red-500;
   }
   input.user-touched:valid {
-    @apply border-green-500 focus:border-green-500 focus:ring-green-500;
+    @apply border-green-500 focus:border-green-500;
   }
 </style>
 
@@ -90,7 +90,7 @@ const { classes } = Astro.props
       form.checkValidity() ? enableBtn() : disableBtn();
     };
 
-    // mark field as 'touched' when user interacts
+    // Mark fields as touched only after user interaction
     form.querySelectorAll('input, textarea').forEach((el) => {
       el.addEventListener('blur', () => el.classList.add('user-touched'));
       el.addEventListener('input', syncState);
@@ -110,7 +110,7 @@ const { classes } = Astro.props
       }
     });
 
-    // also show feedback if disabled button is clicked
+    // If user clicks when disabled, show the friendly message
     btn.addEventListener('click', (e) => {
       if (btn.classList.contains('pointer-events-none')) {
         e.preventDefault();
