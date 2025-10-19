@@ -1,7 +1,7 @@
 ---
 // Signup Modal (Repurposed as Contact Form)
 // Keeps Foxi modal overlay, centering, animation.
-// Disables submit until required fields are valid.
+// Disables submit until required fields are valid (without using a disabled prop).
 
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
@@ -19,7 +19,6 @@ const { classes } = Astro.props
       Tell us a bit about your enquiry and we'll get back to you.
     </p>
 
-    <!-- Form gets a stable id -->
     <Form id="contactForm">
       <FormField>
         <InputField type="text" id="firstName" label="First Name" required />
@@ -27,7 +26,6 @@ const { classes } = Astro.props
       </FormField>
 
       <FormField>
-        <!-- No default value; floating label handles the ghost text -->
         <InputField type="email" id="email" label="Email" required />
       </FormField>
 
@@ -36,8 +34,13 @@ const { classes } = Astro.props
       </FormField>
 
       <div class="mt-6 text-center">
-        <!-- Use a class hook instead of id (Button doesn't support id prop) -->
-        <Button class:list={['js-submit']} style="primary" type="submit" size="lg" disabled>
+        <!-- Start visually/interaction disabled via classes; no unsupported props -->
+        <Button
+          class:list={['js-submit','pointer-events-none','opacity-50']}
+          style="primary"
+          type="submit"
+          size="lg"
+        >
           Send Message
         </Button>
       </div>
@@ -53,34 +56,39 @@ const { classes } = Astro.props
 
   /* Smooth popup motion (same feel as Foxi signup) */
   .modal__popup { @apply transition-transform duration-500 ease-out; }
-
-  /* Subtle disabled state */
-  .js-submit:disabled { @apply opacity-50 pointer-events-none; }
 </style>
 
 <script is:inline>
-  // Toggle the submit button based on form validity
+  // Enable the submit button only when the form is valid.
   document.addEventListener('astro:page-load', () => {
     const form = document.getElementById('contactForm');
     if (!form) return;
 
-    // Find the Button via class hook or fallback to submit type
     const btn =
       form.querySelector('.js-submit') ||
       form.querySelector('button[type="submit"]');
 
     if (!btn) return;
 
-    const toggle = () => {
-      const valid = form.checkValidity();
-      btn.disabled = !valid;
-      btn.setAttribute('aria-disabled', String(!valid));
+    const disableBtn = () => {
+      btn.classList.add('pointer-events-none','opacity-50');
+      btn.setAttribute('aria-disabled','true');
+    };
+    const enableBtn = () => {
+      btn.classList.remove('pointer-events-none','opacity-50');
+      btn.setAttribute('aria-disabled','false');
     };
 
-    toggle();
-    form.addEventListener('input', toggle);
-    form.addEventListener('change', toggle);
+    const syncState = () => {
+      form.checkValidity() ? enableBtn() : disableBtn();
+    };
 
+    // Initial state + live updates
+    syncState();
+    form.addEventListener('input', syncState);
+    form.addEventListener('change', syncState);
+
+    // Prevent invalid submits (including Enter key)
     form.addEventListener('submit', (e) => {
       if (!form.checkValidity()) {
         e.preventDefault();
