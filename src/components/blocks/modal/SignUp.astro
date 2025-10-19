@@ -1,7 +1,7 @@
 ---
 // Signup Modal (Repurposed as Contact Form)
 // Keeps Foxi modal overlay, centering, animation.
-// Adds disabled submit until required fields valid.
+// Disables submit until required fields are valid.
 
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
@@ -19,15 +19,15 @@ const { classes } = Astro.props
       Tell us a bit about your enquiry and we'll get back to you.
     </p>
 
-    <!-- 1) Give the form a stable id -->
+    <!-- Form gets a stable id -->
     <Form id="contactForm">
       <FormField>
-        <!-- Mark whichever fields you want as required -->
         <InputField type="text" id="firstName" label="First Name" required />
         <InputField type="text" id="lastName" label="Last Name" />
       </FormField>
 
       <FormField>
+        <!-- No default value; floating label handles the ghost text -->
         <InputField type="email" id="email" label="Email" required />
       </FormField>
 
@@ -36,8 +36,8 @@ const { classes } = Astro.props
       </FormField>
 
       <div class="mt-6 text-center">
-        <!-- 2) Start disabled; we’ll enable when valid -->
-        <Button id="submitBtn" style="primary" type="submit" size="lg" disabled>
+        <!-- Use a class hook instead of id (Button doesn't support id prop) -->
+        <Button class:list={['js-submit']} style="primary" type="submit" size="lg" disabled>
           Send Message
         </Button>
       </div>
@@ -54,16 +54,22 @@ const { classes } = Astro.props
   /* Smooth popup motion (same feel as Foxi signup) */
   .modal__popup { @apply transition-transform duration-500 ease-out; }
 
-  /* Optional: a subtle disabled state */
-  #submitBtn:disabled { @apply opacity-50 pointer-events-none; }
+  /* Subtle disabled state */
+  .js-submit:disabled { @apply opacity-50 pointer-events-none; }
 </style>
 
 <script is:inline>
-  // 3) Toggle the submit button based on form validity
+  // Toggle the submit button based on form validity
   document.addEventListener('astro:page-load', () => {
     const form = document.getElementById('contactForm');
-    const btn  = document.getElementById('submitBtn');
-    if (!form || !btn) return;
+    if (!form) return;
+
+    // Find the Button via class hook or fallback to submit type
+    const btn =
+      form.querySelector('.js-submit') ||
+      form.querySelector('button[type="submit"]');
+
+    if (!btn) return;
 
     const toggle = () => {
       const valid = form.checkValidity();
@@ -71,12 +77,10 @@ const { classes } = Astro.props
       btn.setAttribute('aria-disabled', String(!valid));
     };
 
-    // Run once, then on every change
     toggle();
     form.addEventListener('input', toggle);
     form.addEventListener('change', toggle);
 
-    // Extra safety: prevent submit and show native messages if invalid
     form.addEventListener('submit', (e) => {
       if (!form.checkValidity()) {
         e.preventDefault();
