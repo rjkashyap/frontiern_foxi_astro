@@ -4,7 +4,7 @@
 import Layout from '../layouts/Layout.astro'
 // - UI
 import Hero from '../components/blocks/hero/HomeCTA.astro'
-// import Features from '../components/blocks/features/FeatureCards.astro'
+import Features from '../components/blocks/features/FeatureCards.astro'
 // import Testimonial from '../components/blocks/testimonials/BasicDark.astro'
 // import HighlightBlocks from '../components/blocks/highlights/HightlightRows.astro'
 // import CTA from '../components/blocks/CTA/BasicDark.astro'
@@ -55,7 +55,7 @@ const SEO = {
 ---
 <Layout title={SEO.title} description={SEO.description}>
   <Hero heroUrl={heroUrl} heroAlt={heroAlt} />
-  {/* <Features /> */}
+  <Features />
   {/* <Testimonial bg={testimonialBackground} bgPosition="right" /> */}
   {/* <HighlightBlocks /> */}
   {/* <CTA /> */}
