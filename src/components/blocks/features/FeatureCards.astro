@@ -1,38 +1,199 @@
+---
+/**
+ * Feature Cards grid Section (with filters)
+ * - 3 cols × 2 rows on large screens, stacks on small
+ * - 6 small cards, same height
+ * - Hard-coded filter toolbar (instant fade)
+ * - Neutral dark background + accent border for filters
+ */
+
+// Layout
+import Section from '../../ui/Section.astro'
+import Row from '../../ui/Row.astro'
+import Col from '../../ui/Col.astro'
+// UI
+import Card from '../../ui/cards/FeatureCard.astro'
+
+// Images (use existing 5; reuse one for the 6th to avoid missing asset)
+import feature01 from '../../../assets/cards/feature-01.svg'
+import feature02 from '../../../assets/cards/feature-02.svg'
+import feature03 from '../../../assets/cards/feature-03.svg'
+import feature04 from '../../../assets/cards/feature-04.svg'
+import feature05 from '../../../assets/cards/feature-05.svg'
+
+// Hard-coded catalog (title, subtitle, image, link, category slug)
+const items = [
+  {
+    title: 'All your data in one place',
+    subtitle:
+      'Stay on top of your tasks and deadlines with our intuitive project management tool.',
+    image: feature01,
+    link: '/features',
+    cat: 'staff-role'
+  },
+  {
+    title: 'Organize & manage your projects',
+    subtitle:
+      'Plan, assign, and track with clarity across teams and timelines.',
+    image: feature02,
+    link: '/features',
+    cat: 'mission-internship'
+  },
+  {
+    title: 'Keep your team connected',
+    subtitle:
+      'Integrated chat to share updates, files, and messages securely.',
+    image: feature03,
+    link: '/features',
+    cat: 'church-planting-residency'
+  },
+  {
+    title: 'Manage your customers',
+    subtitle:
+      'Build and nurture relationships with a powerful, simple CRM.',
+    image: feature04,
+    link: '/features',
+    cat: 'short-term-trip'
+  },
+  {
+    title: 'Simplify your financial operations',
+    subtitle:
+      'Create, send, and track invoices effortlessly.',
+    image: feature05,
+    link: '/features',
+    cat: 'medium-term-placement'
+  },
+  {
+    title: 'Insights that drive action',
+    subtitle:
+      'Dashboards and reports that surface what matters.',
+    image: feature01, // reusing an existing SVG to avoid missing asset
+    link: '/features',
+    cat: 'long-term-placement'
+  }
+]
+
+// Filter buttons (hard-coded)
+const filters = [
+  { slug: 'all', label: 'All' },
+  { slug: 'staff-role', label: 'Staff Role' },
+  { slug: 'mission-internship', label: 'Mission Internship' },
+  { slug: 'church-planting-residency', label: 'Church Planting Residency' },
+  { slug: 'short-term-trip', label: 'Short-term Trip' },
+  { slug: 'medium-term-placement', label: 'Medium-term Placement' },
+  { slug: 'long-term-placement', label: 'Long-term Placement' }
+]
+---
+
+<Section id="features">
+  <!-- Heading / Intro preserved -->
+  <Row>
+    <Col span="12" align="center" classes="mb-8 max-w-4xl mx-auto">
+      <h2 class="text-pretty">Innovative tools to <strong>transform</strong> your workflow</h2>
+      <p class="pb-0 text-lg">
+        Explore the suite of tools designed to streamline your workflow, enhance productivity, and
+        drive growth. Each product is crafted with precision to meet your needs and exceed your
+        expectations.
+      </p>
+    </Col>
+  </Row>
+
+  <!-- Filter Bar -->
+  <Row>
+    <Col span="12" align="center">
+      <div id="feature-filters"
+           class="inline-flex flex-wrap items-center justify-center gap-2 rounded border px-2 py-2
+                  bg-neutral-900/60 border-neutral-800
+                  dark:bg-neutral-900/60 dark:border-neutral-800">
+        {filters.map((f, i) => (
+          <button
+            type="button"
+            data-filter={f.slug}
+            class:list={[
+              'px-3 py-1.5 text-sm rounded border transition',
+              'border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:border-neutral-600',
+              i === 0 ? 'is-active bg-neutral-800 border-primary-500 text-neutral-100' : ''
+            ]}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+    </Col>
+  </Row>
+
+  <!-- Grid: 3 cols × 2 rows on lg, stacks on small -->
+  <div
+    class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+    id="feature-grid"
+  >
+    {items.map((it) => (
+      // Wrapper enforces equal height without needing a `classes` prop on <Card>
+      <div
+        class="flex h-full"
+        data-cat={it.cat}
+      >
+        <div class="flex flex-col h-full w-full transition-opacity duration-200 will-change-[opacity,transform]">
+          <!-- Card: image first, text later (FeatureCard already does this order) -->
+          <Card
+            title={it.title}
+            subtitle={it.subtitle}
+            image={it.image}
+            link={it.link}
+          />
+        </div>
+      </div>
+    ))}
+  </div>
+</Section>
+
 <style>
-  /* ↓ Shrink overall card footprint (about 50% smaller height) */
-  #feature-grid .card {
-    @apply scale-[0.9] md:scale-[0.95]; /* visually smaller */
-    transform-origin: top center;
-  }
-
-  /* ↓ Tighten spacing inside cards (if your <Card> component has inner padding) */
-  #feature-grid .card > * {
-    @apply py-1 sm:py-2;
-  }
-
-  /* ↓ Limit height to avoid tall uneven cards */
-  #feature-grid > div {
-    @apply h-[180px] sm:h-[220px] lg:h-[240px];
-  }
-
-  /* ↓ Keep equal heights & clean transitions */
-  #feature-grid > div,
-  #feature-grid .card {
-    @apply flex flex-col justify-between;
-  }
-
   /* Active filter button */
   #feature-filters .is-active {
+    /* neutral dark + accent border */
     box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
   }
 
-  /* Instant fade (snappy show/hide) */
+  /* Instant fade behavior (no slide) for filter transitions */
   #feature-grid > div {
     opacity: 1;
-    transition: opacity 0.15s ease-out;
   }
   #feature-grid > div.is-hidden {
     opacity: 0;
     pointer-events: none;
   }
 </style>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const bar   = document.getElementById('feature-filters');
+    const grid  = document.getElementById('feature-grid');
+    if (!bar || !grid) return;
+
+    const btns  = Array.from(bar.querySelectorAll('[data-filter]'));
+    const cards = Array.from(grid.children); // each wrapper <div class="flex h-full" ...>
+
+    const apply = (slug) => {
+      cards.forEach((wrap) => {
+        const cat = wrap.getAttribute('data-cat');
+        const show = slug === 'all' || cat === slug;
+        wrap.classList.toggle('is-hidden', !show);
+      });
+    };
+
+    const setActive = (target) => {
+      btns.forEach(b => b.classList.remove('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100'));
+      target.classList.add('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100');
+    };
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActive(btn);
+        apply(btn.getAttribute('data-filter'));
+      });
+    });
+
+    // initial: 'all'
+    apply('all');
+  });
+</script>
