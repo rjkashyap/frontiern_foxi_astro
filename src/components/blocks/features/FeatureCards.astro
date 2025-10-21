@@ -97,13 +97,12 @@ const filters = [
     id="feature-grid"
   >
     {items.map((it) => (
-      <!-- Equal-height wrapper (short cards) -->
+      <!-- Equal-height wrapper (cards set to 1.5× previous height) -->
       <div
-        class="flex h-[180px] sm:h-[200px] lg:h-[220px] w-full"
+        class="flex h-[270px] sm:h-[300px] lg:h-[330px] w-full"
         data-cat={it.cat}
       >
         <div class="flex flex-col h-full w-full transition-opacity duration-200 will-change-[opacity,transform]">
-          <!-- Make the card fill the allotted height -->
           <div class="h-full">
             <Card
               title={it.title}
@@ -128,8 +127,7 @@ const filters = [
   #feature-grid > div { opacity: 1; }
   #feature-grid > div.is-hidden { opacity: 0; pointer-events: none; }
 
-  /* Optional: slightly tighten text inside cards so short height feels balanced */
-  /* If FeatureCard emits predictable selectors, these will apply; otherwise safe no-ops */
+  /* Optional: slightly tighten text inside cards */
   :where(#feature-grid .card h3){ line-height:1.2 }
   :where(#feature-grid .card p){ line-height:1.35 }
 </style>
