@@ -2,8 +2,8 @@
 /**
  * Feature Cards grid Section (with filters)
  * - 3 cols × 2 rows on large screens, stacks on small
- * - 6 small cards, same height
- * - Hard-coded filter toolbar (instant fade)
+ * - Equal-height cards (adjusted to 1.5× previous)
+ * - Hard-coded filter toolbar (instant fade, gapless reflow)
  * - Neutral dark background + accent border for filters
  */
 
@@ -14,14 +14,14 @@ import Col from '../../ui/Col.astro'
 // UI
 import Card from '../../ui/cards/FeatureCard.astro'
 
-// Images (use existing 5; reuse one for the 6th to avoid missing asset)
+// Images (use existing 5; reuse one for the 6th)
 import feature01 from '../../../assets/cards/feature-01.svg'
 import feature02 from '../../../assets/cards/feature-02.svg'
 import feature03 from '../../../assets/cards/feature-03.svg'
 import feature04 from '../../../assets/cards/feature-04.svg'
 import feature05 from '../../../assets/cards/feature-05.svg'
 
-// Hard-coded catalog (title, subtitle, image, link, category slug)
+// Hard-coded catalog
 const items = [
   { title: 'All your data in one place',
     subtitle: 'Stay on top of your tasks and deadlines with our intuitive project management tool.',
@@ -43,7 +43,7 @@ const items = [
     image: feature01, link: '/features', cat: 'long-term-placement' }
 ]
 
-// Filter buttons (hard-coded)
+// Filter buttons
 const filters = [
   { slug: 'all', label: 'All' },
   { slug: 'staff-role', label: 'Staff Role' },
@@ -56,7 +56,7 @@ const filters = [
 ---
 
 <Section id="features">
-  <!-- Heading / Intro preserved -->
+  <!-- Heading -->
   <Row>
     <Col span="12" align="center" classes="mb-8 max-w-4xl mx-auto">
       <h2 class="text-pretty">Innovative tools to <strong>transform</strong> your workflow</h2>
@@ -91,18 +91,17 @@ const filters = [
     </Col>
   </Row>
 
-  <!-- Grid: 3 cols × 2 rows on lg, stacks on small -->
+  <!-- Grid -->
   <div
     class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
     id="feature-grid"
   >
     {items.map((it) => (
-      <!-- Equal-height wrapper (cards set to 1.5× previous height) -->
       <div
-        class="flex h-[270px] sm:h-[300px] lg:h-[330px] w-full"
+        class="flex h-[270px] sm:h-[300px] lg:h-[330px] w-full transition-opacity duration-150"
         data-cat={it.cat}
       >
-        <div class="flex flex-col h-full w-full transition-opacity duration-200 will-change-[opacity,transform]">
+        <div class="flex flex-col h-full w-full">
           <div class="h-full">
             <Card
               title={it.title}
@@ -118,16 +117,20 @@ const filters = [
 </Section>
 
 <style>
-  /* Active filter button */
   #feature-filters .is-active {
     box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
   }
 
-  /* Instant fade behavior (no slide) for filter transitions */
-  #feature-grid > div { opacity: 1; }
-  #feature-grid > div.is-hidden { opacity: 0; pointer-events: none; }
+  #feature-grid > div {
+    opacity: 1;
+    transition: opacity 0.15s ease-in-out;
+  }
 
-  /* Optional: slightly tighten text inside cards */
+  #feature-grid > div.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   :where(#feature-grid .card h3){ line-height:1.2 }
   :where(#feature-grid .card p){ line-height:1.35 }
 </style>
@@ -139,18 +142,28 @@ const filters = [
     if (!bar || !grid) return;
 
     const btns  = Array.from(bar.querySelectorAll('[data-filter]'));
-    const cards = Array.from(grid.children); // each wrapper
+    const cards = Array.from(grid.children);
 
     const apply = (slug) => {
       cards.forEach((wrap) => {
         const cat = wrap.getAttribute('data-cat');
         const show = slug === 'all' || cat === slug;
-        wrap.classList.toggle('is-hidden', !show);
+
+        if (show) {
+          wrap.classList.remove('is-hidden', 'hidden');
+          wrap.style.display = '';
+          requestAnimationFrame(() => { wrap.style.opacity = '1'; });
+        } else {
+          wrap.style.opacity = '0';
+          setTimeout(() => wrap.classList.add('hidden'), 150);
+        }
       });
     };
 
     const setActive = (target) => {
-      btns.forEach(b => b.classList.remove('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100'));
+      btns.forEach(b =>
+        b.classList.remove('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100')
+      );
       target.classList.add('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100');
     };
 
@@ -162,6 +175,6 @@ const filters = [
       });
     });
 
-    apply('all'); // initial
+    apply('all');
   });
 </script>
