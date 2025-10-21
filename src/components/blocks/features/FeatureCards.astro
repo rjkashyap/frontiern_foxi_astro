@@ -23,54 +23,24 @@ import feature05 from '../../../assets/cards/feature-05.svg'
 
 // Hard-coded catalog (title, subtitle, image, link, category slug)
 const items = [
-  {
-    title: 'All your data in one place',
-    subtitle:
-      'Stay on top of your tasks and deadlines with our intuitive project management tool.',
-    image: feature01,
-    link: '/features',
-    cat: 'staff-role'
-  },
-  {
-    title: 'Organize & manage your projects',
-    subtitle:
-      'Plan, assign, and track with clarity across teams and timelines.',
-    image: feature02,
-    link: '/features',
-    cat: 'mission-internship'
-  },
-  {
-    title: 'Keep your team connected',
-    subtitle:
-      'Integrated chat to share updates, files, and messages securely.',
-    image: feature03,
-    link: '/features',
-    cat: 'church-planting-residency'
-  },
-  {
-    title: 'Manage your customers',
-    subtitle:
-      'Build and nurture relationships with a powerful, simple CRM.',
-    image: feature04,
-    link: '/features',
-    cat: 'short-term-trip'
-  },
-  {
-    title: 'Simplify your financial operations',
-    subtitle:
-      'Create, send, and track invoices effortlessly.',
-    image: feature05,
-    link: '/features',
-    cat: 'medium-term-placement'
-  },
-  {
-    title: 'Insights that drive action',
-    subtitle:
-      'Dashboards and reports that surface what matters.',
-    image: feature01, // reusing an existing SVG to avoid missing asset
-    link: '/features',
-    cat: 'long-term-placement'
-  }
+  { title: 'All your data in one place',
+    subtitle: 'Stay on top of your tasks and deadlines with our intuitive project management tool.',
+    image: feature01, link: '/features', cat: 'staff-role' },
+  { title: 'Organize & manage your projects',
+    subtitle: 'Plan, assign, and track with clarity across teams and timelines.',
+    image: feature02, link: '/features', cat: 'mission-internship' },
+  { title: 'Keep your team connected',
+    subtitle: 'Integrated chat to share updates, files, and messages securely.',
+    image: feature03, link: '/features', cat: 'church-planting-residency' },
+  { title: 'Manage your customers',
+    subtitle: 'Build and nurture relationships with a powerful, simple CRM.',
+    image: feature04, link: '/features', cat: 'short-term-trip' },
+  { title: 'Simplify your financial operations',
+    subtitle: 'Create, send, and track invoices effortlessly.',
+    image: feature05, link: '/features', cat: 'medium-term-placement' },
+  { title: 'Insights that drive action',
+    subtitle: 'Dashboards and reports that surface what matters.',
+    image: feature01, link: '/features', cat: 'long-term-placement' }
 ]
 
 // Filter buttons (hard-coded)
@@ -127,19 +97,21 @@ const filters = [
     id="feature-grid"
   >
     {items.map((it) => (
-      // Wrapper enforces equal height without needing a `classes` prop on <Card>
+      <!-- Equal-height wrapper (short cards) -->
       <div
-        class="flex h-full"
+        class="flex h-[180px] sm:h-[200px] lg:h-[220px] w-full"
         data-cat={it.cat}
       >
         <div class="flex flex-col h-full w-full transition-opacity duration-200 will-change-[opacity,transform]">
-          <!-- Card: image first, text later (FeatureCard already does this order) -->
-          <Card
-            title={it.title}
-            subtitle={it.subtitle}
-            image={it.image}
-            link={it.link}
-          />
+          <!-- Make the card fill the allotted height -->
+          <div class="h-full">
+            <Card
+              title={it.title}
+              subtitle={it.subtitle}
+              image={it.image}
+              link={it.link}
+            />
+          </div>
         </div>
       </div>
     ))}
@@ -149,18 +121,17 @@ const filters = [
 <style>
   /* Active filter button */
   #feature-filters .is-active {
-    /* neutral dark + accent border */
     box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
   }
 
   /* Instant fade behavior (no slide) for filter transitions */
-  #feature-grid > div {
-    opacity: 1;
-  }
-  #feature-grid > div.is-hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
+  #feature-grid > div { opacity: 1; }
+  #feature-grid > div.is-hidden { opacity: 0; pointer-events: none; }
+
+  /* Optional: slightly tighten text inside cards so short height feels balanced */
+  /* If FeatureCard emits predictable selectors, these will apply; otherwise safe no-ops */
+  :where(#feature-grid .card h3){ line-height:1.2 }
+  :where(#feature-grid .card p){ line-height:1.35 }
 </style>
 
 <script is:inline>
@@ -170,7 +141,7 @@ const filters = [
     if (!bar || !grid) return;
 
     const btns  = Array.from(bar.querySelectorAll('[data-filter]'));
-    const cards = Array.from(grid.children); // each wrapper <div class="flex h-full" ...>
+    const cards = Array.from(grid.children); // each wrapper
 
     const apply = (slug) => {
       cards.forEach((wrap) => {
@@ -193,7 +164,6 @@ const filters = [
       });
     });
 
-    // initial: 'all'
-    apply('all');
+    apply('all'); // initial
   });
 </script>
