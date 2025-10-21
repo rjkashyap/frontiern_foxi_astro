@@ -1,7 +1,6 @@
 ---
 // Signup Modal (Repurposed as Contact Form)
-// Keeps Foxi modal overlay, centering, animation.
-// Adds delayed (post-interaction) validation + friendly disabled message.
+// Matches Foxi contact page validation and required field behaviour.
 
 import Modal from '../../ui/Modal.astro'
 import Form from '../../ui/forms/Form.astro'
@@ -19,7 +18,6 @@ const { classes } = Astro.props
       Tell us a bit about your enquiry and we'll get back to you.
     </p>
 
-    <!-- Note: no 'novalidate' prop here, since Form.astro doesn't support it -->
     <Form id="contactForm">
       <FormField>
         <InputField type="text" id="firstName" label="First Name" required />
@@ -59,40 +57,36 @@ const { classes } = Astro.props
 
   .modal__popup { @apply transition-transform duration-500 ease-out; }
 
-  /* Progressive validation feedback (only after interaction) */
-  input.user-touched:invalid {
-    @apply border-red-500 text-red-600 focus:border-red-500;
+  /* Let native Foxi validation handle required styling (asterisk + red) */
+  input:invalid {
+    @apply invalid:border-red-500 invalid:text-red-500 focus:invalid:border-red-500;
   }
-  input.user-touched:valid {
-    @apply border-green-500 focus:border-green-500;
+  input:valid {
+    @apply border-neutral-200 focus:border-primary-500;
   }
 </style>
 
 <script is:inline>
   document.addEventListener('astro:page-load', () => {
     const form = document.getElementById('contactForm');
-    if (!form) return;
-
-    const btn = form.querySelector('.js-submit');
+    const btn = form?.querySelector('.js-submit');
     const msg = document.getElementById('formMsg');
-    if (!btn) return;
+    if (!form || !btn) return;
 
     const disableBtn = () => {
-      btn.classList.add('pointer-events-none','opacity-50');
-      btn.setAttribute('aria-disabled','true');
+      btn.classList.add('pointer-events-none', 'opacity-50');
+      btn.setAttribute('aria-disabled', 'true');
     };
     const enableBtn = () => {
-      btn.classList.remove('pointer-events-none','opacity-50');
-      btn.setAttribute('aria-disabled','false');
+      btn.classList.remove('pointer-events-none', 'opacity-50');
+      btn.setAttribute('aria-disabled', 'false');
     };
 
     const syncState = () => {
       form.checkValidity() ? enableBtn() : disableBtn();
     };
 
-    // Mark fields as touched only after user interaction
     form.querySelectorAll('input, textarea').forEach((el) => {
-      el.addEventListener('blur', () => el.classList.add('user-touched'));
       el.addEventListener('input', syncState);
       el.addEventListener('change', syncState);
     });
@@ -104,13 +98,11 @@ const { classes } = Astro.props
         e.preventDefault();
         msg.classList.remove('hidden');
         msg.textContent = 'Please fill all required fields correctly.';
-        form.reportValidity();
       } else {
         msg.classList.add('hidden');
       }
     });
 
-    // If user clicks when disabled, show the friendly message
     btn.addEventListener('click', (e) => {
       if (btn.classList.contains('pointer-events-none')) {
         e.preventDefault();
