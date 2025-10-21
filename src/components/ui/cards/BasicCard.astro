@@ -1,5 +1,4 @@
 ---
-/*
 // Basic Card
 // ------------
 // Description: The basic card component
@@ -13,13 +12,14 @@
 // - Type: Image-top or Image-bottom (refers to the image position)
 // - classes: extra classes
 // Reference: https://wind-ui.com/components/cards/
-*/
 
+// Components
 import { Image } from 'astro:assets'
 import { Icon } from 'astro-icon/components'
 import Card from './partials/Card.astro'
 import CardBody from './partials/CardBody.astro'
 
+// Props
 type Props = {
   title?: string
   subtitle?: string
@@ -35,18 +35,16 @@ const { title = '', subtitle, titleSize = 'lg', image, icon, link, type, classes
 
 <Card classes={classes} link={link}>
   {image && (
-    <div class:list={['card__media', type === 'image-bottom' ? 'order-2' : '']}>
-      <!-- Padding wrapper adds space from card border; bg inherits -->
-      <div class="card__media-inner">
-        <!-- Use object-contain so the SVG/image is never cropped -->
-        <Image
-          src={image}
-          alt={title}
-          width={600}
-          height={400}
-          class="card__img"
-        />
-      </div>
+    <div class:list={['card__media', type === 'image-bottom' ? 'order-2' : 'order-0']}>
+      <Image
+        src={image}
+        alt={title}
+        width={600}
+        height={400}
+        loading="lazy"
+        decoding="async"
+        class="card__image"
+      />
     </div>
   )}
 
@@ -64,25 +62,31 @@ const { title = '', subtitle, titleSize = 'lg', image, icon, link, type, classes
 </Card>
 
 <style>
+  /* Icon, unchanged */
   .card__icon {
     @apply inline-block size-6 shrink-0 text-primary-500;
   }
 
-  /* Image wrapper: adds padding so the graphic doesn’t touch the card edge */
-  .card__media-inner {
-    @apply p-4 pt-4 pb-0; /* bottom can be tight since text follows */
+  /* New media wrapper: centers image, adds padding to avoid touching the border */
+  .card__media {
+    @apply w-full flex items-center justify-center p-4;
   }
 
-  /* Ensure image never crops and scales down nicely inside its padded box */
-  .card__img {
+  /* Never crop images; shrink to fit the available area on all screens */
+  .card__image {
     @apply w-full h-auto object-contain;
-    /* For raster images that could be huge, keep a sensible max-height
-       without forcing crop. Tweak if you want smaller/larger thumbnails. */
-    max-height: 12rem; /* ~192px */
+
+    /* Cap the image height so it never overflows short cards (tighter on phones) */
+    max-height: 8rem;   /* ~128px on phones */
   }
 
-  /* Optional: if you want stricter equal heights without cropping,
-     you can give the outer media a min-height and let object-contain do the rest.
-     Leaving it out by default to avoid layout jumps. */
-  /* .card__media { @apply min-h-[8rem]; } */
+  @screen sm {
+    .card__image { max-height: 9.5rem; }  /* ~152px */
+  }
+  @screen md {
+    .card__image { max-height: 11rem; }   /* ~176px */
+  }
+  @screen lg {
+    .card__image { max-height: 12.5rem; } /* ~200px */
+  }
 </style>
