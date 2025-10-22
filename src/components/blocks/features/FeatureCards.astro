@@ -126,25 +126,26 @@ const filters = [
   /* optional: slightly smoother transform perf */
   #feature-grid .card-wrap { will-change: transform, opacity; }
 </style>
-
 <script>
   import gsap from "gsap";
 
-  document.addEventListener('astro:page-load', () => {
-    const bar  = document.getElementById('feature-filters');
-    const grid = document.getElementById('feature-grid');
+  document.addEventListener("astro:page-load", () => {
+    const bar = document.getElementById("feature-filters");
+    const grid = document.getElementById("feature-grid");
     if (!bar || !grid) return;
 
     const DURATION = 0.35;
-    const EASE     = "power2.out";
+    const EASE = "power2.out";
 
-    const btns  = Array.from(bar.querySelectorAll<HTMLButtonElement>('[data-filter]'));
-    const wraps = () => Array.from(grid.querySelectorAll<HTMLDivElement>('.card-wrap'));
+    const btns = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-filter]"));
+    const wraps = () => Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
+
+    const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
 
     function measureVisiblePositions() {
       const map = new Map<HTMLDivElement, { x: number; y: number }>();
       wraps().forEach((w) => {
-        if (!w.classList.contains('hidden')) {
+        if (!w.classList.contains("hidden")) {
           const r = w.getBoundingClientRect();
           map.set(w, { x: r.left, y: r.top });
         }
@@ -154,71 +155,80 @@ const filters = [
 
     function setActive(btn: HTMLButtonElement) {
       btns.forEach((b) =>
-        b.classList.remove('is-active','bg-neutral-800','border-primary-500','text-neutral-100')
+        b.classList.remove(
+          "is-active",
+          "bg-neutral-800",
+          "border-primary-500",
+          "text-neutral-100"
+        )
       );
-      btn.classList.add('is-active','bg-neutral-800','border-primary-500','text-neutral-100');
+      btn.classList.add("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
     }
 
-    function applyFilter(slug: string) {
+    async function applyFilter(slug: string) {
       const before = measureVisiblePositions();
 
+      // 1️⃣ Unhide new items (but don't measure yet)
       wraps().forEach((w) => {
-        const cat  = w.getAttribute('data-cat');
-        const show = slug === 'all' || cat === slug;
+        const cat = w.getAttribute("data-cat");
+        const show = slug === "all" || cat === slug;
 
-        if (show && w.classList.contains('hidden')) {
-          w.classList.remove('hidden');
+        if (show && w.classList.contains("hidden")) {
+          w.classList.remove("hidden");
           gsap.set(w, { opacity: 0, scale: 0.95 });
         }
       });
 
-      wraps().forEach((w) => {
-        const cat  = w.getAttribute('data-cat');
-        const show = slug === 'all' || cat === slug;
+      // 🕐 Wait one frame for browser to reflow
+      await nextFrame();
 
-        if (!show && !w.classList.contains('hidden')) {
+      // 2️⃣ Animate out hidden ones
+      wraps().forEach((w) => {
+        const cat = w.getAttribute("data-cat");
+        const show = slug === "all" || cat === slug;
+
+        if (!show && !w.classList.contains("hidden")) {
           gsap.to(w, {
-            opacity: 0, scale: 0.92, duration: 0.18, ease: "power1.out",
+            opacity: 0,
+            scale: 0.92,
+            duration: 0.18,
+            ease: "power1.out",
             onComplete: () => {
-              w.classList.add('hidden');
+              w.classList.add("hidden");
               gsap.set(w, { clearProps: "opacity,scale" });
-            }
+            },
           });
         }
       });
 
-      requestAnimationFrame(() => {
-        const after = measureVisiblePositions();
+      // 3️⃣ Measure AFTER positions now that layout is final
+      const after = measureVisiblePositions();
 
-        after.forEach((afterPos, el) => {
-          const beforePos = before.get(el);
-          if (!beforePos) {
-            gsap.to(el, { opacity: 1, scale: 1, duration: 0.22, ease: "power1.out" });
-            return;
-          }
+      // 4️⃣ Animate between before and after
+      after.forEach((afterPos, el) => {
+        const beforePos = before.get(el);
+        if (!beforePos) {
+          gsap.to(el, { opacity: 1, scale: 1, duration: 0.25, ease: "power1.out" });
+          return;
+        }
 
-          const dx = beforePos.x - afterPos.x;
-          const dy = beforePos.y - afterPos.y;
+        const dx = beforePos.x - afterPos.x;
+        const dy = beforePos.y - afterPos.y;
 
-          if (dx || dy) {
-            gsap.fromTo(
-              el,
-              { x: dx, y: dy },
-              { x: 0, y: 0, duration: DURATION, ease: EASE }
-            );
-          }
-        });
+        if (dx || dy) {
+          gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: DURATION, ease: EASE });
+        }
       });
     }
 
     btns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener("click", (e) => {
         e.preventDefault();
         setActive(btn);
-        applyFilter(btn.getAttribute('data-filter') || 'all');
+        applyFilter(btn.getAttribute("data-filter") || "all");
       });
     });
 
-    applyFilter('all');
+    applyFilter("all");
   });
 </script>
