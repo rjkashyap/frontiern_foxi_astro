@@ -1,33 +1,49 @@
 ---
 /**
- * Feature Cards grid Section (with filters)
- * - Smooth fade + scale transition on filter change
+ * Feature Cards grid Section (with GSAP FLIP filter animation)
  * - 3 cols × 2 rows on large screens, stacks on small
- * - Equal-height cards
- * - Hard-coded filter toolbar (instant fade, gapless reflow)
+ * - Equal-height wrappers so rows align
+ * - Hard-coded filter toolbar
  * - Neutral dark background + accent border for filters
  */
 
+// Layout
 import Section from '../../ui/Section.astro'
 import Row from '../../ui/Row.astro'
 import Col from '../../ui/Col.astro'
+// UI
 import Card from '../../ui/cards/FeatureCard.astro'
 
+// Images
 import feature01 from '../../../assets/cards/feature-01.svg'
 import feature02 from '../../../assets/cards/feature-02.svg'
 import feature03 from '../../../assets/cards/feature-03.svg'
 import feature04 from '../../../assets/cards/feature-04.svg'
 import feature05 from '../../../assets/cards/feature-05.svg'
 
+// Catalog
 const items = [
-  { title: 'All your data in one place', subtitle: 'Stay on top of your tasks and deadlines with our intuitive project management tool.', image: feature01, link: '/features', cat: 'staff-role' },
-  { title: 'Organize & manage your projects', subtitle: 'Plan, assign, and track with clarity across teams and timelines.', image: feature02, link: '/features', cat: 'mission-internship' },
-  { title: 'Keep your team connected', subtitle: 'Integrated chat to share updates, files, and messages securely.', image: feature03, link: '/features', cat: 'church-planting-residency' },
-  { title: 'Manage your customers', subtitle: 'Build and nurture relationships with a powerful, simple CRM.', image: feature04, link: '/features', cat: 'short-term-trip' },
-  { title: 'Simplify your financial operations', subtitle: 'Create, send, and track invoices effortlessly.', image: feature05, link: '/features', cat: 'medium-term-placement' },
-  { title: 'Insights that drive action', subtitle: 'Dashboards and reports that surface what matters.', image: feature01, link: '/features', cat: 'long-term-placement' }
+  { title: 'All your data in one place',
+    subtitle: 'Stay on top of your tasks and deadlines with our intuitive project management tool.',
+    image: feature01, link: '/features', cat: 'staff-role' },
+  { title: 'Organize & manage your projects',
+    subtitle: 'Plan, assign, and track with clarity across teams and timelines.',
+    image: feature02, link: '/features', cat: 'mission-internship' },
+  { title: 'Keep your team connected',
+    subtitle: 'Integrated chat to share updates, files, and messages securely.',
+    image: feature03, link: '/features', cat: 'church-planting-residency' },
+  { title: 'Manage your customers',
+    subtitle: 'Build and nurture relationships with a powerful, simple CRM.',
+    image: feature04, link: '/features', cat: 'short-term-trip' },
+  { title: 'Simplify your financial operations',
+    subtitle: 'Create, send, and track invoices effortlessly.',
+    image: feature05, link: '/features', cat: 'medium-term-placement' },
+  { title: 'Insights that drive action',
+    subtitle: 'Dashboards and reports that surface what matters.',
+    image: feature01, link: '/features', cat: 'long-term-placement' }
 ]
 
+// Filter buttons
 const filters = [
   { slug: 'all', label: 'All' },
   { slug: 'staff-role', label: 'Staff Role' },
@@ -40,6 +56,7 @@ const filters = [
 ---
 
 <Section id="features">
+  <!-- Heading -->
   <Row>
     <Col span="12" align="center" classes="mb-8 max-w-4xl mx-auto">
       <h2 class="text-pretty">Innovative tools to <strong>transform</strong> your workflow</h2>
@@ -51,6 +68,7 @@ const filters = [
     </Col>
   </Row>
 
+  <!-- Filter Bar -->
   <Row>
     <Col span="12" align="center">
       <div id="feature-filters"
@@ -73,12 +91,25 @@ const filters = [
     </Col>
   </Row>
 
-  <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" id="feature-grid">
+  <!-- Grid -->
+  <div
+    id="feature-grid"
+    class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+  >
     {items.map((it) => (
-      <div class="flex h-[420px] sm:h-[380px] lg:h-[390px] w-full transition-opacity duration-150" data-cat={it.cat}>
+      <!-- wrapper controls fixed card height for perfect alignment -->
+      <div
+        class="card-wrap flex h-[360px] sm:h-[320px] lg:h-[340px] w-full"
+        data-cat={it.cat}
+      >
         <div class="flex flex-col h-full w-full">
           <div class="h-full">
-            <Card title={it.title} subtitle={it.subtitle} image={it.image} link={it.link} />
+            <Card
+              title={it.title}
+              subtitle={it.subtitle}
+              image={it.image}
+              link={it.link}
+            />
           </div>
         </div>
       </div>
@@ -87,116 +118,115 @@ const filters = [
 </Section>
 
 <style>
-  /* Active filter button accent */
+  /* active state ring hint */
   #feature-filters .is-active {
     box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
   }
 
-  /* =====================
-     ANIMATIONS
-     ===================== */
-  #feature-grid > div {
-    opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity 0.25s ease-in-out,
-      transform 0.25s ease-in-out;
-  }
-
-  /* When hidden, fade out and scale down slightly */
-  #feature-grid > div.is-hiding {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-
-  /* When revealed, fade in smoothly */
-  #feature-grid > div.is-showing {
-    opacity: 0;
-    transform: scale(1.04);
-  }
-
-  #feature-grid > div.is-showing.active {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  /* Smooth reflow */
-  #feature-grid {
-    transition: all 0.25s ease-in-out;
-  }
-
-  /* Tighter spacing */
-  #feature-grid .card .card__body { padding-top: .25rem; padding-bottom: .25rem; }
-  #feature-grid .card h3 { margin-bottom: .125rem; line-height: 1.2; }
-  #feature-grid .card p  { margin-bottom: .125rem; line-height: 1.35; }
-
-  /* Image container tweaks */
-  #feature-grid .card { display: flex; flex-direction: column; }
-  #feature-grid .card > picture { flex: 1 1 auto; padding: .5rem .5rem 0 .5rem; }
-  #feature-grid .card > picture img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: .5rem;
-    display: block;
-  }
-
-  /* Button area tighter */
-  #feature-grid .card .cta-area {
-    margin-top: .25rem;
-    padding-top: .125rem;
-    padding-bottom: .25rem;
-  }
+  /* optional: slightly smoother transform perf */
+  #feature-grid .card-wrap { will-change: transform, opacity; }
 </style>
 
-<script is:inline>
+<script>
+  import gsap from "gsap";
+
   document.addEventListener('astro:page-load', () => {
     const bar  = document.getElementById('feature-filters');
     const grid = document.getElementById('feature-grid');
     if (!bar || !grid) return;
 
+    const DURATION = 0.35;
+    const EASE     = "power2.out";
+
     const btns  = Array.from(bar.querySelectorAll('[data-filter]'));
-    const cards = Array.from(grid.children);
+    const wraps = () => Array.from(grid.querySelectorAll('.card-wrap'));
 
-    const apply = (slug) => {
-      cards.forEach((wrap) => {
-        const cat = wrap.getAttribute('data-cat');
-        const show = slug === 'all' || cat === slug;
-
-        wrap.classList.remove('is-hiding', 'is-showing', 'active');
-
-        if (show) {
-          wrap.classList.add('is-showing');
-          wrap.style.display = '';
-          requestAnimationFrame(() => {
-            wrap.classList.add('active');
-          });
-          setTimeout(() => wrap.classList.remove('is-showing'), 250);
-        } else {
-          wrap.classList.add('is-hiding');
-          setTimeout(() => {
-            wrap.style.display = 'none';
-            wrap.classList.remove('is-hiding');
-          }, 250);
+    function measureVisiblePositions() {
+      const map = new Map();
+      wraps().forEach(w => {
+        if (!w.classList.contains('hidden')) {
+          const r = w.getBoundingClientRect();
+          map.set(w, { x: r.left, y: r.top });
         }
       });
-    };
+      return map;
+    }
 
-    const setActive = (target) => {
-      btns.forEach(b =>
-        b.classList.remove('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100')
-      );
-      target.classList.add('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100');
-    };
+    function setActive(btn) {
+      btns.forEach(b => b.classList.remove('is-active','bg-neutral-800','border-primary-500','text-neutral-100'));
+      btn.classList.add('is-active','bg-neutral-800','border-primary-500','text-neutral-100');
+    }
 
+    function applyFilter(slug) {
+      // 1) measure before
+      const before = measureVisiblePositions();
+
+      // 2) hide/show with tiny animation cues
+      wraps().forEach(w => {
+        const cat  = w.getAttribute('data-cat');
+        const show = slug === 'all' || cat === slug;
+
+        if (show && w.classList.contains('hidden')) {
+          // make it participate in layout first (hidden removes it)
+          w.classList.remove('hidden');
+          // start slightly faded & scaled, then animate in
+          gsap.set(w, { opacity: 0, scale: 0.95 });
+        }
+      });
+
+      // hide ones that should go out (animate, then display none via .hidden)
+      wraps().forEach(w => {
+        const cat  = w.getAttribute('data-cat');
+        const show = slug === 'all' || cat === slug;
+
+        if (!show && !w.classList.contains('hidden')) {
+          gsap.to(w, {
+            opacity: 0, scale: 0.92, duration: 0.18, ease: "power1.out",
+            onComplete: () => {
+              w.classList.add('hidden');
+              gsap.set(w, { clearProps: "opacity,scale" });
+            }
+          });
+        }
+      });
+
+      // 3) next frame: measure after (only visible)
+      requestAnimationFrame(() => {
+        const after = measureVisiblePositions();
+
+        // 4) FLIP: move each visible element from old→new
+        after.forEach((afterPos, el) => {
+          const beforePos = before.get(el);
+          if (!beforePos) {
+            // new element (was hidden): just fade/scale up into place
+            gsap.to(el, { opacity: 1, scale: 1, duration: 0.22, ease: "power1.out" });
+            return;
+          }
+
+          const dx = beforePos.x - afterPos.x;
+          const dy = beforePos.y - afterPos.y;
+
+          if (dx || dy) {
+            gsap.fromTo(
+              el,
+              { x: dx, y: dy },
+              { x: 0, y: 0, duration: DURATION, ease: EASE }
+            );
+          }
+        });
+      });
+    }
+
+    // wire buttons
     btns.forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         setActive(btn);
-        apply(btn.getAttribute('data-filter'));
+        applyFilter(btn.getAttribute('data-filter'));
       });
     });
 
-    apply('all');
+    // initial
+    applyFilter('all');
   });
 </script>
