@@ -2,7 +2,7 @@
 /**
  * Feature Cards grid Section (with filters)
  * - 3 cols × 2 rows on large screens, stacks on small
- * - Equal-height cards (adjusted heights)
+ * - Equal-height cards (extra space added for the bottom button)
  * - Hard-coded filter toolbar (instant fade, gapless reflow)
  * - Neutral dark background + accent border for filters
  */
@@ -14,7 +14,7 @@ import Col from '../../ui/Col.astro'
 // UI
 import Card from '../../ui/cards/FeatureCard.astro'
 
-// Images (use existing 5; reuse one for the 6th)
+// Images (use existing assets)
 import feature01 from '../../../assets/cards/feature-01.svg'
 import feature02 from '../../../assets/cards/feature-02.svg'
 import feature03 from '../../../assets/cards/feature-03.svg'
@@ -98,7 +98,7 @@ const filters = [
   >
     {items.map((it) => (
       <div
-        class="flex h-[360px] sm:h-[320px] lg:h-[330px] w-full transition-opacity duration-150"
+        class="flex h-[420px] sm:h-[380px] lg:h-[390px] w-full transition-opacity duration-150"
         data-cat={it.cat}
       >
         <div class="flex flex-col h-full w-full">
