@@ -1,0 +1,36 @@
+---
+import Modal from '../../ui/Modal.astro'
+import Form from '../../ui/forms/Form.astro'
+import FormField from '../../ui/forms/partials/FormField.astro'
+import InputField from '../../ui/forms/form-elements/InputField.astro'
+import Button from '../../ui/Button.astro'
+---
+
+<Modal id="opportunities" title="Opportunities">
+  <div class="mx-auto w-full max-w-xl">
+    <p class="mb-6 text-base leading-relaxed">
+      Tell us a bit about the opportunity you’re interested in and we’ll get back to you.
+    </p>
+
+    <Form id="opportunitiesForm">
+      <FormField>
+        <InputField type="text" id="firstName" label="First Name" required />
+        <InputField type="text" id="lastName" label="Last Name" />
+      </FormField>
+
+      <FormField>
+        <InputField type="email" id="email" label="Email" required />
+      </FormField>
+
+      <FormField>
+        <InputField type="tel" id="phone" label="Phone Number" />
+      </FormField>
+
+      <div class="mt-6 text-center">
+        <Button style="primary" type="submit" size="lg">
+          Send Message
+        </Button>
+      </div>
+    </Form>
+  </div>
+</Modal>
