@@ -1,11 +1,11 @@
 ---
 /**
  * Feature Cards grid Section (with filters)
- * - Decreased spacing (heading/paragraph/button)
- * - More room for the image (uncropped, rounded)
+ * - Smooth fade + scale transition on filter change
  * - 3 cols × 2 rows on large screens, stacks on small
  * - Equal-height cards
  * - Hard-coded filter toolbar (instant fade, gapless reflow)
+ * - Neutral dark background + accent border for filters
  */
 
 import Section from '../../ui/Section.astro'
@@ -88,18 +88,49 @@ const filters = [
 
 <style>
   /* Active filter button accent */
-  #feature-filters .is-active { box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6'); }
+  #feature-filters .is-active {
+    box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
+  }
 
-  /* Instant fade behavior (no slide) */
-  #feature-grid > div { opacity: 1; transition: opacity 0.15s ease-in-out; }
-  #feature-grid > div.is-hidden { opacity: 0; pointer-events: none; }
+  /* =====================
+     ANIMATIONS
+     ===================== */
+  #feature-grid > div {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity 0.25s ease-in-out,
+      transform 0.25s ease-in-out;
+  }
 
-  /* Tighter spacing inside cards */
+  /* When hidden, fade out and scale down slightly */
+  #feature-grid > div.is-hiding {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  /* When revealed, fade in smoothly */
+  #feature-grid > div.is-showing {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+
+  #feature-grid > div.is-showing.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Smooth reflow */
+  #feature-grid {
+    transition: all 0.25s ease-in-out;
+  }
+
+  /* Tighter spacing */
   #feature-grid .card .card__body { padding-top: .25rem; padding-bottom: .25rem; }
   #feature-grid .card h3 { margin-bottom: .125rem; line-height: 1.2; }
   #feature-grid .card p  { margin-bottom: .125rem; line-height: 1.35; }
 
-  /* More room for the image, keep uncropped & rounded */
+  /* Image container tweaks */
   #feature-grid .card { display: flex; flex-direction: column; }
   #feature-grid .card > picture { flex: 1 1 auto; padding: .5rem .5rem 0 .5rem; }
   #feature-grid .card > picture img {
@@ -110,14 +141,18 @@ const filters = [
     display: block;
   }
 
-  /* Button area even tighter */
-  #feature-grid .card .cta-area { margin-top: .25rem; padding-top: .125rem; padding-bottom: .25rem; }
+  /* Button area tighter */
+  #feature-grid .card .cta-area {
+    margin-top: .25rem;
+    padding-top: .125rem;
+    padding-bottom: .25rem;
+  }
 </style>
 
 <script is:inline>
   document.addEventListener('astro:page-load', () => {
-    const bar   = document.getElementById('feature-filters');
-    const grid  = document.getElementById('feature-grid');
+    const bar  = document.getElementById('feature-filters');
+    const grid = document.getElementById('feature-grid');
     if (!bar || !grid) return;
 
     const btns  = Array.from(bar.querySelectorAll('[data-filter]'));
@@ -128,13 +163,21 @@ const filters = [
         const cat = wrap.getAttribute('data-cat');
         const show = slug === 'all' || cat === slug;
 
+        wrap.classList.remove('is-hiding', 'is-showing', 'active');
+
         if (show) {
-          wrap.classList.remove('is-hidden', 'hidden');
+          wrap.classList.add('is-showing');
           wrap.style.display = '';
-          requestAnimationFrame(() => { wrap.style.opacity = '1'; });
+          requestAnimationFrame(() => {
+            wrap.classList.add('active');
+          });
+          setTimeout(() => wrap.classList.remove('is-showing'), 250);
         } else {
-          wrap.style.opacity = '0';
-          setTimeout(() => wrap.classList.add('hidden'), 150);
+          wrap.classList.add('is-hiding');
+          setTimeout(() => {
+            wrap.style.display = 'none';
+            wrap.classList.remove('is-hiding');
+          }, 250);
         }
       });
     };
