@@ -1,52 +1,64 @@
 ---
-// Feature Card
+// Basic Card
 // ------------
-// Description: The Card for presenting a feature
-// Properties:
-// - Title: the title of the card
-// - Subtitle: the subtitle of the card
-// - Image: the main image of the card
-// - Link: optional link (not used when opening modal)
-//
-// This version adds a "Learn more" button fixed at the bottom,
-// opening the modal with id="opportunities".
+// Description: The basic card component
+// Reference: https://wind-ui.com/components/cards/
 
-// Components
-import Card from './BasicCard.astro'
-import Button from '../Button.astro'
+import { Image } from 'astro:assets'
+import { Icon } from 'astro-icon/components'
+import Card from './partials/Card.astro'
+import CardBody from './partials/CardBody.astro'
 
 type Props = {
   title?: string
   subtitle?: string
+  titleSize?: 'sm' | 'base' | 'lg' | 'xl'
   image?: any
+  icon?: string
   link?: string
+  type?: 'image-top' | 'image-bottom'
+  classes?: string
 }
-const { title, subtitle, image, link } = Astro.props
+
+const { title = '', subtitle, titleSize = 'lg', image, icon, link, type, classes } = Astro.props
 ---
 
-<Card
-  title={title}
-  subtitle={subtitle}
-  titleSize="xl"
-  link={link}
-  image={image}
-  type="image-bottom"
-  classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
-/>
-  <div class="mt-auto pt-4 pb-4 flex justify-center">
-    <Button modal="opportunities" style="primary" size="sm">
-      Learn more
-    </Button>
-  </div>
+<Card classes={classes} link={link}>
+  {
+    image && (
+      <div class="image-wrapper rounded-2xl overflow-hidden p-2">
+        <Image
+          src={image}
+          alt={title}
+          class={type === 'image-bottom' ? 'order-2 rounded-2xl object-contain' : 'rounded-2xl object-contain'}
+          width={600}
+          height={400}
+        />
+      </div>
+    )
+  }
+
+  {icon && (
+    <div class="px-6 pt-6">
+      <Icon name={icon} class="card__icon" />
+    </div>
+  )}
+
+  <CardBody>
+    {title && (
+      <h3 class:list={[['text-' + `${titleSize} ` + `lg:text` + `${titleSize}`]]}>{title}</h3>
+    )}
+    {subtitle && <p>{subtitle}</p>}
+    <slot />
+  </CardBody>
 </Card>
 
 <style>
-  /* Ensures uniform button spacing and clean bottom alignment */
-  .card button {
-    @apply cursor-pointer transition;
+  .card__icon {
+    @apply inline-block size-6 shrink-0 text-primary-500;
   }
 
-  .card .mt-auto {
-    margin-top: auto;
+  .image-wrapper img {
+    @apply w-full h-auto;
   }
 </style>

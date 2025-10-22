@@ -1,190 +1,39 @@
 ---
-/**
- * Feature Cards grid Section (with filters)
- * - 3 cols × 2 rows on large screens, stacks on small
- * - Equal-height cards (balanced mobile sizing)
- * - Rounded image corners
- * - Hard-coded filter toolbar (instant fade, gapless reflow)
- * - Neutral dark background + accent border for filters
- */
+// Feature Card
+// ------------
+// Description: Card presenting a feature, with a bottom “Learn more” button that opens the
+// modal id="opportunities". No titleSize prop is passed to avoid build errors.
 
-// Layout
-import Section from '../../ui/Section.astro'
-import Row from '../../ui/Row.astro'
-import Col from '../../ui/Col.astro'
-// UI
-import Card from '../../ui/cards/FeatureCard.astro'
+// Components
+import Card from './BasicCard.astro'
+import Button from '../Button.astro'
 
-// Images
-import feature01 from '../../../assets/cards/feature-05.svg'
-import feature02 from '../../../assets/cards/feature-02.svg'
-import feature03 from '../../../assets/cards/feature-03.svg'
-import feature04 from '../../../assets/cards/feature-04.svg'
-import feature05 from '../../../assets/cards/feature-05.svg'
-
-// Hard-coded catalog
-const items = [
-  { title: 'All your data in one place',
-    subtitle: 'Stay on top of your tasks and deadlines with our intuitive project management tool.',
-    image: feature01, link: '/features', cat: 'staff-role' },
-  { title: 'Organize & manage your projects',
-    subtitle: 'Plan, assign, and track with clarity across teams and timelines.',
-    image: feature02, link: '/features', cat: 'mission-internship' },
-  { title: 'Keep your team connected',
-    subtitle: 'Integrated chat to share updates, files, and messages securely.',
-    image: feature03, link: '/features', cat: 'church-planting-residency' },
-  { title: 'Manage your customers',
-    subtitle: 'Build and nurture relationships with a powerful, simple CRM.',
-    image: feature04, link: '/features', cat: 'short-term-trip' },
-  { title: 'Simplify your financial operations',
-    subtitle: 'Create, send, and track invoices effortlessly.',
-    image: feature05, link: '/features', cat: 'medium-term-placement' },
-  { title: 'Insights that drive action',
-    subtitle: 'Dashboards and reports that surface what matters.',
-    image: feature01, link: '/features', cat: 'long-term-placement' }
-]
-
-// Filter buttons
-const filters = [
-  { slug: 'all', label: 'All' },
-  { slug: 'staff-role', label: 'Staff Role' },
-  { slug: 'mission-internship', label: 'Mission Internship' },
-  { slug: 'church-planting-residency', label: 'Church Planting Residency' },
-  { slug: 'short-term-trip', label: 'Short-term Trip' },
-  { slug: 'medium-term-placement', label: 'Medium-term Placement' },
-  { slug: 'long-term-placement', label: 'Long-term Placement' }
-]
+type Props = {
+  title?: string
+  subtitle?: string
+  image?: any
+  link?: string
+}
+const { title, subtitle, image, link } = Astro.props
 ---
 
-<Section id="features">
-  <!-- Heading -->
-  <Row>
-    <Col span="12" align="center" classes="mb-8 max-w-4xl mx-auto">
-      <h2 class="text-pretty">Innovative tools to <strong>transform</strong> your workflow</h2>
-      <p class="pb-0 text-lg">
-        Explore the suite of tools designed to streamline your workflow, enhance productivity, and
-        drive growth. Each product is crafted with precision to meet your needs and exceed your
-        expectations.
-      </p>
-    </Col>
-  </Row>
-
-  <!-- Filter Bar -->
-  <Row>
-    <Col span="12" align="center">
-      <div id="feature-filters"
-           class="inline-flex flex-wrap items-center justify-center gap-2 rounded border px-2 py-2
-                  bg-neutral-900/60 border-neutral-800
-                  dark:bg-neutral-900/60 dark:border-neutral-800">
-        {filters.map((f, i) => (
-          <button
-            type="button"
-            data-filter={f.slug}
-            class:list={[
-              'px-3 py-1.5 text-sm rounded border transition',
-              'border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:border-neutral-600',
-              i === 0 ? 'is-active bg-neutral-800 border-primary-500 text-neutral-100' : ''
-            ]}>
-            {f.label}
-          </button>
-        ))}
+<div class="flex h-full w-full">
+  <div class="flex flex-col h-full w-full">
+    <Card
+      title={title}
+      subtitle={subtitle}
+      /* DO NOT pass titleSize here: it breaks with the current BasicCard Props in your build */
+      link={link}
+      image={image}
+      type="image-bottom"
+      classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
+    >
+      <!-- Bottom action area -->
+      <div class="mt-4 pt-2 pb-3 flex justify-center">
+        <Button modal="opportunities" style="primary" size="sm">
+          Learn more
+        </Button>
       </div>
-    </Col>
-  </Row>
-
-  <!-- Grid -->
-  <div
-    class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-    id="feature-grid"
-  >
-    {items.map((it) => (
-      <div
-        class="flex h-[360px] sm:h-[320px] lg:h-[330px] w-full transition-opacity duration-150"
-        data-cat={it.cat}
-      >
-        <div class="flex flex-col h-full w-full">
-          <div class="h-full rounded-2xl overflow-hidden"> <!-- ⬅ Rounded image container -->
-            <Card
-              title={it.title}
-              subtitle={it.subtitle}
-              image={it.image}
-              link={it.link}
-            />
-          </div>
-        </div>
-      </div>
-    ))}
+    </Card>
   </div>
-</Section>
-
-<style>
-  #feature-filters .is-active {
-    box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
-  }
-
-  #feature-grid > div {
-    opacity: 1;
-    transition: opacity 0.15s ease-in-out;
-  }
-
-  #feature-grid > div.is-hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Rounded image handling */
-  #feature-grid img {
-    object-fit: contain;      /* show full image, never cropped */
-    width: 100%;
-    height: 100%;
-    padding: 0.5rem;          /* slight inner gap */
-    border-radius: 1rem;      /* ensure curved image corners */
-  }
-
-  :where(#feature-grid .card h3){ line-height:1.2 }
-  :where(#feature-grid .card p){ line-height:1.35 }
-</style>
-
-<script is:inline>
-  document.addEventListener('astro:page-load', () => {
-    const bar   = document.getElementById('feature-filters');
-    const grid  = document.getElementById('feature-grid');
-    if (!bar || !grid) return;
-
-    const btns  = Array.from(bar.querySelectorAll('[data-filter]'));
-    const cards = Array.from(grid.children);
-
-    const apply = (slug) => {
-      cards.forEach((wrap) => {
-        const cat = wrap.getAttribute('data-cat');
-        const show = slug === 'all' || cat === slug;
-
-        if (show) {
-          wrap.classList.remove('is-hidden', 'hidden');
-          wrap.style.display = '';
-          requestAnimationFrame(() => { wrap.style.opacity = '1'; });
-        } else {
-          wrap.style.opacity = '0';
-          setTimeout(() => wrap.classList.add('hidden'), 150);
-        }
-      });
-    };
-
-    const setActive = (target) => {
-      btns.forEach(b =>
-        b.classList.remove('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100')
-      );
-      target.classList.add('is-active', 'bg-neutral-800', 'border-primary-500', 'text-neutral-100');
-    };
-
-    btns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActive(btn);
-        apply(btn.getAttribute('data-filter'));
-      });
-    });
-
-    apply('all');
-  });
-</script>
+</div>
