@@ -1,25 +1,26 @@
 ---
 // Feature Card
 // ------------
-// Description: Card presenting a feature, with a bottom “Learn more” button that opens the
-// modal id="opportunities". No titleSize prop is passed to avoid build errors.
+// Description: Card presenting a feature, with a bottom “Learn more” button that opens
+// the modal id="opportunities". No titleSize prop is passed to avoid build errors.
 
 // Components
-import Card from './BasicCard.astro'
-import Button from '../../Button.astro'
+import BasicCard from './BasicCard.astro'
+import Button from '../Button.astro'
 
+// Props
 type Props = {
   title?: string
   subtitle?: string
   image?: any
   link?: string
 }
-const { title, subtitle, image, link } = Astro.props
+const { title , subtitle, image, link } = Astro.props
 ---
 
 <div class="flex h-full w-full">
   <div class="flex flex-col h-full w-full">
-    <Card
+    <BasicCard
       title={title}
       subtitle={subtitle}
       link={link}
@@ -27,23 +28,12 @@ const { title, subtitle, image, link } = Astro.props
       type="image-bottom"
       classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800 rounded-xl overflow-hidden"
     >
-      <!-- Bottom action area -->
+      <!-- Footer / CTA -->
       <div class="mt-auto pt-4 pb-5 flex justify-center">
         <Button modal="opportunities" style="primary" size="sm">
           Learn more
         </Button>
       </div>
-    </Card>
+    </BasicCard>
   </div>
 </div>
-
-<style>
-  /* Ensures the image fully fits inside rounded corners */
-  .card img {
-    object-fit: contain !important;
-    width: 100%;
-    height: auto;
-    padding: 0.5rem; /* adds subtle breathing room between image and card border */
-    border-radius: 0.75rem; /* match rounded-xl */
-  }
-</style>
