@@ -138,12 +138,12 @@ const filters = [
     const DURATION = 0.35;
     const EASE     = "power2.out";
 
-    const btns  = Array.from(bar.querySelectorAll('[data-filter]'));
-    const wraps = () => Array.from(grid.querySelectorAll('.card-wrap'));
+    const btns  = Array.from(bar.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+    const wraps = () => Array.from(grid.querySelectorAll<HTMLDivElement>('.card-wrap'));
 
     function measureVisiblePositions() {
-      const map = new Map();
-      wraps().forEach(w => {
+      const map = new Map<HTMLDivElement, { x: number; y: number }>();
+      wraps().forEach((w) => {
         if (!w.classList.contains('hidden')) {
           const r = w.getBoundingClientRect();
           map.set(w, { x: r.left, y: r.top });
@@ -152,30 +152,27 @@ const filters = [
       return map;
     }
 
-    function setActive(btn) {
-      btns.forEach(b => b.classList.remove('is-active','bg-neutral-800','border-primary-500','text-neutral-100'));
+    function setActive(btn: HTMLButtonElement) {
+      btns.forEach((b) =>
+        b.classList.remove('is-active','bg-neutral-800','border-primary-500','text-neutral-100')
+      );
       btn.classList.add('is-active','bg-neutral-800','border-primary-500','text-neutral-100');
     }
 
-    function applyFilter(slug) {
-      // 1) measure before
+    function applyFilter(slug: string) {
       const before = measureVisiblePositions();
 
-      // 2) hide/show with tiny animation cues
-      wraps().forEach(w => {
+      wraps().forEach((w) => {
         const cat  = w.getAttribute('data-cat');
         const show = slug === 'all' || cat === slug;
 
         if (show && w.classList.contains('hidden')) {
-          // make it participate in layout first (hidden removes it)
           w.classList.remove('hidden');
-          // start slightly faded & scaled, then animate in
           gsap.set(w, { opacity: 0, scale: 0.95 });
         }
       });
 
-      // hide ones that should go out (animate, then display none via .hidden)
-      wraps().forEach(w => {
+      wraps().forEach((w) => {
         const cat  = w.getAttribute('data-cat');
         const show = slug === 'all' || cat === slug;
 
@@ -190,15 +187,12 @@ const filters = [
         }
       });
 
-      // 3) next frame: measure after (only visible)
       requestAnimationFrame(() => {
         const after = measureVisiblePositions();
 
-        // 4) FLIP: move each visible element from old→new
         after.forEach((afterPos, el) => {
           const beforePos = before.get(el);
           if (!beforePos) {
-            // new element (was hidden): just fade/scale up into place
             gsap.to(el, { opacity: 1, scale: 1, duration: 0.22, ease: "power1.out" });
             return;
           }
@@ -217,16 +211,14 @@ const filters = [
       });
     }
 
-    // wire buttons
-    btns.forEach(btn => {
+    btns.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         setActive(btn);
-        applyFilter(btn.getAttribute('data-filter'));
+        applyFilter(btn.getAttribute('data-filter') || 'all');
       });
     });
 
-    // initial
     applyFilter('all');
   });
 </script>
