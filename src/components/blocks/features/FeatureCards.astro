@@ -1,8 +1,10 @@
 ---
 /**
  * Feature Cards grid Section (with filters)
+ * - Decreased spacing between heading/paragraph/button inside cards
+ * - Extra space given to the image (bigger image area)
  * - 3 cols × 2 rows on large screens, stacks on small
- * - Equal-height cards (extra space added for the bottom button)
+ * - Equal-height cards
  * - Hard-coded filter toolbar (instant fade, gapless reflow)
  * - Neutral dark background + accent border for filters
  */
@@ -117,22 +119,41 @@ const filters = [
 </Section>
 
 <style>
+  /* Active filter button accent */
   #feature-filters .is-active {
     box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
   }
 
+  /* Instant fade behavior (no slide) */
   #feature-grid > div {
     opacity: 1;
     transition: opacity 0.15s ease-in-out;
   }
-
   #feature-grid > div.is-hidden {
     opacity: 0;
     pointer-events: none;
   }
 
-  :where(#feature-grid .card h3){ line-height:1.2 }
-  :where(#feature-grid .card p){ line-height:1.35 }
+  /* Tighter spacing inside cards: shrink heading/paragraph/button spacing */
+  /* Works with current BasicCard/FeatureCard markup */
+  #feature-grid .card .card__body { padding-top: .5rem; padding-bottom: .5rem; }
+  #feature-grid .card h3 { margin-bottom: .25rem; line-height: 1.2; }
+  #feature-grid .card p  { margin-bottom: .25rem; line-height: 1.35; }
+
+  /* Give more room to the image area */
+  /* Make the image wrapper grow and keep image uncropped with rounded corners */
+  #feature-grid .card { display: flex; flex-direction: column; }
+  #feature-grid .card > picture { flex: 1 1 auto; padding: .5rem .5rem 0 .5rem; }
+  #feature-grid .card > picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;         /* never crop */
+    border-radius: .5rem;        /* rounded image corners */
+    display: block;
+  }
+
+  /* Tighten the CTA spacing injected by FeatureCard’s bottom slot */
+  #feature-grid .card .cta-area { margin-top: .5rem; padding-top: .25rem; padding-bottom: .5rem; }
 </style>
 
 <script is:inline>
