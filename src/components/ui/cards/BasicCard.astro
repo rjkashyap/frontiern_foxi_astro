@@ -2,24 +2,13 @@
 // Basic Card
 // ------------
 // Description: The basic card component
-// Properties:
-// - Title: the title of the card
-// - Subtitle: the subtitle of the card
-// - TitleSize: the size of the title
-// - Image: the main image of the card
-// - Icon: the icon of the card
-// - Link: If provided, the card will be a link
-// - Type: Image-top or Image-bottom (refers to the image position)
-// - classes: extra classes
 // Reference: https://wind-ui.com/components/cards/
 
-// Components
 import { Image } from 'astro:assets'
 import { Icon } from 'astro-icon/components'
 import Card from './partials/Card.astro'
 import CardBody from './partials/CardBody.astro'
 
-// Props
 type Props = {
   title?: string
   subtitle?: string
@@ -30,63 +19,46 @@ type Props = {
   type?: 'image-top' | 'image-bottom'
   classes?: string
 }
+
 const { title = '', subtitle, titleSize = 'lg', image, icon, link, type, classes } = Astro.props
 ---
 
 <Card classes={classes} link={link}>
-  {image && (
-    <div class:list={['card__media', type === 'image-bottom' ? 'order-2' : 'order-0']}>
-      <Image
-        src={image}
-        alt={title}
-        width={600}
-        height={400}
-        loading="lazy"
-        decoding="async"
-        class="card__image"
-      />
-    </div>
-  )}
+  {
+    image && (
+      <div class="image-wrapper rounded-2xl overflow-hidden p-2">
+        <Image
+          src={image}
+          alt={title}
+          class={type === 'image-bottom' ? 'order-2 rounded-2xl object-contain' : 'rounded-2xl object-contain'}
+          width={600}
+          height={400}
+        />
+      </div>
+    )
+  }
 
   {icon && (
     <div class="px-6 pt-6">
-      <Icon name={`${icon}`} class="card__icon" />
+      <Icon name={icon} class="card__icon" />
     </div>
   )}
 
   <CardBody>
-    {title && <h3 class:list={[['text-' + `${titleSize} ` + `lg:text` + `${titleSize}`]]}>{title}</h3>}
+    {title && (
+      <h3 class:list={[['text-' + `${titleSize} ` + `lg:text` + `${titleSize}`]]}>{title}</h3>
+    )}
     {subtitle && <p>{subtitle}</p>}
     <slot />
   </CardBody>
 </Card>
 
 <style>
-  /* Icon, unchanged */
   .card__icon {
     @apply inline-block size-6 shrink-0 text-primary-500;
   }
 
-  /* New media wrapper: centers image, adds padding to avoid touching the border */
-  .card__media {
-    @apply w-full flex items-center justify-center p-4;
-  }
-
-  /* Never crop images; shrink to fit the available area on all screens */
-  .card__image {
-    @apply w-full h-auto object-contain;
-
-    /* Cap the image height so it never overflows short cards (tighter on phones) */
-    max-height: 8rem;   /* ~128px on phones */
-  }
-
-  @screen sm {
-    .card__image { max-height: 9.5rem; }  /* ~152px */
-  }
-  @screen md {
-    .card__image { max-height: 11rem; }   /* ~176px */
-  }
-  @screen lg {
-    .card__image { max-height: 12.5rem; } /* ~200px */
+  .image-wrapper img {
+    @apply w-full h-auto;
   }
 </style>
