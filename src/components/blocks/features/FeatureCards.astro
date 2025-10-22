@@ -71,10 +71,12 @@ const filters = [
   <!-- Filter Bar -->
   <Row>
     <Col span="12" align="center">
-      <div id="feature-filters"
-           class="inline-flex flex-wrap items-center justify-center gap-2 rounded border px-2 py-2
-                  bg-neutral-900/60 border-neutral-800
-                  dark:bg-neutral-900/60 dark:border-neutral-800">
+      <div
+        id="feature-filters"
+        class="inline-flex flex-wrap items-center justify-center gap-2 rounded border px-2 py-2
+               bg-neutral-900/60 border-neutral-800
+               dark:bg-neutral-900/60 dark:border-neutral-800"
+      >
         {filters.map((f, i) => (
           <button
             type="button"
@@ -83,7 +85,8 @@ const filters = [
               'px-3 py-1.5 text-sm rounded border transition',
               'border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:border-neutral-600',
               i === 0 ? 'is-active bg-neutral-800 border-primary-500 text-neutral-100' : ''
-            ]}>
+            ]}
+          >
             {f.label}
           </button>
         ))}
@@ -92,24 +95,12 @@ const filters = [
   </Row>
 
   <!-- Grid -->
-  <div
-    id="feature-grid"
-    class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-  >
+  <div id="feature-grid" class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {items.map((it) => (
-      <!-- wrapper controls fixed card height for perfect alignment -->
-      <div
-        class="card-wrap flex h-[360px] sm:h-[320px] lg:h-[340px] w-full"
-        data-cat={it.cat}
-      >
+      <div class="card-wrap flex h-[360px] sm:h-[320px] lg:h-[340px] w-full" data-cat={it.cat}>
         <div class="flex flex-col h-full w-full">
           <div class="h-full">
-            <Card
-              title={it.title}
-              subtitle={it.subtitle}
-              image={it.image}
-              link={it.link}
-            />
+            <Card title={it.title} subtitle={it.subtitle} image={it.image} link={it.link} />
           </div>
         </div>
       </div>
@@ -118,14 +109,15 @@ const filters = [
 </Section>
 
 <style>
-  /* active state ring hint */
   #feature-filters .is-active {
     box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
   }
 
-  /* optional: slightly smoother transform perf */
-  #feature-grid .card-wrap { will-change: transform, opacity; }
+  #feature-grid .card-wrap {
+    will-change: transform, opacity;
+  }
 </style>
+
 <script>
   import gsap from "gsap";
 
@@ -137,13 +129,14 @@ const filters = [
     const DURATION = 0.35;
     const EASE = "power2.out";
 
-    const btns = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-filter]"));
-    const wraps = () => Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
+    const btns = Array.from(bar.querySelectorAll("[data-filter]"));
+    const wraps = () => Array.from(grid.querySelectorAll(".card-wrap"));
 
-    const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+    // ✅ Fixed typing for TS
+    const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(resolve));
 
     function measureVisiblePositions() {
-      const map = new Map<HTMLDivElement, { x: number; y: number }>();
+      const map = new Map();
       wraps().forEach((w) => {
         if (!w.classList.contains("hidden")) {
           const r = w.getBoundingClientRect();
@@ -153,7 +146,7 @@ const filters = [
       return map;
     }
 
-    function setActive(btn: HTMLButtonElement) {
+    function setActive(btn) {
       btns.forEach((b) =>
         b.classList.remove(
           "is-active",
@@ -165,10 +158,10 @@ const filters = [
       btn.classList.add("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
     }
 
-    async function applyFilter(slug: string) {
+    async function applyFilter(slug) {
       const before = measureVisiblePositions();
 
-      // 1️⃣ Unhide new items (but don't measure yet)
+      // 1️⃣ Unhide new items
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
@@ -179,7 +172,7 @@ const filters = [
         }
       });
 
-      // 🕐 Wait one frame for browser to reflow
+      // 🕐 Wait one frame for layout reflow
       await nextFrame();
 
       // 2️⃣ Animate out hidden ones
@@ -201,10 +194,10 @@ const filters = [
         }
       });
 
-      // 3️⃣ Measure AFTER positions now that layout is final
+      // 3️⃣ Measure AFTER positions now that layout is stable
       const after = measureVisiblePositions();
 
-      // 4️⃣ Animate between before and after
+      // 4️⃣ Animate smooth FLIP movement
       after.forEach((afterPos, el) => {
         const beforePos = before.get(el);
         if (!beforePos) {
@@ -216,7 +209,11 @@ const filters = [
         const dy = beforePos.y - afterPos.y;
 
         if (dx || dy) {
-          gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: DURATION, ease: EASE });
+          gsap.fromTo(
+            el,
+            { x: dx, y: dy },
+            { x: 0, y: 0, duration: DURATION, ease: EASE }
+          );
         }
       });
     }
