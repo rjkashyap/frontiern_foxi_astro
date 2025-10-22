@@ -18,10 +18,10 @@ const { title, subtitle, image, link } = Astro.props
 
 <div class="flex h-full w-full">
   <div class="flex flex-col h-full w-full">
+    <!-- Do NOT pass titleSize here -->
     <Card
       title={title}
       subtitle={subtitle}
-      /* DO NOT pass titleSize here */
       link={link}
       image={image}
       type="image-bottom"
