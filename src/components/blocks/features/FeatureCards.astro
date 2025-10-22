@@ -6,7 +6,7 @@
 
 // Components
 import Card from './BasicCard.astro'
-import Button from '../Button.astro'
+import Button from '../../Button.astro'
 
 type Props = {
   title?: string
@@ -22,7 +22,6 @@ const { title, subtitle, image, link } = Astro.props
     <Card
       title={title}
       subtitle={subtitle}
-      /* DO NOT pass titleSize here: it breaks with the current BasicCard Props in your build */
       link={link}
       image={image}
       type="image-bottom"
