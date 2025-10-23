@@ -1,9 +1,4 @@
 ---
-// Feature Card
-// ------------
-// Whole card (including “Learn more” button) opens the signup modal.
-// No external navigation; link prop removed.
-
 import Card from './BasicCard.astro'
 import Button from '../Button.astro'
 
@@ -15,8 +10,6 @@ type Props = {
 
 const { title, subtitle, image } = Astro.props
 ---
-<!-- Whole card acts as modal trigger -->
-<!-- Whole card acts as modal trigger -->
 <div class="relative h-full w-full">
   <!-- Full-card invisible button triggers modal -->
   <button
@@ -35,15 +28,11 @@ const { title, subtitle, image } = Astro.props
         type="image-bottom"
         classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
       >
-        <!-- Bottom action area (same modal trigger, visually present) -->
+        <!-- Visible CTA, sits above the overlay (z-20) -->
         <div class="mt-1 mb-2 flex justify-center relative z-20">
-          <button
-            type="button"
-            data-modal="signup"
-            class="button button--sm button--primary !py-1.5 !px-3"
-          >
+          <Button modal="signup" size="sm" style="primary" classes="!py-1.5 !px-3">
             Learn more
-          </button>
+          </Button>
         </div>
       </Card>
     </div>
