@@ -113,11 +113,10 @@ const filters = [
     will-change: transform, opacity;
   }
 </style>
-
 <script>
   import gsap from "gsap";
 
-  document.addEventListener("astro:page-load", (): void => {
+  document.addEventListener("astro:page-load", () => {
     const bar = document.getElementById("feature-filters");
     const grid = document.getElementById("feature-grid");
     if (!bar || !grid) return;
@@ -125,31 +124,12 @@ const filters = [
     const DURATION = 0.35;
     const EASE = "power2.out";
 
-    const btns = Array.from(
-      bar.querySelectorAll<HTMLButtonElement>("[data-filter]")
-    );
-    const wraps = (): HTMLDivElement[] =>
-      Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
-
-    // Typed RAF->Promise helper
+    const btns = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-filter]"));
+    const wraps = () => Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
     const nextFrame = (): Promise<void> =>
-      new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
-    function measureVisiblePositions(): Map<
-      HTMLDivElement,
-      { x: number; y: number }
-    > {
-      const map = new Map<HTMLDivElement, { x: number; y: number }>();
-      wraps().forEach((w) => {
-        if (!w.classList.contains("hidden")) {
-          const r = w.getBoundingClientRect();
-          map.set(w, { x: r.left, y: r.top });
-        }
-      });
-      return map;
-    }
-
-    function setActive(btn: HTMLButtonElement): void {
+    function setActive(btn: HTMLButtonElement) {
       btns.forEach((b) =>
         b.classList.remove(
           "is-active",
@@ -161,64 +141,82 @@ const filters = [
       btn.classList.add("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
     }
 
-    async function applyFilter(slug: string): Promise<void> {
-      const before = measureVisiblePositions();
-
-      // 1) Unhide matches (prep for fade-in)
+    function measurePositions(onlyVisible = true) {
+      const map = new Map<HTMLDivElement, { x: number; y: number }>();
       wraps().forEach((w) => {
+        if (!onlyVisible || !w.classList.contains("hidden")) {
+          const r = w.getBoundingClientRect();
+          map.set(w, { x: r.left, y: r.top });
+        }
+      });
+      return map;
+    }
+
+    async function applyFilter(slug: string) {
+      const all = wraps();
+      const toShow: HTMLDivElement[] = [];
+      const toHide: HTMLDivElement[] = [];
+
+      // Decide final visibility
+      all.forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
-        if (show && w.classList.contains("hidden")) {
-          w.classList.remove("hidden");
-          gsap.set(w, { opacity: 0, scale: 0.95 });
+        (show ? toShow : toHide).push(w);
+      });
+
+      // Measure BEFORE (current visible layout)
+      const before = measurePositions(true);
+
+      // 1) Hide unmatched immediately so grid packs top-left with the final set
+      toHide.forEach((w) => {
+        if (!w.classList.contains("hidden")) {
+          w.classList.add("hidden"); // display:none; no flicker, no mid-column placement
         }
       });
 
-      // Wait a frame for layout
+      // 2) Prepare incoming items (still hidden right now)
+      toShow.forEach((w) => {
+        if (w.classList.contains("hidden")) {
+          w.classList.remove("hidden");       // make it participate in final layout
+          gsap.set(w, { opacity: 0, scale: 0.96 }); // prep for fade/scale in
+        }
+      });
+
+      // Wait a frame for the browser to compute the new grid
       await nextFrame();
 
-      // 2) Hide non-matches (fade-out, then hide)
-      wraps().forEach((w) => {
-        const cat = w.getAttribute("data-cat");
-        const show = slug === "all" || cat === slug;
-        if (!show && !w.classList.contains("hidden")) {
-          gsap.to(w, {
-            opacity: 0,
-            scale: 0.92,
-            duration: 0.18,
-            ease: "power1.out",
-            onComplete: () => {
-              w.classList.add("hidden");
-              gsap.set(w, { clearProps: "opacity,scale" });
-            },
-          });
-        }
-      });
+      // Measure AFTER (final visible layout)
+      const after = measurePositions(true);
 
-      // 3) Measure after positions
-      const after = measureVisiblePositions();
+      // 3) Animate: items that existed before get FLIP; newly shown fade/scale in
+      wraps().forEach((el) => {
+        if (el.classList.contains("hidden")) return; // ignore hidden
 
-      // 4) FLIP between before/after
-      after.forEach((afterPos, el) => {
         const beforePos = before.get(el);
+        const afterPos = after.get(el);
+
+        if (!afterPos) return;
+
         if (!beforePos) {
-          gsap.to(el, { opacity: 1, scale: 1, duration: 0.25, ease: "power1.out" });
-          return;
-        }
-        const dx = beforePos.x - afterPos.x;
-        const dy = beforePos.y - afterPos.y;
-        if (dx || dy) {
-          gsap.fromTo(
-            el,
-            { x: dx, y: dy },
-            { x: 0, y: 0, duration: DURATION, ease: EASE }
-          );
+          // Newly shown
+          gsap.to(el, { opacity: 1, scale: 1, duration: 0.22, ease: "power1.out" });
+        } else {
+          // FLIP from old to new spot
+          const dx = beforePos.x - afterPos.x;
+          const dy = beforePos.y - afterPos.y;
+          if (dx || dy) {
+            gsap.fromTo(
+              el,
+              { x: dx, y: dy },
+              { x: 0, y: 0, duration: DURATION, ease: EASE }
+            );
+          }
         }
       });
     }
 
     btns.forEach((btn) => {
-      btn.addEventListener("click", (e: MouseEvent) => {
+      btn.addEventListener("click", (e) => {
         e.preventDefault();
         setActive(btn);
         applyFilter(btn.getAttribute("data-filter") || "all");
