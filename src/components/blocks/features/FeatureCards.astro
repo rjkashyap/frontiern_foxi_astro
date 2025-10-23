@@ -117,7 +117,7 @@ const filters = [
 <script>
   import gsap from "gsap";
 
-  document.addEventListener("astro:page-load", () => {
+  document.addEventListener("astro:page-load", (): void => {
     const bar = document.getElementById("feature-filters");
     const grid = document.getElementById("feature-grid");
     if (!bar || !grid) return;
@@ -125,13 +125,21 @@ const filters = [
     const DURATION = 0.35;
     const EASE = "power2.out";
 
-    const btns = Array.from(bar.querySelectorAll("[data-filter]"));
-    const wraps = () => Array.from(grid.querySelectorAll(".card-wrap"));
+    const btns = Array.from(
+      bar.querySelectorAll<HTMLButtonElement>("[data-filter]")
+    );
+    const wraps = (): HTMLDivElement[] =>
+      Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
 
-    const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+    // Typed RAF->Promise helper
+    const nextFrame = (): Promise<void> =>
+      new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-    function measureVisiblePositions() {
-      const map = new Map();
+    function measureVisiblePositions(): Map<
+      HTMLDivElement,
+      { x: number; y: number }
+    > {
+      const map = new Map<HTMLDivElement, { x: number; y: number }>();
       wraps().forEach((w) => {
         if (!w.classList.contains("hidden")) {
           const r = w.getBoundingClientRect();
@@ -141,7 +149,7 @@ const filters = [
       return map;
     }
 
-    function setActive(btn) {
+    function setActive(btn: HTMLButtonElement): void {
       btns.forEach((b) =>
         b.classList.remove(
           "is-active",
@@ -153,10 +161,10 @@ const filters = [
       btn.classList.add("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
     }
 
-    async function applyFilter(slug) {
+    async function applyFilter(slug: string): Promise<void> {
       const before = measureVisiblePositions();
 
-      // 1️⃣ Unhide new items
+      // 1) Unhide matches (prep for fade-in)
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
@@ -166,9 +174,10 @@ const filters = [
         }
       });
 
-      await nextFrame(); // wait for reflow
+      // Wait a frame for layout
+      await nextFrame();
 
-      // 2️⃣ Animate out hidden ones
+      // 2) Hide non-matches (fade-out, then hide)
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
@@ -186,27 +195,30 @@ const filters = [
         }
       });
 
-      // 3️⃣ Measure new layout
+      // 3) Measure after positions
       const after = measureVisiblePositions();
 
-      // 4️⃣ Animate FLIP layout
+      // 4) FLIP between before/after
       after.forEach((afterPos, el) => {
         const beforePos = before.get(el);
         if (!beforePos) {
           gsap.to(el, { opacity: 1, scale: 1, duration: 0.25, ease: "power1.out" });
           return;
         }
-
         const dx = beforePos.x - afterPos.x;
         const dy = beforePos.y - afterPos.y;
         if (dx || dy) {
-          gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: DURATION, ease: EASE });
+          gsap.fromTo(
+            el,
+            { x: dx, y: dy },
+            { x: 0, y: 0, duration: DURATION, ease: EASE }
+          );
         }
       });
     }
 
     btns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
+      btn.addEventListener("click", (e: MouseEvent) => {
         e.preventDefault();
         setActive(btn);
         applyFilter(btn.getAttribute("data-filter") || "all");
