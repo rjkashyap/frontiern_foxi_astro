@@ -25,22 +25,22 @@ import feature05 from '../../../assets/cards/feature-05.svg'
 const items = [
   { title: 'All your data in one place',
     subtitle: 'Stay on top of your tasks and deadlines with our intuitive project management tool.',
-    image: feature01, link: '/features', cat: 'staff-role' },
+    image: feature01, cat: 'staff-role' },
   { title: 'Organize & manage your projects',
     subtitle: 'Plan, assign, and track with clarity across teams and timelines.',
-    image: feature02, link: '/features', cat: 'mission-internship' },
+    image: feature02, cat: 'mission-internship' },
   { title: 'Keep your team connected',
     subtitle: 'Integrated chat to share updates, files, and messages securely.',
-    image: feature03, link: '/features', cat: 'church-planting-residency' },
+    image: feature03, cat: 'church-planting-residency' },
   { title: 'Manage your customers',
     subtitle: 'Build and nurture relationships with a powerful, simple CRM.',
-    image: feature04, link: '/features', cat: 'short-term-trip' },
+    image: feature04, cat: 'short-term-trip' },
   { title: 'Simplify your financial operations',
     subtitle: 'Create, send, and track invoices effortlessly.',
-    image: feature05, link: '/features', cat: 'medium-term-placement' },
+    image: feature05, cat: 'medium-term-placement' },
   { title: 'Insights that drive action',
     subtitle: 'Dashboards and reports that surface what matters.',
-    image: feature01, link: '/features', cat: 'long-term-placement' }
+    image: feature01, cat: 'long-term-placement' }
 ]
 
 // Filter buttons
@@ -98,11 +98,7 @@ const filters = [
   <div id="feature-grid" class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {items.map((it) => (
       <div class="card-wrap flex h-[360px] sm:h-[320px] lg:h-[340px] w-full" data-cat={it.cat}>
-        <div class="flex flex-col h-full w-full">
-          <div class="h-full">
-            <Card title={it.title} subtitle={it.subtitle} image={it.image} link={it.link} />
-          </div>
-        </div>
+        <Card title={it.title} subtitle={it.subtitle} image={it.image} />
       </div>
     ))}
   </div>
@@ -117,6 +113,7 @@ const filters = [
     will-change: transform, opacity;
   }
 </style>
+
 <script>
   import gsap from "gsap";
 
@@ -128,15 +125,13 @@ const filters = [
     const DURATION = 0.35;
     const EASE = "power2.out";
 
-    const btns = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-filter]"));
-    const wraps = () => Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
+    const btns = Array.from(bar.querySelectorAll("[data-filter]"));
+    const wraps = () => Array.from(grid.querySelectorAll(".card-wrap"));
 
-    // ✅ Fixed TS typing for RAF + Promise
-    const nextFrame = (): Promise<void> =>
-      new Promise((resolve) => requestAnimationFrame(() => resolve()));
+    const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
     function measureVisiblePositions() {
-      const map = new Map<HTMLDivElement, { x: number; y: number }>();
+      const map = new Map();
       wraps().forEach((w) => {
         if (!w.classList.contains("hidden")) {
           const r = w.getBoundingClientRect();
@@ -146,22 +141,17 @@ const filters = [
       return map;
     }
 
-    function setActive(btn: HTMLButtonElement) {
+    function setActive(btn) {
       btns.forEach((b) =>
-        b.classList.remove(
-          "is-active",
-          "bg-neutral-800",
-          "border-primary-500",
-          "text-neutral-100"
-        )
+        b.classList.remove("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100")
       );
       btn.classList.add("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
     }
 
-    async function applyFilter(slug: string) {
+    async function applyFilter(slug) {
       const before = measureVisiblePositions();
 
-      // 1️⃣ Unhide matching items
+      // show relevant cards
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
@@ -171,10 +161,9 @@ const filters = [
         }
       });
 
-      // 🕐 Wait for reflow
       await nextFrame();
 
-      // 2️⃣ Hide unmatched items
+      // hide others
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
@@ -192,10 +181,8 @@ const filters = [
         }
       });
 
-      // 3️⃣ Measure new positions
       const after = measureVisiblePositions();
 
-      // 4️⃣ Animate FLIP layout smoothly
       after.forEach((afterPos, el) => {
         const beforePos = before.get(el);
         if (!beforePos) {
