@@ -129,22 +129,22 @@ const filters = [
     const DURATION = 0.35;
     const EASE = "power2.out";
 
-    const btns = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-filter]"));
-    const wraps = () => Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
+    const btns = Array.from(bar.querySelectorAll("[data-filter]"));
+    const wraps = () => Array.from(grid.querySelectorAll(".card-wrap"));
 
-    // ✅ Make each card open the signup modal
+    // Ensure modal opens when clicking anywhere on card
     wraps().forEach((wrap) => {
-      wrap.addEventListener("click", () => {
-        const modalTarget = wrap.querySelector<HTMLElement>("[data-modal='signup']");
-        modalTarget?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      wrap.addEventListener("click", (e) => {
+        const modalTarget = wrap.querySelector("[data-modal='signup']");
+        if (modalTarget) modalTarget.click();
       });
     });
 
     const nextFrame = () =>
-      new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
     function measureVisiblePositions() {
-      const map = new Map<HTMLDivElement, { x: number; y: number }>();
+      const map = new Map();
       wraps().forEach((w) => {
         if (!w.classList.contains("hidden")) {
           const r = w.getBoundingClientRect();
@@ -154,7 +154,7 @@ const filters = [
       return map;
     }
 
-    function setActive(btn: HTMLButtonElement) {
+    function setActive(btn) {
       btns.forEach((b) =>
         b.classList.remove(
           "is-active",
@@ -171,12 +171,14 @@ const filters = [
       );
     }
 
-    async function applyFilter(slug: string) {
+    async function applyFilter(slug) {
       const before = measureVisiblePositions();
 
+      // Unhide new items
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
+
         if (show && w.classList.contains("hidden")) {
           w.classList.remove("hidden");
           gsap.set(w, { opacity: 0, scale: 0.95 });
@@ -185,9 +187,11 @@ const filters = [
 
       await nextFrame();
 
+      // Animate out hidden ones
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
+
         if (!show && !w.classList.contains("hidden")) {
           gsap.to(w, {
             opacity: 0,
@@ -213,6 +217,7 @@ const filters = [
 
         const dx = beforePos.x - afterPos.x;
         const dy = beforePos.y - afterPos.y;
+
         if (dx || dy) {
           gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: DURATION, ease: EASE });
         }
