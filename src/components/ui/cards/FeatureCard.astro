@@ -7,7 +7,7 @@
 // Notes:
 // - Uses a full-card invisible <button data-modal="signup"> overlay for clicks.
 // - Keeps the bottom Button for UX clarity.
-// - No titleSize prop (avoids previous type mismatch).
+// - No titleSize prop (matches BasicCard props).
 
 import Card from './BasicCard.astro'
 import Button from '../Button.astro'
@@ -35,10 +35,11 @@ const { title, subtitle, image, link } = Astro.props
   <!-- The visual card -->
   <div class="flex h-full w-full">
     <div class="flex flex-col h-full w-full">
+      <!-- The `link` prop is optional; modal opening is handled by data-modal above -->
       <Card
         title={title}
         subtitle={subtitle}
-        link={link}               <!-- optional, not used for modal -->
+        link={link}
         image={image}
         type="image-bottom"
         classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
