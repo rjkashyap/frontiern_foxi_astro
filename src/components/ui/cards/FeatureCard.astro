@@ -1,30 +1,51 @@
 ---
-interface Props {
-  title: string
-  subtitle: string
-  image: ImageMetadata
+// Feature Card
+// ------------
+// Whole card (including “Learn more” button) opens the signup modal.
+// No external navigation; link prop removed.
+
+import Card from './BasicCard.astro'
+import Button from '../Button.astro'
+
+type Props = {
+  title?: string
+  subtitle?: string
+  image?: any
 }
 
 const { title, subtitle, image } = Astro.props
 ---
 
-<div
-  class="relative flex flex-col items-start justify-between rounded-lg border border-neutral-800 bg-neutral-900/60 p-6 shadow-md transition hover:-translate-y-1 hover:shadow-lg cursor-pointer"
-  data-modal="signup"
->
-  <div class="flex flex-col gap-4">
-    <img src={image.src} alt={title} class="h-16 w-16 object-contain" />
-    <div>
-      <h3 class="text-lg font-semibold text-white">{title}</h3>
-      <p class="text-sm text-neutral-400">{subtitle}</p>
-    </div>
-  </div>
-
+<!-- Whole card acts as modal trigger -->
+<div class="relative h-full w-full">
+  <!-- Full-card invisible button triggers modal -->
   <button
     type="button"
     data-modal="signup"
-    class="mt-6 inline-flex items-center gap-1 rounded-md border border-primary-500 bg-primary-500/10 px-3 py-1.5 text-sm font-medium text-primary-400 transition hover:bg-primary-500 hover:text-white"
-  >
-    Learn More
-  </button>
+    aria-label={`Open signup modal for ${title ?? 'this feature'}`}
+    class="absolute inset-0 z-10 bg-transparent cursor-pointer"
+  ></button>
+
+  <div class="flex h-full w-full">
+    <div class="flex flex-col h-full w-full">
+      <Card
+        title={title}
+        subtitle={subtitle}
+        image={image}
+        type="image-bottom"
+        classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
+      >
+        <!-- Bottom action area (same modal trigger, visually present) -->
+        <div class="mt-1 mb-2 flex justify-center relative z-20">
+          <button
+            type="button"
+            data-modal="signup"
+            class="button button--sm button--primary !py-1.5 !px-3"
+          >
+            Learn more
+          </button>
+        </div>
+      </Card>
+    </div>
+  </div>
 </div>
