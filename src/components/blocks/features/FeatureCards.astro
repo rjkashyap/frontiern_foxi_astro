@@ -125,18 +125,13 @@ const filters = [
     const DURATION = 0.35;
     const EASE = "power2.out";
 
-    const btns: HTMLButtonElement[] = Array.from(
-      bar.querySelectorAll<HTMLButtonElement>("[data-filter]")
-    );
-    const wraps = (): HTMLDivElement[] =>
-      Array.from(grid.querySelectorAll<HTMLDivElement>(".card-wrap"));
+    const btns = Array.from(bar.querySelectorAll("[data-filter]"));
+    const wraps = () => Array.from(grid.querySelectorAll(".card-wrap"));
 
-    // ✅ Explicitly typed Promise<void>
-    const nextFrame = (): Promise<void> =>
-      new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
 
-    function measureVisiblePositions(): Map<HTMLDivElement, { x: number; y: number }> {
-      const map = new Map<HTMLDivElement, { x: number; y: number }>();
+    function measureVisiblePositions() {
+      const map = new Map();
       wraps().forEach((w) => {
         if (!w.classList.contains("hidden")) {
           const r = w.getBoundingClientRect();
@@ -146,17 +141,22 @@ const filters = [
       return map;
     }
 
-    function setActive(btn: HTMLButtonElement): void {
+    function setActive(btn) {
       btns.forEach((b) =>
-        b.classList.remove("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100")
+        b.classList.remove(
+          "is-active",
+          "bg-neutral-800",
+          "border-primary-500",
+          "text-neutral-100"
+        )
       );
       btn.classList.add("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
     }
 
-    async function applyFilter(slug: string): Promise<void> {
+    async function applyFilter(slug) {
       const before = measureVisiblePositions();
 
-      // show relevant cards
+      // 1️⃣ Unhide new items
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
@@ -166,9 +166,9 @@ const filters = [
         }
       });
 
-      await nextFrame();
+      await nextFrame(); // wait for reflow
 
-      // hide others
+      // 2️⃣ Animate out hidden ones
       wraps().forEach((w) => {
         const cat = w.getAttribute("data-cat");
         const show = slug === "all" || cat === slug;
@@ -186,8 +186,10 @@ const filters = [
         }
       });
 
+      // 3️⃣ Measure new layout
       const after = measureVisiblePositions();
 
+      // 4️⃣ Animate FLIP layout
       after.forEach((afterPos, el) => {
         const beforePos = before.get(el);
         if (!beforePos) {
