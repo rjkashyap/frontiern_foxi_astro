@@ -1,8 +1,8 @@
 ---
 // Feature Card
 // ------------
-// Description: Card presenting a feature, with a bottom “Learn more” button that opens the
-// modal id="opportunities". No titleSize prop is passed to avoid build errors.
+// Description: Card presenting a feature with a bottom “Learn more” button 
+// that opens the same signup modal as the “Try it now” button in the navbar.
 
 import Card from './BasicCard.astro'
 import Button from '../Button.astro'
@@ -13,12 +13,12 @@ type Props = {
   image?: any
   link?: string
 }
+
 const { title, subtitle, image, link } = Astro.props
 ---
 
 <div class="flex h-full w-full">
   <div class="flex flex-col h-full w-full">
-    <!-- Do NOT pass titleSize here -->
     <Card
       title={title}
       subtitle={subtitle}
@@ -27,9 +27,10 @@ const { title, subtitle, image, link } = Astro.props
       type="image-bottom"
       classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
     >
-      <!-- Bottom action area (tighter spacing) -->
-      <div class="cta-area mt-1 pt-1 pb-1 flex justify-center">
-        <Button modal="opportunities" style="primary" size="sm">
+      <!-- Bottom action area -->
+      <div class="mt-2 mb-2 flex justify-center">
+        <!-- Use the same modal trigger as the navbar -->
+        <Button modal="signup" style="primary" size="sm">
           Learn more
         </Button>
       </div>
