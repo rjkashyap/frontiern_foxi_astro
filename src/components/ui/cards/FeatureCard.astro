@@ -1,13 +1,8 @@
 ---
 // Feature Card
 // ------------
-// Entire card is clickable to open the signup modal, plus a visible “Learn more”
-// button at the bottom that triggers the same modal.
-//
-// Notes:
-// - Uses a full-card invisible <button data-modal="signup"> overlay for clicks.
-// - Keeps the bottom Button for UX clarity.
-// - No titleSize prop (matches BasicCard props).
+// Whole card (including “Learn more” button) opens the signup modal.
+// No external navigation; link prop removed.
 
 import Card from './BasicCard.astro'
 import Button from '../Button.astro'
@@ -16,39 +11,39 @@ type Props = {
   title?: string
   subtitle?: string
   image?: any
-  link?: string
 }
 
-const { title, subtitle, image, link } = Astro.props
+const { title, subtitle, image } = Astro.props
 ---
 
-<!-- Relative wrapper so the invisible overlay can cover the card -->
+<!-- Whole card acts as modal trigger -->
 <div class="relative h-full w-full">
-  <!-- Invisible full-card click target to open modal -->
+  <!-- Full-card invisible button triggers modal -->
   <button
     type="button"
     data-modal="signup"
-    aria-label={`Open sign up modal for ${title ?? 'this feature'}`}
+    aria-label={`Open signup modal for ${title ?? 'this feature'}`}
     class="absolute inset-0 z-10 bg-transparent cursor-pointer"
   ></button>
 
-  <!-- The visual card -->
   <div class="flex h-full w-full">
     <div class="flex flex-col h-full w-full">
-      <!-- The `link` prop is optional; modal opening is handled by data-modal above -->
       <Card
         title={title}
         subtitle={subtitle}
-        link={link}
         image={image}
         type="image-bottom"
         classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
       >
-        <!-- Bottom action area (kept above overlay for direct clicks) -->
+        <!-- Bottom action area (same modal trigger, visually present) -->
         <div class="mt-1 mb-2 flex justify-center relative z-20">
-          <Button modal="signup" style="primary" size="sm" classes="!py-1.5 !px-3">
+          <button
+            type="button"
+            data-modal="signup"
+            class="button button--sm button--primary !py-1.5 !px-3"
+          >
             Learn more
-          </Button>
+          </button>
         </div>
       </Card>
     </div>
