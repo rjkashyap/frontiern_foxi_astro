@@ -40,24 +40,23 @@ export const footerNavigationData: FooterData = {
       'Equipping believers to go with the gospel and multiply disciples, churches, and leaders until there is no place left.',
     logo: {
       src: '/fnlogo.svg',
-      alt: 'The tailwind astro theme',
+      alt: 'Frontier Nations logo',
       text: 'Frontier Nations'
     }
   },
 
   footerColumns: [
-     {
-       category: 'Product',
-       subCategories: [
-    //     { subCategory: 'Features',   subCategoryLink: '/features' },
-    //     { subCategory: 'FAQ',        subCategoryLink: '/faq' },
-    //     { subCategory: 'Pricing',    subCategoryLink: '/pricing' },
-    //     { subCategory: 'Changelog',  subCategoryLink: '/changelog' },
-         { subCategory: 'Terms',      subCategoryLink: '/terms' }
-         { subCategory: 'Page Search',      subCategoryLink: '/pagesearch' }
-       ]
-     },
-
+    {
+      category: 'Product',
+      subCategories: [
+        // { subCategory: 'Features',   subCategoryLink: '/features' },
+        // { subCategory: 'FAQ',        subCategoryLink: '/faq' },
+        // { subCategory: 'Pricing',    subCategoryLink: '/pricing' },
+        // { subCategory: 'Changelog',  subCategoryLink: '/changelog' },
+        { subCategory: 'Terms', subCategoryLink: '/terms' },
+        { subCategory: 'Page Search', subCategoryLink: '/pagesearch' }
+      ]
+    },
     // {
     //   category: 'About us',
     //   subCategories: [
@@ -66,12 +65,10 @@ export const footerNavigationData: FooterData = {
     //     { subCategory: 'Careers',  subCategoryLink: '/blog' }
     //   ]
     // },
-
     {
       category: 'Get in touch',
       subCategories: [
-        { subCategory: 'Contact', subCategoryLink: '/contact' },
-
+        { subCategory: 'Contact', subCategoryLink: '/contact' }
         // { subCategory: 'Support', subCategoryLink: '/contact' },
         // { subCategory: 'Join us', subCategoryLink: '/contact' }
       ]
