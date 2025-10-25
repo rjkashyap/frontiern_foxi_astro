@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build && npx pagefind --source dist --output-subdir pagefind --verbose",
+    "build": "astro check && astro build && ./node_modules/.bin/pagefind --source dist --output-subdir search --verbose",
     "preview": "astro preview",
     "astro": "astro"
   },
