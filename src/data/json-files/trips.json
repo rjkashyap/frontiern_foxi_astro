@@ -1,0 +1,54 @@
+[
+  {
+    "code": "FJ26A",
+    "title": "Suva, Fiji",
+    "region": "Oceania",
+    "country": "Fiji",
+    "leave_date": "2026-03-10",
+    "end_date": "2026-03-20",
+    "trip_type": "Interest Phase",
+    "access_activities": ["Purely Evangelistic (support local Church Planting efforts)", "Practical Service (supply water filters, snake bandages etc.)"],
+    "blurb": "Partner with local churches to share the gospel and serve communities.",
+    "image": "/images/trips/fj26a.jpg",
+    "url": "/trips/fj26a/"
+  },
+  {
+    "code": "TH26B",
+    "title": "Chiang Mai, Thailand",
+    "region": "Asia",
+    "country": "Thailand",
+    "leave_date": "2026-06-12",
+    "end_date": "2026-06-22",
+    "trip_type": "Interest Phase",
+    "access_activities": ["Teaching English", "Movie screenings"],
+    "blurb": "Support outreach through language teaching and film-led conversations.",
+    "image": "/images/trips/th26b.jpg",
+    "url": "/trips/th26b/"
+  },
+  {
+    "code": "SE26C",
+    "title": "Stockholm, Sweden",
+    "region": "Europe",
+    "country": "Sweden",
+    "leave_date": "2026-08-05",
+    "end_date": "2026-08-15",
+    "trip_type": "Interest Phase",
+    "access_activities": ["Sports", "Trauma Healing Workshops"],
+    "blurb": "Engage seekers through sport initiatives and restorative workshops.",
+    "image": "/images/trips/se26c.jpg",
+    "url": "/trips/se26c/"
+  },
+  {
+    "code": "KE26D",
+    "title": "Nairobi, Kenya",
+    "region": "Africa",
+    "country": "Kenya",
+    "leave_date": "2026-10-10",
+    "end_date": "2026-10-20",
+    "trip_type": "Interest Phase",
+    "access_activities": ["Practical Service (supply water filters, snake bandages etc.)", "Purely Evangelistic (support local Church Planting efforts)"],
+    "blurb": "Serve alongside local partners in both word and deed.",
+    "image": "/images/trips/ke26d.jpg",
+    "url": "/trips/ke26d/"
+  }
+]
