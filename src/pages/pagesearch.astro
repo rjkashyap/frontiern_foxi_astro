@@ -68,23 +68,69 @@ const header = {
 </Layout>
 
 <style is:global>
-  /* Light touch styling so the Pagefind UI sits nicely with your theme */
-  .pagefind-wrapper .pagefind-ui__form {
-    margin-bottom: 1rem;
+  /* Base (light stays as-is). Only adjust dark. */
+  html.dark .pagefind-wrapper,
+  @media (prefers-color-scheme: dark) {
+    html:not(.dark) .pagefind-wrapper { /* no-op for users without the .dark class */ }
   }
-  .pagefind-wrapper .pagefind-ui__search-input {
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-    line-height: 1.25rem;
-  }
-  .pagefind-wrapper .pagefind-ui__drawer {
-    border-radius: 1rem;
-  }
-  .pagefind-wrapper .pagefind-ui__result {
-    border-radius: 0.75rem;
-  }
-  /* Respect dark mode if your site uses it */
-  html.dark .pagefind-wrapper .pagefind-ui__form {
+
+  /* Containers */
+  html.dark .pagefind-wrapper .pagefind-ui__form,
+  html.dark .pagefind-wrapper .pagefind-ui__drawer,
+  html.dark .pagefind-wrapper .pagefind-ui__results-area {
     background: transparent;
+    color: #e5e7eb;            /* Tailwind zinc-200 */
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  /* Input */
+  html.dark .pagefind-wrapper .pagefind-ui__search-input {
+    background: rgba(255,255,255,0.06);
+    color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__search-input::placeholder {
+    color: rgba(229,231,235,0.55);
+  }
+
+  /* Buttons / chips */
+  html.dark .pagefind-wrapper .pagefind-ui__button {
+    background: rgba(255,255,255,0.06);
+    color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__filter-pill,
+  html.dark .pagefind-wrapper .pagefind-ui__filter-link {
+    background: rgba(255,255,255,0.06);
+    color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  /* Result titles / links / metadata */
+  html.dark .pagefind-wrapper .pagefind-ui__result-title,
+  html.dark .pagefind-wrapper .pagefind-ui__result-link {
+    color: #bfdbfe;            /* Tailwind sky-200 for readable links on dark */
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
+  html.dark .pagefind-wrapper .pagefind-ui__message {
+    color: #e5e7eb;
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__result {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+
+  /* Facet headers & counts */
+  html.dark .pagefind-wrapper .pagefind-ui__filter-group-title,
+  html.dark .pagefind-wrapper .pagefind-ui__filter-count {
+    color: #cbd5e1;            /* slate-300 */
+  }
+
+  /* Highlighted terms */
+  html.dark .pagefind-wrapper .pagefind-ui__result-excerpt mark {
+    background: rgba(250,204,21,0.25);  /* amber-400 @ 25% */
+    color: inherit;
+    border-radius: 0.25rem;
+    padding: 0 .1rem;
   }
 </style>
