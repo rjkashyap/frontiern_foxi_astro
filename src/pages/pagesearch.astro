@@ -9,30 +9,8 @@ import Layout from '../layouts/Layout.astro'
 import SidebarContent from '../components/blocks/basic/StickySidebar.astro'
 import Hero from '../components/blocks/hero/PageHeader.astro'
 
-// Types for our demo data
-type Trip = {
-  code?: string
-  title: string
-  region: string
-  country: string
-  leave_date?: string
-  end_date?: string
-  trip_type: string
-  access_activities?: string[]
-  blurb?: string
-  image?: string
-  url?: string
-}
-
-// Build-time load of JSON without requiring TS "resolveJsonModule"
-const trips: Trip[] = await (await fetch(
-  new URL('../../data/json-files/trips.json', import.meta.url)
-)).json()
-
-// Helpers to derive date facets
-const getYear = (d?: string) => (d ? String(new Date(d).getUTCFullYear()) : '')
-const getMonth = (d?: string) =>
-  d ? String(new Date(d).getUTCMonth() + 1).padStart(2, '0') : ''
+// Demo data (Phase 1). Replace later with Baserow export.
+import trips from '../../data/json-files/trips.json'
 
 // SEO
 const SEO = {
@@ -44,7 +22,7 @@ const SEO = {
 // Page Header
 const header = {
   title: 'Find a <strong>Mission Trip</strong>',
-  text: 'Filter by Region, Country, Leave Date (Year/Month), and Trip Type.'
+  text: 'Filter by Region, Country, Leave Date, and Trip Type.'
 }
 ---
 
@@ -56,7 +34,7 @@ const header = {
     <div slot="sidebar" class="space-y-4">
       <h3 class="text-xl font-semibold">Tips</h3>
       <ul class="list-disc list-inside text-sm text-muted-foreground space-y-2">
-        <li>Use the filters to narrow by Region, Country, Trip Type, or Year/Month.</li>
+        <li>Use the filters to narrow by Region, Country, or Trip Type.</li>
         <li>Try a keyword in the search box (e.g. “Kenya” or “Teaching English”).</li>
         <li>Click a result to view full trip details.</li>
       </ul>
@@ -81,7 +59,6 @@ const header = {
             new window.PagefindUI({
               element: "#trip-search",
               basePath: "/search/"
-              // You can add: translations: { placeholder: "Search trips..." }
             });
           }
         </script>
@@ -89,7 +66,7 @@ const header = {
 
       <!-- Phase 1 demo: render your trips so Pagefind can detect facets -->
       <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
-        {trips.map((t: Trip) => (
+        {trips.map((t) => (
           <article class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/5 p-4 shadow-sm">
             <a href={t.url} class="block">
               {t.image && <img src={t.image} alt={t.title} class="w-full h-40 object-cover rounded-lg mb-3" />}
@@ -97,11 +74,6 @@ const header = {
               {t.blurb && <p class="text-sm opacity-80 mt-1">{t.blurb}</p>}
               <p class="text-xs mt-2 opacity-70">
                 <span>{t.region}</span> &middot; <span>{t.country}</span> &middot; <span>{t.trip_type}</span>
-                {t.leave_date && (
-                  <>
-                    {' '}• <span>{new Date(t.leave_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })}</span>
-                  </>
-                )}
               </p>
             </a>
 
@@ -110,11 +82,7 @@ const header = {
             <span data-pagefind-filter="country" class="hidden">{t.country}</span>
             <span data-pagefind-filter="trip_type" class="hidden">{t.trip_type}</span>
 
-            <!-- Date facets (Year/Month) -->
-            {t.leave_date && <span data-pagefind-filter="leave_year" class="hidden">{getYear(t.leave_date)}</span>}
-            {t.leave_date && <span data-pagefind-filter="leave_month" class="hidden">{getMonth(t.leave_date)}</span>}
-
-            <!-- Optional metadata (sortable later if needed) -->
+            <!-- Optional metadata (sortable later) -->
             {t.leave_date && <span data-pagefind-meta="leave_date" class="hidden">{t.leave_date}</span>}
           </article>
         ))}
