@@ -43,7 +43,6 @@ const header = {
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
         <!-- Pagefind UI assets -->
         <link rel="stylesheet" href="/search/pagefind-ui.css" />
-
         <!-- keep this as a raw external script (don’t let Vite bundle it) -->
         <script src="/search/pagefind-ui.js" is:inline></script>
 
@@ -105,22 +104,27 @@ const header = {
     border: 1px solid rgba(255,255,255,0.12);
   }
 
-  /* Result titles / links / metadata */
+  /* Strong dark-mode overrides for RESULT TITLES (headings/links) */
+  html.dark .pagefind-wrapper {
+    --pf-title: #e5e7eb;        /* zinc-200 */
+    --pf-title-hover: #bfdbfe;  /* sky-200 */
+  }
   html.dark .pagefind-wrapper .pagefind-ui__result-title,
-  html.dark .pagefind-wrapper .pagefind-ui__result-link {
-    color: #e5e7eb !important;  /* brighter for headings */
+  html.dark .pagefind-wrapper .pagefind-ui__result-title * {
+    color: var(--pf-title) !important;
   }
   html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:link, :visited, :active) {
-    color: #e5e7eb !important;
+    color: var(--pf-title) !important;
     text-decoration: none;
   }
   html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:hover, :focus-visible),
   html.dark .pagefind-wrapper .pagefind-ui__result-link:is(:hover, :focus-visible) {
-    color: #bfdbfe !important;  /* sky-200 on hover */
+    color: var(--pf-title-hover) !important;
     text-decoration: underline;
     text-underline-offset: 2px;
   }
 
+  /* Other result text */
   html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
   html.dark .pagefind-wrapper .pagefind-ui__message {
     color: #e5e7eb;
@@ -154,26 +158,27 @@ const header = {
     stroke: currentColor !important;
     opacity: 0.95;
   }
-  /* Placeholder text inside the input */
   html.dark .pagefind-wrapper .pagefind-ui__search-input::placeholder {
-    color: #e5e7eb !important;      /* brighter than before */
+    color: #e5e7eb !important;
     opacity: 0.85;
   }
-  /* Input text + caret for better contrast */
   html.dark .pagefind-wrapper .pagefind-ui__search-input {
     color: #e5e7eb !important;
     caret-color: #bfdbfe;           /* sky-200 */
   }
-  /* Focus ring so the box “lights up” when active */
   html.dark .pagefind-wrapper .pagefind-ui__search-input:focus,
   html.dark .pagefind-wrapper .pagefind-ui__search-input:focus-visible {
     outline: 2px solid rgba(191,219,254,0.7) !important; /* sky-200 */
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(191,219,254,0.15);
   }
-  /* Catch-all for any leftover label text */
   html.dark .pagefind-wrapper [class*="label"],
   html.dark .pagefind-wrapper label {
     color: #e5e7eb !important;
+  }
+
+  /* === Hide the clear (reset) button entirely === */
+  .pagefind-wrapper .pagefind-ui__reset {
+    display: none !important;
   }
 </style>
