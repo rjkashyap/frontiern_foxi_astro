@@ -57,7 +57,6 @@ const header = {
             new window.PagefindUI({
               element: "#trip-search",
               basePath: "/search/",
-              // You can set a placeholder if you like:
               // translations: { placeholder: "Search trips..." }
             });
           }
@@ -106,11 +105,44 @@ const header = {
     border: 1px solid rgba(255,255,255,0.12);
   }
 
-  /* Result titles / links / metadata */
-  html.dark .pagefind-wrapper .pagefind-ui__result-title,
-  html.dark .pagefind-wrapper .pagefind-ui__result-link {
-    color: #bfdbfe;            /* Tailwind sky-200 for readable links on dark */
+  /* === STRONG dark-mode overrides for RESULT TITLES (headings/links) === */
+  html.dark .pagefind-wrapper {
+    --pf-title: #e5e7eb;        /* zinc-200 */
+    --pf-title-hover: #bfdbfe;  /* sky-200 */
   }
+  /* Title container + any children (covers <h3> and nested <a>) */
+  html.dark .pagefind-wrapper .pagefind-ui__result-title,
+  html.dark .pagefind-wrapper .pagefind-ui__result-title * {
+    color: var(--pf-title) !important;
+  }
+  /* Title links in every state */
+  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:link, :visited, :active) {
+    color: var(--pf-title) !important;
+    text-decoration: none;
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:hover, :focus-visible) {
+    color: var(--pf-title-hover) !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  /* If Pagefind uses a separate "result link" class, cover it too */
+  html.dark .pagefind-wrapper .pagefind-ui__result-link:is(:link, :visited, :active) {
+    color: var(--pf-title) !important;
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__result-link:is(:hover, :focus-visible) {
+    color: var(--pf-title-hover) !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  /* Belt-and-braces: any headings inside a result card */
+  html.dark .pagefind-wrapper .pagefind-ui__result h1,
+  html.dark .pagefind-wrapper .pagefind-ui__result h2,
+  html.dark .pagefind-wrapper .pagefind-ui__result h3,
+  html.dark .pagefind-wrapper .pagefind-ui__result h4 {
+    color: var(--pf-title) !important;
+  }
+
+  /* Other result text */
   html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
   html.dark .pagefind-wrapper .pagefind-ui__message {
     color: #e5e7eb;
