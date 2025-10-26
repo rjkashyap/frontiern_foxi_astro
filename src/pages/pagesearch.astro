@@ -12,7 +12,7 @@ import Hero from '../components/blocks/hero/PageHeader.astro'
 // Node FS to read local JSON during build (works on CloudCannon)
 import fs from 'node:fs/promises'
 
-// Types for our demo data
+// Types
 type Trip = {
   code?: string
   title: string
@@ -27,10 +27,26 @@ type Trip = {
   url?: string
 }
 
-// Load JSON at build time without TS config changes
-const tripsPath = new URL('../../data/json-files/trips.json', import.meta.url)
-const tripsJson = await fs.readFile(tripsPath, 'utf-8')
-const trips: Trip[] = JSON.parse(tripsJson)
+// Robust loader: try several likely paths; never crash the build.
+async function loadTrips(): Promise<Trip[]> {
+  const candidates = [
+    '../../data/json-files/trips.json',   // project-root/data/...
+    '../data/json-files/trips.json',      // src/data/...
+    '../../src/data/json-files/trips.json',
+    '../../../data/json-files/trips.json' // safety net for some build layouts
+  ]
+  for (const rel of candidates) {
+    try {
+      const u = new URL(rel, import.meta.url)
+      const raw = await fs.readFile(u, 'utf-8')
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed as Trip[]
+    } catch (_) { /* keep trying */ }
+  }
+  return [] // fallback: empty list (page still builds)
+}
+
+const trips: Trip[] = await loadTrips()
 
 // Helpers to derive date facets
 const getYear = (d?: string) => (d ? String(new Date(d).getUTCFullYear()) : '')
@@ -90,38 +106,47 @@ const header = {
         </script>
       </section>
 
-      <!-- Phase 1 demo: render your trips so Pagefind can detect facets -->
-      <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
-        {trips.map((t: Trip) => (
-          <article class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/5 p-4 shadow-sm">
-            <a href={t.url} class="block">
-              {t.image && <img src={t.image} alt={t.title} class="w-full h-40 object-cover rounded-lg mb-3" />}
-              <h3 class="text-lg font-semibold">{t.title}</h3>
-              {t.blurb && <p class="text-sm opacity-80 mt-1">{t.blurb}</p>}
-              <p class="text-xs mt-2 opacity-70">
-                <span>{t.region}</span> &middot; <span>{t.country}</span> &middot; <span>{t.trip_type}</span>
-                {t.leave_date && (
-                  <>
-                    {' '}• <span>{new Date(t.leave_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })}</span>
-                  </>
-                )}
-              </p>
-            </a>
+      {trips.length === 0 && (
+        <p class="mt-6 text-sm opacity-75">
+          No trips.json found. Add it at <code>data/json-files/trips.json</code> (or <code>src/data/json-files/trips.json</code>)
+          and rebuild to enable filters.
+        </p>
+      )}
 
-            <!-- Pagefind facets (hidden if you don’t want them visible) -->
-            <span data-pagefind-filter="region" class="hidden">{t.region}</span>
-            <span data-pagefind-filter="country" class="hidden">{t.country}</span>
-            <span data-pagefind-filter="trip_type" class="hidden">{t.trip_type}</span>
+      <!-- Render trips so Pagefind can detect facets -->
+      {trips.length > 0 && (
+        <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+          {trips.map((t) => (
+            <article class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/5 p-4 shadow-sm">
+              <a href={t.url} class="block">
+                {t.image && <img src={t.image} alt={t.title} class="w-full h-40 object-cover rounded-lg mb-3" />}
+                <h3 class="text-lg font-semibold">{t.title}</h3>
+                {t.blurb && <p class="text-sm opacity-80 mt-1">{t.blurb}</p>}
+                <p class="text-xs mt-2 opacity-70">
+                  <span>{t.region}</span> &middot; <span>{t.country}</span> &middot; <span>{t.trip_type}</span>
+                  {t.leave_date && (
+                    <>
+                      {' '}• <span>{new Date(t.leave_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })}</span>
+                    </>
+                  )}
+                </p>
+              </a>
 
-            <!-- Date facets (Year/Month) -->
-            {t.leave_date && <span data-pagefind-filter="leave_year" class="hidden">{getYear(t.leave_date)}</span>}
-            {t.leave_date && <span data-pagefind-filter="leave_month" class="hidden">{getMonth(t.leave_date)}</span>}
+              <!-- Pagefind facets (hidden if you don’t want them visible) -->
+              <span data-pagefind-filter="region" class="hidden">{t.region}</span>
+              <span data-pagefind-filter="country" class="hidden">{t.country}</span>
+              <span data-pagefind-filter="trip_type" class="hidden">{t.trip_type}</span>
 
-            <!-- Optional metadata (sortable later if needed) -->
-            {t.leave_date && <span data-pagefind-meta="leave_date" class="hidden">{t.leave_date}</span>}
-          </article>
-        ))}
-      </section>
+              <!-- Date facets (Year/Month) -->
+              {t.leave_date && <span data-pagefind-filter="leave_year" class="hidden">{getYear(t.leave_date)}</span>}
+              {t.leave_date && <span data-pagefind-filter="leave_month" class="hidden">{getMonth(t.leave_date)}</span>}
+
+              <!-- Optional metadata (sortable later if needed) -->
+              {t.leave_date && <span data-pagefind-meta="leave_date" class="hidden">{t.leave_date}</span>}
+            </article>
+          ))}
+        </section>
+      )}
     </div>
   </SidebarContent>
 </Layout>
