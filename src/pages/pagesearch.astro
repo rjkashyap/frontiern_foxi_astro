@@ -9,6 +9,9 @@ import Layout from '../layouts/Layout.astro'
 import SidebarContent from '../components/blocks/basic/StickySidebar.astro'
 import Hero from '../components/blocks/hero/PageHeader.astro'
 
+// Demo data (Phase 1). Replace later with Baserow export.
+import trips from '../../data/json-files/trips.json'
+
 // SEO
 const SEO = {
   title: 'Search Trips',
@@ -43,7 +46,6 @@ const header = {
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
         <!-- Pagefind UI assets -->
         <link rel="stylesheet" href="/search/pagefind-ui.css" />
-
         <!-- keep this as a raw external script (don’t let Vite bundle it) -->
         <script src="/search/pagefind-ui.js" is:inline></script>
 
@@ -56,34 +58,57 @@ const header = {
           if (typeof window !== "undefined" && window.PagefindUI) {
             new window.PagefindUI({
               element: "#trip-search",
-              basePath: "/search/",
-              // You can set a placeholder if you like:
-              // translations: { placeholder: "Search trips..." }
+              basePath: "/search/"
             });
           }
         </script>
+      </section>
+
+      <!-- Phase 1 demo: render your trips so Pagefind can detect facets -->
+      <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+        {trips.map((t) => (
+          <article class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/5 p-4 shadow-sm">
+            <a href={t.url} class="block">
+              {t.image && <img src={t.image} alt={t.title} class="w-full h-40 object-cover rounded-lg mb-3" />}
+              <h3 class="text-lg font-semibold">{t.title}</h3>
+              {t.blurb && <p class="text-sm opacity-80 mt-1">{t.blurb}</p>}
+              <p class="text-xs mt-2 opacity-70">
+                <span>{t.region}</span> &middot; <span>{t.country}</span> &middot; <span>{t.trip_type}</span>
+              </p>
+            </a>
+
+            <!-- Pagefind facets (hidden if you don’t want them visible) -->
+            <span data-pagefind-filter="region" class="hidden">{t.region}</span>
+            <span data-pagefind-filter="country" class="hidden">{t.country}</span>
+            <span data-pagefind-filter="trip_type" class="hidden">{t.trip_type}</span>
+
+            <!-- Optional metadata (sortable later) -->
+            {t.leave_date && <span data-pagefind-meta="leave_date" class="hidden">{t.leave_date}</span>}
+          </article>
+        ))}
       </section>
     </div>
   </SidebarContent>
 </Layout>
 
 <style is:global>
-  /* Base (light stays as-is). Only adjust dark. */
-  html.dark .pagefind-wrapper,
-  @media (prefers-color-scheme: dark) {
-    html:not(.dark) .pagefind-wrapper { /* no-op for users without the .dark class */ }
+  /* Light touch layout polish */
+  .pagefind-wrapper .pagefind-ui__form { margin-bottom: 1rem; }
+  .pagefind-wrapper .pagefind-ui__search-input {
+    border-radius: 0.75rem; padding: 0.75rem 1rem; line-height: 1.25rem;
   }
+  .pagefind-wrapper .pagefind-ui__drawer { border-radius: 1rem; }
+  .pagefind-wrapper .pagefind-ui__result { border-radius: 0.75rem; }
 
-  /* Containers */
+  /* Dark-mode overrides: containers and text */
   html.dark .pagefind-wrapper .pagefind-ui__form,
   html.dark .pagefind-wrapper .pagefind-ui__drawer,
   html.dark .pagefind-wrapper .pagefind-ui__results-area {
     background: transparent;
-    color: #e5e7eb;            /* Tailwind zinc-200 */
+    color: #e5e7eb; /* zinc-200 */
     border-color: rgba(255,255,255,0.12);
   }
 
-  /* Input */
   html.dark .pagefind-wrapper .pagefind-ui__search-input {
     background: rgba(255,255,255,0.06);
     color: #e5e7eb;
@@ -93,12 +118,7 @@ const header = {
     color: rgba(229,231,235,0.55);
   }
 
-  /* Buttons / chips */
-  html.dark .pagefind-wrapper .pagefind-ui__button {
-    background: rgba(255,255,255,0.06);
-    color: #e5e7eb;
-    border: 1px solid rgba(255,255,255,0.12);
-  }
+  html.dark .pagefind-wrapper .pagefind-ui__button,
   html.dark .pagefind-wrapper .pagefind-ui__filter-pill,
   html.dark .pagefind-wrapper .pagefind-ui__filter-link {
     background: rgba(255,255,255,0.06);
@@ -106,24 +126,44 @@ const header = {
     border: 1px solid rgba(255,255,255,0.12);
   }
 
-  /* Result titles / links / metadata */
-  html.dark .pagefind-wrapper .pagefind-ui__result-title,
-  html.dark .pagefind-wrapper .pagefind-ui__result-link {
-    color: #bfdbfe;            /* Tailwind sky-200 for readable links on dark */
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
-  html.dark .pagefind-wrapper .pagefind-ui__message {
-    color: #e5e7eb;
-  }
   html.dark .pagefind-wrapper .pagefind-ui__result {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.10);
   }
 
+  /* Make result headings “light up” in dark mode */
+  :root {
+    --fn-link-dark: #e5e7eb;        /* zinc-200 */
+    --fn-link-dark-hover: #bfdbfe;  /* sky-200 */
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__result-title,
+  html.dark .pagefind-wrapper .pagefind-ui__result-title a,
+  html.dark .pagefind-wrapper .pagefind-ui__result-link,
+  html.dark .pagefind-wrapper .pagefind-ui__result h1,
+  html.dark .pagefind-wrapper .pagefind-ui__result h2,
+  html.dark .pagefind-wrapper .pagefind-ui__result h3,
+  html.dark .pagefind-wrapper .pagefind-ui__result h4 {
+    color: var(--fn-link-dark) !important;
+  }
+  html.dark .pagefind-wrapper .pagefind-ui__result-title a:hover,
+  html.dark .pagefind-wrapper .pagefind-ui__result-link:hover,
+  html.dark .pagefind-wrapper .pagefind-ui__result-title a:focus-visible,
+  html.dark .pagefind-wrapper .pagefind-ui__result-link:focus-visible {
+    color: var(--fn-link-dark-hover) !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Other result text */
+  html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
+  html.dark .pagefind-wrapper .pagefind-ui__message {
+    color: #e5e7eb;
+  }
+
   /* Facet headers & counts */
   html.dark .pagefind-wrapper .pagefind-ui__filter-group-title,
   html.dark .pagefind-wrapper .pagefind-ui__filter-count {
-    color: #cbd5e1;            /* slate-300 */
+    color: #cbd5e1; /* slate-300 */
   }
 
   /* Highlighted terms */
