@@ -9,6 +9,9 @@ import Layout from '../layouts/Layout.astro'
 import SidebarContent from '../components/blocks/basic/StickySidebar.astro'
 import Hero from '../components/blocks/hero/PageHeader.astro'
 
+// Node FS to read local JSON during build (works on CloudCannon)
+import fs from 'node:fs/promises'
+
 // Types for our demo data
 type Trip = {
   code?: string
@@ -24,10 +27,10 @@ type Trip = {
   url?: string
 }
 
-// Build-time load of JSON without requiring TS "resolveJsonModule"
-const trips: Trip[] = await (await fetch(
-  new URL('../../data/json-files/trips.json', import.meta.url)
-)).json()
+// Load JSON at build time without TS config changes
+const tripsPath = new URL('../../data/json-files/trips.json', import.meta.url)
+const tripsJson = await fs.readFile(tripsPath, 'utf-8')
+const trips: Trip[] = JSON.parse(tripsJson)
 
 // Helpers to derive date facets
 const getYear = (d?: string) => (d ? String(new Date(d).getUTCFullYear()) : '')
@@ -81,7 +84,7 @@ const header = {
             new window.PagefindUI({
               element: "#trip-search",
               basePath: "/search/"
-              // You can add: translations: { placeholder: "Search trips..." }
+              // translations: { placeholder: "Search trips..." }
             });
           }
         </script>
