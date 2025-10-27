@@ -1,25 +1,24 @@
 ---
 /**
- * Page: Page Search (Pagefind UI embedded)
+ * Page: Trips Filter (no search box)
  * Path: /pagesearch
  */
 
-// Components
 import Layout from '../layouts/Layout.astro'
 import SidebarContent from '../components/blocks/basic/StickySidebar.astro'
 import Hero from '../components/blocks/hero/PageHeader.astro'
 
 // SEO
 const SEO = {
-  title: 'Search Trips',
+  title: 'Browse Trips',
   description:
-    'Find a mission trip by country, region, date, and type. Filter and search across our upcoming opportunities.'
+    'All trips are listed below. Use the filters to narrow by Region, Country, and Trip Type.'
 }
 
 // Page Header
 const header = {
-  title: 'Find a <strong>Mission Trip</strong>',
-  text: 'Filter by Region, Country, Leave Date, and Trip Type.'
+  title: 'All <strong>Mission Trips</strong>',
+  text: 'Use the filters to narrow by Region, Country, and Trip Type.'
 }
 ---
 
@@ -29,237 +28,263 @@ const header = {
   <SidebarContent>
     <!-- Sidebar -->
     <div slot="sidebar" class="space-y-4">
-      <h3 class="text-xl font-semibold">Tips</h3>
-      <ul class="list-disc list-inside text-sm text-muted-foreground space-y-2">
-        <li>Use the filters to narrow by Region, Country, or Trip Type.</li>
-        <li>Try a keyword in the search box (e.g. “Kenya” or “Teaching English”).</li>
-        <li>Click a result to view full trip details.</li>
-      </ul>
+      <h3 class="text-xl font-semibold">Filter trips</h3>
+      <p class="text-sm text-muted-foreground">
+        All trips are visible by default. Select any combination of filters.
+      </p>
+
+      <!-- Filter UI is injected here -->
+      <div id="trip-filters" class="space-y-6">
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 p-3">
+          <h4 class="font-semibold mb-2">Region</h4>
+          <div id="filter-region" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 p-3">
+          <h4 class="font-semibold mb-2">Country</h4>
+          <div id="filter-country" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 p-3">
+          <h4 class="font-semibold mb-2">Trip Type</h4>
+          <div id="filter-type" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <button id="clear-filters" class="w-full inline-flex items-center justify-center rounded-lg border border-gray-300/70 dark:border-white/15 bg-white/70 dark:bg-white/10 px-3 py-2 text-sm font-medium hover:bg-white dark:hover:bg-white/15 transition">
+          Clear all filters
+        </button>
+      </div>
     </div>
 
     <!-- Main content -->
     <div class="basic-text">
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
-        <!-- Pagefind UI CSS (can be static) -->
-        <link rel="stylesheet" href="/search/pagefind-ui.css" />
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold">Trips</h3>
+          <div id="trip-count" class="text-sm text-muted-foreground">Loading…</div>
+        </div>
 
-        <!-- Mount point -->
-        <div id="trip-search" class="pagefind-wrapper" tabindex="-1" aria-label="Site search"></div>
+        <!-- Cards are injected here -->
+        <div id="trip-list" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
 
-        <!-- Dynamically (re)load Pagefind UI script and mount on every return / interaction -->
-        <script is:inline>
-          (() => {
-            const MOUNT_SEL = '#trip-search';
-            const SCRIPT_SRC = '/search/pagefind-ui.js';
-            const RETRY_MS = 60;
-            const MAX_RETRIES = 16;
-            let mounting = false;
-
-            const $ = (sel, root = document) => root.querySelector(sel);
-
-            function purgeInertAndClicks() {
-              // Unfreeze any elements that may have been left inert by view transitions or the router
-              document.querySelectorAll('[inert]').forEach(n => n.removeAttribute('inert'));
-              document.documentElement.style.pointerEvents = 'auto';
-              document.body.style.pointerEvents = 'auto';
-            }
-
-            function ensureClickable(el) {
-              if (!el) return;
-              el.style.pointerEvents = 'auto';
-              let p = el.parentElement;
-              while (p) { p.style.pointerEvents = 'auto'; p = p.parentElement; }
-            }
-
-            function hasUI(wrapper) {
-              return !!wrapper.querySelector('.pagefind-ui__form, .pagefind-ui__search-input');
-            }
-
-            function injectScriptFresh(onload) {
-              // Remove any previously injected script (so it will execute again)
-              document.querySelectorAll('script[data-pagefind-dynamic]').forEach(s => s.remove());
-
-              const s = document.createElement('script');
-              s.src = `${SCRIPT_SRC}?v=${Date.now()}`; // bust frozen/bfcache’d exec state
-              s.async = true;
-              s.defer = true;
-              s.dataset.pagefindDynamic = '1';
-              s.addEventListener('load', () => onload && onload());
-              s.addEventListener('error', () => console.error('Failed to load Pagefind UI script'));
-              document.head.appendChild(s);
-            }
-
-            function mountPagefind({ force = false, retries = 0 } = {}) {
-              const el = $(MOUNT_SEL);
-              if (!el) return;
-
-              // If already mounted and not forcing, skip.
-              if (!force && hasUI(el)) return;
-              if (mounting) return;
-
-              purgeInertAndClicks();
-              ensureClickable(el);
-
-              const startMount = () => {
-                if (!window.PagefindUI) {
-                  if (retries >= MAX_RETRIES) return;
-                  return setTimeout(() => mountPagefind({ force, retries: retries + 1 }), RETRY_MS);
-                }
-
-                mounting = true;
-                // clean slate
-                el.innerHTML = '';
-
-                try {
-                  new window.PagefindUI({
-                    element: MOUNT_SEL,
-                    basePath: '/search/',
-                    // translations: { placeholder: 'Search trips…' }
-                  });
-                } catch (e) {
-                  console.error('Pagefind init failed:', e);
-                } finally {
-                  mounting = false;
-                  // Make absolutely sure input is interactive
-                  const input = $('.pagefind-ui__search-input', el);
-                  ensureClickable(input || el);
-                }
-              };
-
-              if (!window.PagefindUI) {
-                // Always (re)inject script to guarantee execution after BFCache restore
-                injectScriptFresh(startMount);
-              } else {
-                startMount();
-              }
-            }
-
-            // Initial mount
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', () => mountPagefind({ force: true }), { once: true });
-            } else {
-              mountPagefind({ force: true });
-            }
-
-            // Astro client router lifecycle
-            window.addEventListener('astro:page-load', () => mountPagefind({ force: true }));
-            window.addEventListener('astro:after-swap', () => mountPagefind({ force: true }));
-
-            // BFCache restore: no reload; re-inject and mount
-            window.addEventListener('pageshow', (e) => {
-              if (e.persisted) {
-                purgeInertAndClicks();
-                mountPagefind({ force: true });
-              }
-            });
-
-            // Visible again? make sure UI is alive
-            document.addEventListener('visibilitychange', () => {
-              if (document.visibilityState === 'visible') mountPagefind();
-            });
-
-            // User interaction “last resort” activators
-            const wrapper = $(MOUNT_SEL);
-            if (wrapper) {
-              const trigger = () => mountPagefind({ force: false });
-              wrapper.addEventListener('pointerdown', trigger, { passive: true });
-              wrapper.addEventListener('focus', trigger, { capture: true, passive: true });
-              wrapper.addEventListener('keydown', trigger, { capture: true });
-            }
-          })();
-        </script>
+        <!-- Optional: lightweight no-results -->
+        <p id="no-results" class="hidden mt-6 text-sm text-muted-foreground">No trips match the selected filters.</p>
       </section>
     </div>
   </SidebarContent>
 </Layout>
 
+<!-- Client code -->
+<script is:inline>
+  (() => {
+    const ENDPOINTS = ['/trips/index.html', '/trips/', '/trips']; // try these in order
+    const LIST_SEL = '#trip-list';
+    const COUNT_SEL = '#trip-count';
+    const NORES_SEL = '#no-results';
+
+    const FILTER_MAP = [
+      { key: 'Region',  container: '#filter-region'  },
+      { key: 'Country', container: '#filter-country' },
+      { key: 'TripType', container: '#filter-type'  },
+    ];
+
+    const state = {
+      cards: [],          // Array<HTMLElement>
+      facets: new Map(),  // key -> Set(values)
+      active: { Region: new Set(), Country: new Set(), TripType: new Set() },
+    };
+
+    // --- fetch and mount all cards from /trips page ---
+    async function fetchTripsHTML() {
+      for (const url of ENDPOINTS) {
+        try {
+          const res = await fetch(url, { credentials: 'same-origin' });
+          if (res.ok) return await res.text();
+        } catch (_) { /* try next */ }
+      }
+      throw new Error('Unable to fetch /trips HTML');
+    }
+
+    function extractCards(html) {
+      const dom = new DOMParser().parseFromString(html, 'text/html');
+      // Try to use the scoped body first (your trips page uses data-pagefind-body)
+      const scope = dom.querySelector('[data-pagefind-body]') || dom;
+      // Treat each article as a card
+      const articles = [...scope.querySelectorAll('article')];
+      return articles;
+    }
+
+    function readFacetSpans(cardEl) {
+      // Example hidden spans:
+      // <span data-pagefind-filter="Region" style="display:none">Pacific</span>
+      const spans = cardEl.querySelectorAll('[data-pagefind-filter]');
+      const bag = {};
+      spans.forEach((s) => {
+        const k = s.getAttribute('data-pagefind-filter') || '';
+        const v = (s.textContent || '').trim();
+        if (!k || !v) return;
+        if (!bag[k]) bag[k] = [];
+        bag[k].push(v);
+      });
+      return bag;
+    }
+
+    function addDataAttributes(cardEl, bag) {
+      // store canonical datasets for quick filtering
+      if (bag.Region)  cardEl.dataset.region   = bag.Region.join('|');
+      if (bag.Country) cardEl.dataset.country  = bag.Country.join('|');
+      if (bag.TripType)cardEl.dataset.triptype = bag.TripType.join('|');
+    }
+
+    function collectFacetValues(bag) {
+      for (const [k, vals] of Object.entries(bag)) {
+        if (!state.facets.has(k)) state.facets.set(k, new Set());
+        const set = state.facets.get(k);
+        vals.forEach((v) => set.add(v));
+      }
+    }
+
+    function renderCards(cards) {
+      const list = document.querySelector(LIST_SEL);
+      list.innerHTML = '';
+      cards.forEach((el) => list.appendChild(el));
+      updateCounts();
+    }
+
+    function makePill(label, groupKey) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = label;
+      btn.className =
+        'px-2.5 py-1.5 text-xs rounded-full border border-gray-300/70 dark:border-white/15 bg-white/70 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 transition';
+      btn.setAttribute('data-value', label);
+      btn.addEventListener('click', () => {
+        toggleFacet(groupKey, label);
+        btn.classList.toggle('ring-2');
+        btn.classList.toggle('ring-sky-300/70');
+        btn.classList.toggle('dark:ring-sky-300/40');
+        applyFilters();
+      });
+      return btn;
+    }
+
+    function renderFilters() {
+      FILTER_MAP.forEach(({ key, container }) => {
+        const holder = document.querySelector(container);
+        holder.innerHTML = '';
+        const values = [...(state.facets.get(key) || [])].sort((a, b) => a.localeCompare(b));
+        values.forEach((val) => holder.appendChild(makePill(val, key)));
+      });
+
+      // Clear button
+      const clearBtn = document.getElementById('clear-filters');
+      clearBtn.addEventListener('click', () => {
+        state.active.Region.clear();
+        state.active.Country.clear();
+        state.active.TripType.clear();
+        // Remove visual rings
+        document.querySelectorAll('#trip-filters button[data-value]').forEach((b) => {
+          b.classList.remove('ring-2', 'ring-sky-300/70', 'dark:ring-sky-300/40');
+        });
+        applyFilters();
+      });
+    }
+
+    function toggleFacet(key, value) {
+      const set = state.active[key];
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+    }
+
+    function cardMatchesActive(card) {
+      // AND across groups, OR within each group
+      const tests = [
+        { key: 'Region',   attr: 'region'   },
+        { key: 'Country',  attr: 'country'  },
+        { key: 'TripType', attr: 'triptype' },
+      ];
+      for (const { key, attr } of tests) {
+        const selected = state.active[key];
+        if (selected.size === 0) continue; // group not restricting
+        const values = (card.dataset[attr] || '').split('|').filter(Boolean);
+        // match if card has ANY of the selected values for this group
+        const ok = values.some((v) => selected.has(v));
+        if (!ok) return false;
+      }
+      return true;
+    }
+
+    function applyFilters() {
+      let shown = 0;
+      state.cards.forEach((card) => {
+        const visible = cardMatchesActive(card);
+        card.style.display = visible ? '' : 'none';
+        if (visible) shown++;
+      });
+      updateCounts(shown);
+    }
+
+    function updateCounts(overrideShown) {
+      const total = state.cards.length;
+      const shown = overrideShown ?? state.cards.filter((c) => c.style.display !== 'none').length;
+      const el = document.querySelector(COUNT_SEL);
+      if (el) el.textContent = `${shown} of ${total} trips`;
+      const nr = document.querySelector(NORES_SEL);
+      if (nr) nr.classList.toggle('hidden', shown > 0);
+    }
+
+    async function init() {
+      try {
+        const html = await fetchTripsHTML();
+        const cards = extractCards(html).map((card) => {
+          // Ensure links remain same-origin relative
+          card.querySelectorAll('a[href^="/"]').forEach((a) => a.setAttribute('rel', 'nofollow'));
+          const bag = readFacetSpans(card);
+          addDataAttributes(card, bag);
+          collectFacetValues(bag);
+          // Make each card visually consistent in this grid
+          card.classList.add(
+            'rounded-xl','border','border-gray-200/70','dark:border-white/10','bg-white','dark:bg-white/5','p-4','h-full'
+          );
+          // Ensure titles remain bright in dark mode
+          card.querySelectorAll('h2,h3 a, h2 a, h3').forEach((n) => n.classList.add('text-gray-900','dark:text-zinc-100'));
+          // Prefer pointer cursor
+          card.querySelectorAll('a').forEach((a) => a.classList.add('cursor-pointer'));
+          return card;
+        });
+
+        state.cards = cards;
+        renderFilters();
+        renderCards(cards);    // show all on load
+        applyFilters();        // immediately compute counts (no filtering yet)
+      } catch (e) {
+        console.error('Trips filter init failed:', e);
+        const list = document.querySelector(LIST_SEL);
+        if (list) list.innerHTML = '<p class="text-sm text-red-600 dark:text-red-400">Failed to load trips.</p>';
+      }
+    }
+
+    // Run on initial load, on Astro client route swaps, and on BFCache restore
+    const start = () => init();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', start, { once: true });
+    } else {
+      start();
+    }
+    window.addEventListener('astro:page-load', start);
+    window.addEventListener('astro:after-swap', start);
+    window.addEventListener('pageshow', (e) => { if (e.persisted) start(); });
+  })();
+</script>
+
 <style is:global>
-  /* Dark-mode readability */
-  html.dark .pagefind-wrapper,
-  @media (prefers-color-scheme: dark) {
-    html:not(.dark) .pagefind-wrapper { /* noop */ }
-  }
+  /* Dark mode notes:
+     - Cards and text are already styled with light/dark classes in JS above.
+     - Keep any additional overrides here if you want to tweak further. */
 
-  html.dark .pagefind-wrapper .pagefind-ui__form,
-  html.dark .pagefind-wrapper .pagefind-ui__drawer,
-  html.dark .pagefind-wrapper .pagefind-ui__results-area {
-    background: transparent;
-    color: #e5e7eb;
-    border-color: rgba(255,255,255,0.12);
+  /* Filter pills accessibility focus */
+  #trip-filters button[data-value]:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.65); /* sky-400-ish */
+    outline-offset: 2px;
   }
-
-  html.dark .pagefind-wrapper .pagefind-ui__search-input {
-    background: rgba(255,255,255,0.06);
-    color: #e5e7eb;
-    border: 1px solid rgba(255,255,255,0.12);
-    caret-color: #bfdbfe;
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__search-input::placeholder {
-    color: rgba(229,231,235,0.85) !important;
-  }
-
-  html.dark .pagefind-wrapper .pagefind-ui__label,
-  html.dark .pagefind-wrapper label[for^="pagefind-"],
-  html.dark .pagefind-wrapper .pagefind-ui__search-icon {
-    color: #e5e7eb !important;
-    fill: currentColor !important;
-    stroke: currentColor !important;
-    opacity: 0.95;
-  }
-
-  html.dark .pagefind-wrapper .pagefind-ui__button,
-  html.dark .pagefind-wrapper .pagefind-ui__filter-pill,
-  html.dark .pagefind-wrapper .pagefind-ui__filter-link {
-    background: rgba(255,255,255,0.06);
-    color: #e5e7eb;
-    border: 1px solid rgba(255,255,255,0.12);
-  }
-
-  /* Result titles */
-  html.dark .pagefind-wrapper {
-    --pf-title: #e5e7eb;
-    --pf-title-hover: #bfdbfe;
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__result-title,
-  html.dark .pagefind-wrapper .pagefind-ui__result-title *,
-  html.dark .pagefind-wrapper .pagefind-ui__result-link {
-    color: var(--pf-title) !important;
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:link,:visited,:active) {
-    color: var(--pf-title) !important;
-    text-decoration: none;
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:hover,:focus-visible),
-  html.dark .pagefind-wrapper .pagefind-ui__result-link:is(:hover,:focus-visible) {
-    color: var(--pf-title-hover) !important;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
-  html.dark .pagefind-wrapper .pagefind-ui__message {
-    color: #e5e7eb;
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__result {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.10);
-  }
-
-  html.dark .pagefind-wrapper .pagefind-ui__filter-group-title,
-  html.dark .pagefind-wrapper .pagefind-ui__filter-count {
-    color: #cbd5e1;
-  }
-
-  html.dark .pagefind-wrapper .pagefind-ui__result-excerpt mark {
-    background: rgba(250,204,21,0.25);
-    color: inherit;
-    border-radius: 0.25rem;
-    padding: 0 .1rem;
-  }
-
-  /* Hide the clear (reset) button */
-  .pagefind-wrapper .pagefind-ui__reset { display: none !important; }
-
-  /* Defensive: always allow clicks */
-  .pagefind-wrapper, .pagefind-wrapper * { pointer-events: auto; }
 </style>
