@@ -23,13 +23,6 @@ const header = {
 }
 ---
 
-<!-- Step 2: hard-reload if this page is restored from BFCache (Back/Forward button) -->
-<script is:inline>
-  window.addEventListener('pageshow', (e) => {
-    if (e.persisted) location.reload();
-  });
-</script>
-
 <Layout title={SEO.title} description={SEO.description}>
   <Hero title={header.title} text={header.text} />
 
@@ -49,26 +42,136 @@ const header = {
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
         <!-- Pagefind UI assets -->
         <link rel="stylesheet" href="/search/pagefind-ui.css" />
-        <script src="/search/pagefind-ui.js" is:inline></script>
+        <!-- force the script to execute on client navigations -->
+        <script src="/search/pagefind-ui.js" is:inline data-astro-reload></script>
 
         <!-- Mount point -->
         <div id="trip-search" class="pagefind-wrapper"></div>
 
-        <!-- Init Pagefind UI (kept minimal; reload above fixes BFCache issue) -->
-        <script is:inline>
-          if (typeof window !== "undefined" && window.PagefindUI) {
-            new window.PagefindUI({
-              element: "#trip-search",
-              basePath: "/search/",
-              // translations: { placeholder: "Search trips..." }
-            });
-          }
-          // Also re-init after Astro client navigations (just in case)
-          window.addEventListener('astro:page-load', () => {
-            if (window.PagefindUI) {
-              new window.PagefindUI({ element: "#trip-search", basePath: "/search/" });
+        <!-- Robust init + deep inert purge + fallback reload -->
+        <script is:inline data-astro-reload>
+          (() => {
+            const MOUNT_SEL = '#trip-search';
+            const RETRY_MS = 50;
+            const MAX_RETRIES = 10;
+            let mounting = false;
+            let triedReload = false;
+
+            function purgeAllInert() {
+              // Remove inert from ANY element in the document (old view-transition states can leave it behind)
+              document.querySelectorAll('[inert]').forEach((n) => n.removeAttribute('inert'));
+              // Also make sure root containers allow clicks
+              document.documentElement.style.pointerEvents = 'auto';
+              document.body.style.pointerEvents = 'auto';
             }
-          });
+
+            function ensureClickable(el) {
+              if (!el) return;
+              el.style.pointerEvents = 'auto';
+              let p = el.parentElement;
+              while (p) { p.style.pointerEvents = 'auto'; p = p.parentElement; }
+            }
+
+            function inputLooksBlocked(input) {
+              if (!input) return true;
+              const cs = getComputedStyle(input);
+              return input.disabled || cs.pointerEvents === 'none' || input.matches('[inert]');
+            }
+
+            function findSearchInput(root = document) {
+              // Pagefind uses .pagefind-ui__search-input
+              return root.querySelector('.pagefind-ui__search-input');
+            }
+
+            function mountPagefind(tryCount = 0) {
+              if (mounting) return;
+              const el = document.querySelector(MOUNT_SEL);
+              if (!el) return;
+
+              purgeAllInert();
+              ensureClickable(el);
+
+              if (!window.PagefindUI) {
+                // If the script hasn’t registered yet, try again shortly.
+                if (tryCount < MAX_RETRIES) {
+                  return setTimeout(() => mountPagefind(tryCount + 1), RETRY_MS);
+                }
+                return; // give up silently; other hooks will try again
+              }
+
+              mounting = true;
+              // Clean slate
+              el.innerHTML = '';
+
+              try {
+                new window.PagefindUI({
+                  element: MOUNT_SEL,
+                  basePath: '/search/',
+                  // translations: { placeholder: 'Search trips…' }
+                });
+              } catch (e) {
+                console.error('Pagefind init failed:', e);
+              } finally {
+                setTimeout(() => {
+                  mounting = false;
+
+                  // After UI renders, double-check the input is focusable/clickable
+                  const input = findSearchInput();
+                  if (inputLooksBlocked(input)) {
+                    purgeAllInert();
+                    ensureClickable(input?.closest('.pagefind-wrapper') || el);
+
+                    // Try one more gentle remount if still blocked
+                    if (tryCount < MAX_RETRIES) {
+                      return setTimeout(() => mountPagefind(tryCount + 1), RETRY_MS);
+                    }
+
+                    // LAST RESORT: do a one-time hard reload to clear BFCache state
+                    if (!triedReload) {
+                      triedReload = true;
+                      location.reload();
+                    }
+                  }
+                }, 60);
+              }
+            }
+
+            // First mount
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', () => mountPagefind(), { once: true });
+            } else {
+              mountPagefind();
+            }
+
+            // Re-mount after client router events
+            window.addEventListener('astro:page-load', () => mountPagefind());
+            window.addEventListener('astro:after-swap', () => mountPagefind());
+
+            // Re-mount on BFCache restore (back/forward)
+            window.addEventListener('pageshow', (e) => {
+              if (e.persisted) {
+                purgeAllInert();
+                mountPagefind();
+              }
+            });
+
+            // If page becomes visible again and search is dead, try again
+            document.addEventListener('visibilitychange', () => {
+              if (document.visibilityState === 'visible') mountPagefind();
+            });
+
+            // Belt & suspenders: small retry window while PagefindUI registers
+            if (!window.PagefindUI) {
+              let tries = 0;
+              const ready = setInterval(() => {
+                tries++;
+                if (window.PagefindUI || tries > MAX_RETRIES) {
+                  clearInterval(ready);
+                  mountPagefind();
+                }
+              }, RETRY_MS);
+            }
+          })();
         </script>
       </section>
     </div>
@@ -161,4 +264,7 @@ const header = {
 
   /* Hide the clear (reset) button */
   .pagefind-wrapper .pagefind-ui__reset { display: none !important; }
+
+  /* Defensive: always allow clicks */
+  .pagefind-wrapper, .pagefind-wrapper * { pointer-events: auto; }
 </style>
