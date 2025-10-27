@@ -42,101 +42,121 @@ const header = {
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
         <!-- Pagefind UI assets -->
         <link rel="stylesheet" href="/search/pagefind-ui.css" />
-        <script src="/search/pagefind-ui.js" is:inline></script>
+        <!-- force the script to execute on client navigations -->
+        <script src="/search/pagefind-ui.js" is:inline data-astro-reload></script>
 
         <!-- Mount point -->
         <div id="trip-search" class="pagefind-wrapper" tabindex="-1" aria-label="Site search"></div>
 
-        <!-- Interactive, idempotent activation on click/focus/type -->
-        <script is:inline>
+        <!-- Robust init (no hard reloads), BFCache-safe, interaction-activated -->
+        <script is:inline data-astro-reload>
           (() => {
-            const WRAPPER_SEL = '#trip-search';
-            const MAX_RETRIES = 10;
+            const MOUNT_SEL = '#trip-search';
             const RETRY_MS = 60;
-
+            const MAX_RETRIES = 12;
             let mounting = false;
             let retries = 0;
 
-            function hasUIMounted(wrapper) {
-              // Pagefind UI renders a wrapper; this detects an existing mount
-              return !!wrapper.querySelector('.pagefind-ui__form, .pagefind-ui__search-input');
+            const q = (sel, root = document) => root.querySelector(sel);
+
+            function purgeAllInert() {
+              document.querySelectorAll('[inert]').forEach((n) => n.removeAttribute('inert'));
+              document.documentElement.style.pointerEvents = 'auto';
+              document.body.style.pointerEvents = 'auto';
             }
 
-            function ensureClickable(node) {
-              if (!node) return;
-              node.removeAttribute('inert');
-              node.style.pointerEvents = 'auto';
-              let p = node.parentElement;
+            function ensureClickable(el) {
+              if (!el) return;
+              el.style.pointerEvents = 'auto';
+              let p = el.parentElement;
               while (p) { p.style.pointerEvents = 'auto'; p = p.parentElement; }
             }
 
+            function hasUIMounted(wrapper) {
+              return !!wrapper.querySelector('.pagefind-ui__form, .pagefind-ui__search-input');
+            }
+
             function mountPagefind(force = false) {
-              const wrapper = document.querySelector(WRAPPER_SEL);
-              if (!wrapper) return;
+              const el = q(MOUNT_SEL);
+              if (!el) return;
 
-              // If already mounted and not forcing, bail
-              if (!force && hasUIMounted(wrapper)) return;
-
+              // If already mounted and not forcing, do nothing.
+              if (!force && hasUIMounted(el)) return;
               if (mounting) return;
-              mounting = true;
 
-              // Clean slate, unlock pointer events
-              wrapper.innerHTML = '';
-              ensureClickable(wrapper);
-              document.querySelectorAll('[inert]').forEach((n) => n.removeAttribute('inert'));
+              purgeAllInert();
+              ensureClickable(el);
 
-              // Wait for bundle registration if needed
               if (!window.PagefindUI) {
-                mounting = false;
                 if (retries < MAX_RETRIES) {
                   retries++;
                   return setTimeout(() => mountPagefind(force), RETRY_MS);
                 }
-                // Give up silently; interaction will try again
-                return;
+                return; // stop quietly; any new interaction will try again
               }
+
+              mounting = true;
+              el.innerHTML = '';
 
               try {
                 new window.PagefindUI({
-                  element: WRAPPER_SEL,
+                  element: MOUNT_SEL,
                   basePath: '/search/',
                   // translations: { placeholder: 'Search trips…' }
                 });
               } catch (e) {
-                console.error('Pagefind init error:', e);
+                console.error('Pagefind init failed:', e);
               } finally {
                 mounting = false;
                 retries = 0;
-
-                // Final sanity: make sure the input is interactive
-                const input = wrapper.querySelector('.pagefind-ui__search-input');
-                ensureClickable(input || wrapper);
+                // Make sure the input can be interacted with
+                const input = q('.pagefind-ui__search-input', el);
+                ensureClickable(input || el);
               }
             }
 
-            // First try on ready
+            // First mount
             if (document.readyState === 'loading') {
               document.addEventListener('DOMContentLoaded', () => mountPagefind(), { once: true });
             } else {
               mountPagefind();
             }
 
-            // Re-mount after Astro client navigations
+            // Re-mount after client router events
             window.addEventListener('astro:page-load', () => mountPagefind(true));
             window.addEventListener('astro:after-swap', () => mountPagefind(true));
 
-            // Re-mount when restored from BFCache (back/forward)
+            // Re-mount on BFCache restore (no reload)
             window.addEventListener('pageshow', (e) => {
-              if (e.persisted) mountPagefind(true);
+              if (e.persisted) {
+                purgeAllInert();
+                mountPagefind(true);
+              }
+            });
+
+            // If page becomes visible again, ensure UI is live
+            document.addEventListener('visibilitychange', () => {
+              if (document.visibilityState === 'visible') mountPagefind();
             });
 
             // Interaction-based activation: any click/focus/type triggers mount
-            const wrapper = document.querySelector(WRAPPER_SEL);
+            const wrapper = q(MOUNT_SEL);
             if (wrapper) {
               const trigger = () => mountPagefind();
               wrapper.addEventListener('pointerdown', trigger, { passive: true });
               wrapper.addEventListener('focus', trigger, { passive: true, capture: true });
               wrapper.addEventListener('keydown', trigger, { capture: true });
+            }
+
+            // Tiny readiness loop while the bundle registers
+            if (!window.PagefindUI) {
+              const ready = setInterval(() => {
+                if (window.PagefindUI) {
+                  clearInterval(ready);
+                  mountPagefind(true);
+                }
+              }, RETRY_MS);
+              setTimeout(() => clearInterval(ready), RETRY_MS * MAX_RETRIES);
             }
           })();
         </script>
@@ -156,7 +176,7 @@ const header = {
   html.dark .pagefind-wrapper .pagefind-ui__drawer,
   html.dark .pagefind-wrapper .pagefind-ui__results-area {
     background: transparent;
-    color: #e5e7eb; /* zinc-200 */
+    color: #e5e7eb;
     border-color: rgba(255,255,255,0.12);
   }
 
@@ -164,7 +184,7 @@ const header = {
     background: rgba(255,255,255,0.06);
     color: #e5e7eb;
     border: 1px solid rgba(255,255,255,0.12);
-    caret-color: #bfdbfe; /* sky-200 */
+    caret-color: #bfdbfe;
   }
   html.dark .pagefind-wrapper .pagefind-ui__search-input::placeholder {
     color: rgba(229,231,235,0.85) !important;
@@ -232,6 +252,6 @@ const header = {
   /* Hide the clear (reset) button */
   .pagefind-wrapper .pagefind-ui__reset { display: none !important; }
 
-  /* Defensive: always allow clicks inside the wrapper */
+  /* Defensive: always allow clicks */
   .pagefind-wrapper, .pagefind-wrapper * { pointer-events: auto; }
 </style>
