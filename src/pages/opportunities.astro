@@ -55,7 +55,7 @@ const SEO = {
   #feature-grid .card-wrap { will-change: transform, opacity; }
 </style>
 
-<script is:inline lang="ts">
+<script is:inline>
   import gsap from "gsap";
 
   document.addEventListener("astro:page-load", init);
@@ -63,10 +63,10 @@ const SEO = {
     if (document.visibilityState === "visible") init();
   });
 
-  async function init(): Promise<void> {
-    const bar = document.getElementById("feature-filters") as HTMLElement;
-    const grid = document.getElementById("feature-grid") as HTMLElement;
-    const countEl = document.getElementById("trip-count") as HTMLElement;
+  async function init() {
+    const bar = document.getElementById("feature-filters");
+    const grid = document.getElementById("feature-grid");
+    const countEl = document.getElementById("trip-count");
     if (!bar || !grid) return;
 
     if (grid.dataset.ready === "1") return;
@@ -106,13 +106,13 @@ const SEO = {
       grid.appendChild(wrap);
     });
 
-    const state: Record<string, Set<string>> = { Region: new Set(), Country: new Set(), TripType: new Set() };
-    const btns = Array.from(bar.querySelectorAll("[data-key][data-value]")) as HTMLButtonElement[];
+    const state = { Region: new Set(), Country: new Set(), TripType: new Set() };
+    const btns = Array.from(bar.querySelectorAll("[data-key][data-value]"));
 
     btns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        const k = btn.getAttribute("data-key")!;
-        const v = btn.getAttribute("data-value")!;
+        const k = btn.getAttribute("data-key");
+        const v = btn.getAttribute("data-value");
         const set = state[k];
         if (set.has(v)) {
           set.delete(v);
@@ -126,19 +126,21 @@ const SEO = {
     });
 
     const clearBtn = bar.querySelector("[data-action='clear']");
-    clearBtn?.addEventListener("click", () => {
-      Object.values(state).forEach((s) => s.clear());
-      btns.forEach((b) =>
-        b.classList.remove("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100")
-      );
-      applyFilterFLIP(grid, state, countEl);
-    });
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        Object.values(state).forEach((s) => s.clear());
+        btns.forEach((b) =>
+          b.classList.remove("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100")
+        );
+        applyFilterFLIP(grid, state, countEl);
+      });
+    }
 
     applyFilterFLIP(grid, state, countEl);
     grid.dataset.ready = "1";
   }
 
-  async function fetchTripsHTML(): Promise<string> {
+  async function fetchTripsHTML() {
     const urls = ["/trips/index.html", "/trips/", "/trips"];
     for (const u of urls) {
       try {
@@ -149,24 +151,25 @@ const SEO = {
     throw new Error("Cannot load /trips page");
   }
 
-  function extractTripArticles(html: string): HTMLElement[] {
+  function extractTripArticles(html) {
     const dom = new DOMParser().parseFromString(html, "text/html");
     const scope = dom.querySelector("[data-pagefind-body]") || dom;
     return Array.from(scope.querySelectorAll("article"));
   }
 
-  function readFacet(card: HTMLElement, key: string): string[] {
+  function readFacet(card, key) {
     return Array.from(card.querySelectorAll(`[data-pagefind-filter="${key}"]`))
       .map((x) => (x.textContent || "").trim())
       .filter(Boolean);
   }
 
-  function toFeatureCardData(article: HTMLElement) {
+  function toFeatureCardData(article) {
     const titleEl = article.querySelector("h2,h3");
-    const linkEl = titleEl?.querySelector("a");
-    const title = (titleEl?.textContent || "Untitled Trip").trim();
-    const href = linkEl?.getAttribute("href") || "#";
-    const desc = (article.querySelector("p")?.textContent || "").trim();
+    const linkEl = titleEl ? titleEl.querySelector("a") : null;
+    const title = (titleEl ? titleEl.textContent : "Untitled Trip").trim();
+    const href = linkEl ? linkEl.getAttribute("href") : "#";
+    const descEl = article.querySelector("p");
+    const desc = descEl ? descEl.textContent.trim() : "";
 
     return {
       title,
@@ -179,8 +182,8 @@ const SEO = {
     };
   }
 
-  function collectFacets(articles: HTMLElement[]) {
-    const out = { Region: new Set<string>(), Country: new Set<string>(), TripType: new Set<string>() };
+  function collectFacets(articles) {
+    const out = { Region: new Set(), Country: new Set(), TripType: new Set() };
     articles.forEach((a) => {
       readFacet(a, "Region").forEach((v) => out.Region.add(v));
       readFacet(a, "Country").forEach((v) => out.Country.add(v));
@@ -189,9 +192,9 @@ const SEO = {
     return out;
   }
 
-  function buildFilters(bar: HTMLElement, facets: Record<string, Set<string>>) {
+  function buildFilters(bar, facets) {
     bar.querySelectorAll("[data-key]").forEach((n) => n.remove());
-    const mk = (key: string, val: string): HTMLButtonElement => {
+    function mk(key, val) {
       const b = document.createElement("button");
       b.type = "button";
       b.textContent = `${key}: ${val}`;
@@ -200,24 +203,24 @@ const SEO = {
       b.setAttribute("data-key", key);
       b.setAttribute("data-value", val);
       return b;
-    };
+    }
     ["Region", "Country", "TripType"].forEach((k) =>
-      [...facets[k]].sort((a, b) => a.localeCompare(b)).forEach((v) => bar.appendChild(mk(k, v)))
+      Array.from(facets[k]).sort((a, b) => a.localeCompare(b)).forEach((v) => bar.appendChild(mk(k, v)))
     );
   }
 
-  function applyFilterFLIP(grid: HTMLElement, state: Record<string, Set<string>>, countEl: HTMLElement) {
+  function applyFilterFLIP(grid, state, countEl) {
     const DURATION = 0.35, EASE = "power2.out";
-    const wraps = Array.from(grid.querySelectorAll(".card-wrap")) as HTMLElement[];
+    const wraps = Array.from(grid.querySelectorAll(".card-wrap"));
 
-    const visibleBefore = new Map<HTMLElement, { x: number; y: number }>();
+    const visibleBefore = new Map();
     wraps.forEach((w) => {
       if (w.classList.contains("hidden")) return;
       const r = w.getBoundingClientRect();
       visibleBefore.set(w, { x: r.left, y: r.top });
     });
 
-    const match = (w: HTMLElement): boolean => {
+    function match(w) {
       const keys = [
         { k: "Region", a: "region" },
         { k: "Country", a: "country" },
@@ -230,9 +233,9 @@ const SEO = {
         if (!vals.some((v) => s.has(v))) return false;
       }
       return true;
-    };
+    }
 
-    const toShow: HTMLElement[] = [], toHide: HTMLElement[] = [];
+    const toShow = [], toHide = [];
     wraps.forEach((w) => (match(w) ? toShow : toHide).push(w));
 
     toHide.forEach((w) => w.classList.add("hidden"));
@@ -244,7 +247,7 @@ const SEO = {
     });
 
     requestAnimationFrame(() => {
-      const visibleAfter = new Map<HTMLElement, { x: number; y: number }>();
+      const visibleAfter = new Map();
       wraps.forEach((w) => {
         if (w.classList.contains("hidden")) return;
         const r = w.getBoundingClientRect();
@@ -266,8 +269,8 @@ const SEO = {
     });
   }
 
-  function escapeHTML(s: string): string {
-    const map: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  function escapeHTML(s) {
+    const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
     return s.replace(/[&<>"']/g, (m) => map[m]);
   }
 </script>
