@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build && ./node_modules/.bin/pagefind --source dist --output-subdir search --glob \"trips/**\" --exclude-selectors \".site-footer,.main-nav,header,footer,nav\" --verbose",
+    "build": "astro check && astro build && ./node_modules/.bin/pagefind --source dist --output-subdir search --glob \"trips/**/*.html\" --exclude-selectors \".site-footer,.main-nav,header,footer,nav\" --verbose",
     "preview": "astro preview",
     "astro": "astro"
   },
