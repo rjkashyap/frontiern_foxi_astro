@@ -74,7 +74,7 @@ const header = {
   </SidebarContent>
 </Layout>
 
-<!-- Client code (pure JavaScript, no TS) -->
+<!-- Client code -->
 <script is:inline>
   (() => {
     const ENDPOINTS = ['/trips/index.html', '/trips/', '/trips']; // try these in order
@@ -89,7 +89,7 @@ const header = {
     ];
 
     const state = {
-      cards: [],          // Array<HTMLElement> (final FeatureCard DOM nodes)
+      cards: [],          // Array<HTMLElement> (final FeatureCard-like DOM nodes)
       facets: new Map(),  // key -> Set(values)
       active: { Region: new Set(), Country: new Set(), TripType: new Set() },
     };
@@ -108,7 +108,7 @@ const header = {
     function extractArticles(html) {
       const dom = new DOMParser().parseFromString(html, 'text/html');
       const scope = dom.querySelector('[data-pagefind-body]') || dom;
-      return Array.from(scope.querySelectorAll('article'));
+      return [...scope.querySelectorAll('article')];
     }
 
     // ---------- Data helpers ----------
@@ -133,76 +133,91 @@ const header = {
     }
 
     function escapeHTML(s) {
-      return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      return s.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
     function articleToData(article) {
       const titleEl = article.querySelector('h2,h3');
-      const linkEl  = (titleEl && titleEl.querySelector('a')) || article.querySelector('a[href]');
+      const linkEl  = titleEl?.querySelector('a') || article.querySelector('a[href]');
       const descEl  = article.querySelector('p');
 
-      // Prefer first usable <img> inside the article; fallback to a 1×1 transparent gif
+      // Prefer first usable <img> inside the article; fallback to a tiny transparent pixel
       const imgEl = article.querySelector('img');
-      const imgSrc = (imgEl && imgEl.getAttribute('src')) || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+      const imgSrc = imgEl?.getAttribute('src') || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
 
       const bag = readFacetSpans(article);
 
       return {
-        title: (titleEl && titleEl.textContent || 'Untitled Trip').trim(),
-        href:  (linkEl && linkEl.getAttribute('href')) || '#',
-        subtitle: (descEl && descEl.textContent || '').trim(),
+        title: (titleEl?.textContent || 'Untitled Trip').trim(),
+        href:  linkEl?.getAttribute('href') || '#',
+        subtitle: (descEl?.textContent || '').trim(),
         image: imgSrc,
         bag
       };
     }
 
-    // ---------- Build FeatureCard DOM (no overlay, whole card has a link + visible CTA) ----------
-    function buildFeatureCard(data) {
-      const title = data.title;
-      const subtitle = data.subtitle;
-      const image = data.image;
-      const href = data.href;
-      const bag = data.bag || {};
+    // ---------- Build FeatureCard-like DOM (mirrors FeatureCard wrapper) ----------
+    function buildFeatureCard({ title, subtitle, image, href, bag }) {
+      // Outer wrapper used by your grid examples
+      const outer = document.createElement('div');
+      outer.className = 'card-wrap flex h-[360px] sm:h-[320px] lg:h-[340px] w-full relative';
 
-      const wrap = document.createElement('div');
-      wrap.className = 'card-wrap relative h-full w-full';
+      // dataset for filtering (Region/Country/TripType)
+      if (bag.Region)   outer.dataset.region   = bag.Region.join('|');
+      if (bag.Country)  outer.dataset.country  = bag.Country.join('|');
+      if (bag.TripType) outer.dataset.triptype = bag.TripType.join('|');
 
-      // dataset for filtering
-      if (bag.Region)   wrap.dataset.region   = bag.Region.join('|');
-      if (bag.Country)  wrap.dataset.country  = bag.Country.join('|');
-      if (bag.TripType) wrap.dataset.triptype = bag.TripType.join('|');
+      // Card markup styled to match:
+      // - absolute full-card overlay button (data-modal="signup")
+      // - BasicCard-like shell with image-bottom layout
+      outer.innerHTML = `
+        <button
+          type="button"
+          data-modal="signup"
+          aria-label="Open signup modal for ${escapeHTML(title)}"
+          class="absolute inset-0 z-10 bg-transparent cursor-pointer">
+        </button>
 
-      wrap.innerHTML = `
         <div class="flex h-full w-full">
           <div class="flex flex-col h-full w-full">
-            <div class="w-full h-full flex flex-col justify-between rounded-xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 overflow-hidden shadow-none">
-              <!-- CONTENT -->
-              <a href="${href}" class="block p-4">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-zinc-100 hover:underline">
-                  ${escapeHTML(title)}
+            <div class="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800 rounded-xl overflow-hidden w-full">
+              
+              <!-- content -->
+              <div class="p-4">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-zinc-100">
+                  <a href="${href}" class="hover:underline">${escapeHTML(title)}</a>
                 </h3>
                 ${subtitle ? `<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">${escapeHTML(subtitle)}</p>` : ''}
-              </a>
+              </div>
+
+              <!-- CTA -->
+              <div class="mt-1 mb-2 flex justify-center relative z-20">
+                <button type="button" data-modal="signup" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium bg-primary text-white hover:opacity-90">
+                  Learn more
+                </button>
+              </div>
 
               <!-- image-bottom -->
-              <a href="${href}" class="block mt-auto">
+              <div class="mt-auto">
                 <div class="aspect-[16/9] w-full bg-neutral-200/60 dark:bg-neutral-800/60 flex items-center justify-center">
                   <img src="${image}" alt="" class="h-16 opacity-90" loading="lazy" />
                 </div>
-              </a>
-
-              <!-- Visible CTA -->
-              <div class="mt-1 mb-3 flex justify-center relative z-10">
-                <a href="${href}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium bg-sky-600 text-white hover:bg-sky-700 transition">
-                  Learn more
-                </a>
               </div>
             </div>
           </div>
         </div>
       `;
 
-      return wrap;
+      // Allow title link and visible CTA to be clicked "through" overlay semantics
+      const overlay = outer.querySelector('button[data-modal="signup"]');
+      overlay?.addEventListener('click', (e) => {
+        const t = e.target;
+        if (t && (t.closest('a') || t.closest('button:not([data-modal])'))) return;
+        // Otherwise, this overlay click is your modal trigger; your site's modal
+        // script can listen for [data-modal="signup"].
+      });
+
+      return outer;
     }
 
     // ---------- UI render ----------
@@ -234,22 +249,20 @@ const header = {
       FILTER_MAP.forEach(({ key, container }) => {
         const holder = document.querySelector(container);
         holder.innerHTML = '';
-        const values = Array.from(state.facets.get(key) || []).sort((a, b) => a.localeCompare(b));
+        const values = [...(state.facets.get(key) || [])].sort((a, b) => a.localeCompare(b));
         values.forEach((val) => holder.appendChild(makePill(val, key)));
       });
 
       const clearBtn = document.getElementById('clear-filters');
-      if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-          state.active.Region.clear();
-          state.active.Country.clear();
-          state.active.TripType.clear();
-          document.querySelectorAll('#trip-filters button[data-value]').forEach((b) => {
-            b.classList.remove('ring-2', 'ring-sky-300/70', 'dark:ring-sky-300/40');
-          });
-          applyFilters();
+      clearBtn.addEventListener('click', () => {
+        state.active.Region.clear();
+        state.active.Country.clear();
+        state.active.TripType.clear();
+        document.querySelectorAll('#trip-filters button[data-value]').forEach((b) => {
+          b.classList.remove('ring-2', 'ring-sky-300/70', 'dark:ring-sky-300/40');
         });
-      }
+        applyFilters();
+      });
     }
 
     // ---------- Filtering ----------
@@ -259,16 +272,17 @@ const header = {
       else set.add(value);
     }
 
+    // AND across groups, OR within each group
     function cardMatchesActive(card) {
       const tests = [
         { key: 'Region',   attr: 'region'   },
         { key: 'Country',  attr: 'country'  },
         { key: 'TripType', attr: 'triptype' },
       ];
-      for (const t of tests) {
-        const selected = state.active[t.key];
+      for (const { key, attr } of tests) {
+        const selected = state.active[key];
         if (selected.size === 0) continue;
-        const values = (card.dataset[t.attr] || '').split('|').filter(Boolean);
+        const values = (card.dataset[attr] || '').split('|').filter(Boolean);
         if (!values.some((v) => selected.has(v))) return false;
       }
       return true;
@@ -286,13 +300,9 @@ const header = {
 
     function updateCounts(overrideShown) {
       const total = state.cards.length;
-      const shown = overrideShown != null
-        ? overrideShown
-        : state.cards.filter((c) => c.style.display !== 'none').length;
-
+      const shown = overrideShown ?? state.cards.filter((c) => c.style.display !== 'none').length;
       const el = document.querySelector(COUNT_SEL);
       if (el) el.textContent = `${shown} of ${total} trips`;
-
       const nr = document.querySelector(NORES_SEL);
       if (nr) nr.classList.toggle('hidden', shown > 0);
     }
@@ -303,7 +313,6 @@ const header = {
         const html = await fetchTripsHTML();
         const articles = extractArticles(html);
 
-        // Build FeatureCard DOM from each article
         const cards = articles.map((article) => {
           const data = articleToData(article);
           collectFacetValues(data.bag);
@@ -334,9 +343,12 @@ const header = {
 </script>
 
 <style is:global>
-  /* Filter pills accessibility focus */
+  /* Focus ring for filter pills */
   #trip-filters button[data-value]:focus-visible {
-    outline: 2px solid rgba(56, 189, 248, 0.65); /* sky-400-ish */
+    outline: 2px solid rgba(56, 189, 248, 0.65);
     outline-offset: 2px;
   }
+
+  /* Match original feature-grid wrap behavior */
+  #trip-list .card-wrap { will-change: transform, opacity; }
 </style>
