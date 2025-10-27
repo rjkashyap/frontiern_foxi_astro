@@ -40,27 +40,26 @@ const header = {
     <!-- Main content -->
     <div class="basic-text">
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
-        <!-- Pagefind UI assets -->
+        <!-- Pagefind UI CSS (can be static) -->
         <link rel="stylesheet" href="/search/pagefind-ui.css" />
-        <!-- force the script to execute on client navigations -->
-        <script src="/search/pagefind-ui.js" is:inline data-astro-reload></script>
 
         <!-- Mount point -->
         <div id="trip-search" class="pagefind-wrapper" tabindex="-1" aria-label="Site search"></div>
 
-        <!-- Robust init (no hard reloads), BFCache-safe, interaction-activated -->
-        <script is:inline data-astro-reload>
+        <!-- Dynamically (re)load Pagefind UI script and mount on every return / interaction -->
+        <script is:inline>
           (() => {
             const MOUNT_SEL = '#trip-search';
+            const SCRIPT_SRC = '/search/pagefind-ui.js';
             const RETRY_MS = 60;
-            const MAX_RETRIES = 12;
+            const MAX_RETRIES = 16;
             let mounting = false;
-            let retries = 0;
 
-            const q = (sel, root = document) => root.querySelector(sel);
+            const $ = (sel, root = document) => root.querySelector(sel);
 
-            function purgeAllInert() {
-              document.querySelectorAll('[inert]').forEach((n) => n.removeAttribute('inert'));
+            function purgeInertAndClicks() {
+              // Unfreeze any elements that may have been left inert by view transitions or the router
+              document.querySelectorAll('[inert]').forEach(n => n.removeAttribute('inert'));
               document.documentElement.style.pointerEvents = 'auto';
               document.body.style.pointerEvents = 'auto';
             }
@@ -72,91 +71,100 @@ const header = {
               while (p) { p.style.pointerEvents = 'auto'; p = p.parentElement; }
             }
 
-            function hasUIMounted(wrapper) {
+            function hasUI(wrapper) {
               return !!wrapper.querySelector('.pagefind-ui__form, .pagefind-ui__search-input');
             }
 
-            function mountPagefind(force = false) {
-              const el = q(MOUNT_SEL);
+            function injectScriptFresh(onload) {
+              // Remove any previously injected script (so it will execute again)
+              document.querySelectorAll('script[data-pagefind-dynamic]').forEach(s => s.remove());
+
+              const s = document.createElement('script');
+              s.src = `${SCRIPT_SRC}?v=${Date.now()}`; // bust frozen/bfcache’d exec state
+              s.async = true;
+              s.defer = true;
+              s.dataset.pagefindDynamic = '1';
+              s.addEventListener('load', () => onload && onload());
+              s.addEventListener('error', () => console.error('Failed to load Pagefind UI script'));
+              document.head.appendChild(s);
+            }
+
+            function mountPagefind({ force = false, retries = 0 } = {}) {
+              const el = $(MOUNT_SEL);
               if (!el) return;
 
-              // If already mounted and not forcing, do nothing.
-              if (!force && hasUIMounted(el)) return;
+              // If already mounted and not forcing, skip.
+              if (!force && hasUI(el)) return;
               if (mounting) return;
 
-              purgeAllInert();
+              purgeInertAndClicks();
               ensureClickable(el);
 
-              if (!window.PagefindUI) {
-                if (retries < MAX_RETRIES) {
-                  retries++;
-                  return setTimeout(() => mountPagefind(force), RETRY_MS);
+              const startMount = () => {
+                if (!window.PagefindUI) {
+                  if (retries >= MAX_RETRIES) return;
+                  return setTimeout(() => mountPagefind({ force, retries: retries + 1 }), RETRY_MS);
                 }
-                return; // stop quietly; any new interaction will try again
-              }
 
-              mounting = true;
-              el.innerHTML = '';
+                mounting = true;
+                // clean slate
+                el.innerHTML = '';
 
-              try {
-                new window.PagefindUI({
-                  element: MOUNT_SEL,
-                  basePath: '/search/',
-                  // translations: { placeholder: 'Search trips…' }
-                });
-              } catch (e) {
-                console.error('Pagefind init failed:', e);
-              } finally {
-                mounting = false;
-                retries = 0;
-                // Make sure the input can be interacted with
-                const input = q('.pagefind-ui__search-input', el);
-                ensureClickable(input || el);
+                try {
+                  new window.PagefindUI({
+                    element: MOUNT_SEL,
+                    basePath: '/search/',
+                    // translations: { placeholder: 'Search trips…' }
+                  });
+                } catch (e) {
+                  console.error('Pagefind init failed:', e);
+                } finally {
+                  mounting = false;
+                  // Make absolutely sure input is interactive
+                  const input = $('.pagefind-ui__search-input', el);
+                  ensureClickable(input || el);
+                }
+              };
+
+              if (!window.PagefindUI) {
+                // Always (re)inject script to guarantee execution after BFCache restore
+                injectScriptFresh(startMount);
+              } else {
+                startMount();
               }
             }
 
-            // First mount
+            // Initial mount
             if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', () => mountPagefind(), { once: true });
+              document.addEventListener('DOMContentLoaded', () => mountPagefind({ force: true }), { once: true });
             } else {
-              mountPagefind();
+              mountPagefind({ force: true });
             }
 
-            // Re-mount after client router events
-            window.addEventListener('astro:page-load', () => mountPagefind(true));
-            window.addEventListener('astro:after-swap', () => mountPagefind(true));
+            // Astro client router lifecycle
+            window.addEventListener('astro:page-load', () => mountPagefind({ force: true }));
+            window.addEventListener('astro:after-swap', () => mountPagefind({ force: true }));
 
-            // Re-mount on BFCache restore (no reload)
+            // BFCache restore: no reload; re-inject and mount
             window.addEventListener('pageshow', (e) => {
               if (e.persisted) {
-                purgeAllInert();
-                mountPagefind(true);
+                purgeInertAndClicks();
+                mountPagefind({ force: true });
               }
             });
 
-            // If page becomes visible again, ensure UI is live
+            // Visible again? make sure UI is alive
             document.addEventListener('visibilitychange', () => {
               if (document.visibilityState === 'visible') mountPagefind();
             });
 
-            // Interaction-based activation: any click/focus/type triggers mount
-            const wrapper = q(MOUNT_SEL);
+            // User interaction “last resort” activators
+            const wrapper = $(MOUNT_SEL);
             if (wrapper) {
-              const trigger = () => mountPagefind();
+              const trigger = () => mountPagefind({ force: false });
               wrapper.addEventListener('pointerdown', trigger, { passive: true });
-              wrapper.addEventListener('focus', trigger, { passive: true, capture: true });
+              wrapper.addEventListener('focus', trigger, { capture: true, passive: true });
               wrapper.addEventListener('keydown', trigger, { capture: true });
-            }
-
-            // Tiny readiness loop while the bundle registers
-            if (!window.PagefindUI) {
-              const ready = setInterval(() => {
-                if (window.PagefindUI) {
-                  clearInterval(ready);
-                  mountPagefind(true);
-                }
-              }, RETRY_MS);
-              setTimeout(() => clearInterval(ready), RETRY_MS * MAX_RETRIES);
             }
           })();
         </script>
