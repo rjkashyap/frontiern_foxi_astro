@@ -1,276 +1,342 @@
 ---
-// @ts-nocheck
 /**
- * Opportunities page — short-term mission trips with filters.
- * Fully build-safe version.
+ * Page: Trips Filter (no search box)
+ * Path: /opportunities
  */
 
 import Layout from '../layouts/Layout.astro'
-import Section from '../components/ui/Section.astro'
-import Row from '../components/ui/Row.astro'
-import Col from '../components/ui/Col.astro'
-import feature04 from '../assets/cards/feature-04.svg'
+import SidebarContent from '../components/blocks/basic/StickySidebar.astro'
+import Hero from '../components/blocks/hero/PageHeader.astro'
 
+// SEO
 const SEO = {
-  title: 'Opportunities — Short-term Mission Trips',
+  title: 'Browse Trips',
   description:
-    'Browse all short-term mission trips. Filter by Region, Country, or Trip Type to find where you can serve next.'
+    'All trips are listed below. Use the filters to narrow by Region, Country, and Trip Type.'
+}
+
+// Page Header
+const header = {
+  title: 'All <strong>Mission Trips</strong>',
+  text: 'Use the filters to narrow by Region, Country, and Trip Type.'
 }
 ---
 
 <Layout title={SEO.title} description={SEO.description}>
-  <Section id="opportunities">
-    <Row>
-      <Col span="12" align="center" classes="mb-8 max-w-4xl mx-auto">
-        <h2 class="text-pretty">Find a <strong>Short-term</strong> mission trip</h2>
-        <p class="pb-0 text-lg text-muted-foreground">
-          All short-term trips pulled live from the Trips page. Use filters to narrow by Region, Country, or Trip Type.
-        </p>
-      </Col>
-    </Row>
+  <Hero title={header.title} text={header.text} />
 
-    <Row>
-      <Col span="12" align="center">
-        <div id="feature-filters"
-          class="inline-flex flex-wrap items-center justify-center gap-2 rounded border px-2 py-2
-                 bg-neutral-900/60 border-neutral-800 dark:bg-neutral-900/60 dark:border-neutral-800">
-          <button type="button" data-action="clear"
-            class="px-3 py-1.5 text-sm rounded border transition
-                   border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:border-neutral-600">
-            Clear all
-          </button>
+  <SidebarContent>
+    <!-- Sidebar -->
+    <div slot="sidebar" class="space-y-4">
+      <h3 class="text-xl font-semibold">Filter trips</h3>
+      <p class="text-sm text-muted-foreground">
+        All trips are visible by default. Select any combination of filters.
+      </p>
+
+      <!-- Filter UI is injected here -->
+      <div id="trip-filters" class="space-y-6">
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 p-3">
+          <h4 class="font-semibold mb-2">Region</h4>
+          <div id="filter-region" class="flex flex-wrap gap-2"></div>
         </div>
-        <div class="mt-2 text-sm text-neutral-400" id="trip-count">Loading…</div>
-      </Col>
-    </Row>
 
-    <div id="feature-grid" class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
-  </Section>
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 p-3">
+          <h4 class="font-semibold mb-2">Country</h4>
+          <div id="filter-country" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 p-3">
+          <h4 class="font-semibold mb-2">Trip Type</h4>
+          <div id="filter-type" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <button id="clear-filters" class="w-full inline-flex items-center justify-center rounded-lg border border-gray-300/70 dark:border-white/15 bg-white/70 dark:bg-white/10 px-3 py-2 text-sm font-medium hover:bg-white dark:hover:bg-white/15 transition">
+          Clear all filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="basic-text">
+      <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold">Trips</h3>
+          <div id="trip-count" class="text-sm text-muted-foreground">Loading…</div>
+        </div>
+
+        <!-- Cards are injected here -->
+        <div id="trip-list" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
+
+        <!-- Optional: lightweight no-results -->
+        <p id="no-results" class="hidden mt-6 text-sm text-muted-foreground">No trips match the selected filters.</p>
+      </section>
+    </div>
+  </SidebarContent>
 </Layout>
 
-<style>
-  #feature-filters .is-active {
-    box-shadow: 0 0 0 1px theme('colors.primary.500 / 0.6');
-  }
-  #feature-grid .card-wrap { will-change: transform, opacity; }
-</style>
-
+<!-- Client code (pure JavaScript, no TS) -->
 <script is:inline>
-  import gsap from "gsap";
+  (() => {
+    const ENDPOINTS = ['/trips/index.html', '/trips/', '/trips']; // try these in order
+    const LIST_SEL = '#trip-list';
+    const COUNT_SEL = '#trip-count';
+    const NORES_SEL = '#no-results';
 
-  document.addEventListener("astro:page-load", init);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") init();
-  });
+    const FILTER_MAP = [
+      { key: 'Region',  container: '#filter-region'  },
+      { key: 'Country', container: '#filter-country' },
+      { key: 'TripType', container: '#filter-type'  },
+    ];
 
-  async function init() {
-    const bar = document.getElementById("feature-filters");
-    const grid = document.getElementById("feature-grid");
-    const countEl = document.getElementById("trip-count");
-    if (!bar || !grid) return;
+    const state = {
+      cards: [],          // Array<HTMLElement> (final FeatureCard DOM nodes)
+      facets: new Map(),  // key -> Set(values)
+      active: { Region: new Set(), Country: new Set(), TripType: new Set() },
+    };
 
-    if (grid.dataset.ready === "1") return;
+    // ---------- Fetch & extract ----------
+    async function fetchTripsHTML() {
+      for (const url of ENDPOINTS) {
+        try {
+          const res = await fetch(url, { credentials: 'same-origin' });
+          if (res.ok) return await res.text();
+        } catch (_) { /* try next */ }
+      }
+      throw new Error('Unable to fetch /trips HTML');
+    }
 
-    const html = await fetchTripsHTML();
-    const cards = extractTripArticles(html);
+    function extractArticles(html) {
+      const dom = new DOMParser().parseFromString(html, 'text/html');
+      const scope = dom.querySelector('[data-pagefind-body]') || dom;
+      return Array.from(scope.querySelectorAll('article'));
+    }
 
-    const shorties = cards.filter((card) =>
-      readFacet(card, "TripType").some((t) => /short\s*-?\s*term/i.test(t))
-    );
+    // ---------- Data helpers ----------
+    function readFacetSpans(cardEl) {
+      const spans = cardEl.querySelectorAll('[data-pagefind-filter]');
+      const bag = {};
+      spans.forEach((s) => {
+        const k = s.getAttribute('data-pagefind-filter') || '';
+        const v = (s.textContent || '').trim();
+        if (!k || !v) return;
+        (bag[k] ||= []).push(v);
+      });
+      return bag;
+    }
 
-    const dataItems = shorties.map(toFeatureCardData);
-    const facets = collectFacets(shorties);
-    buildFilters(bar, facets);
+    function collectFacetValues(bag) {
+      for (const [k, vals] of Object.entries(bag)) {
+        if (!state.facets.has(k)) state.facets.set(k, new Set());
+        const set = state.facets.get(k);
+        vals.forEach((v) => set.add(v));
+      }
+    }
 
-    grid.innerHTML = "";
-    dataItems.forEach((d) => {
-      const wrap = document.createElement("div");
-      wrap.className = "card-wrap flex h-[360px] sm:h-[320px] lg:h-[340px] w-full";
-      wrap.dataset.region = d.region.join("|");
-      wrap.dataset.country = d.country.join("|");
-      wrap.dataset.triptype = d.triptype.join("|");
+    function escapeHTML(s) {
+      return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function articleToData(article) {
+      const titleEl = article.querySelector('h2,h3');
+      const linkEl  = (titleEl && titleEl.querySelector('a')) || article.querySelector('a[href]');
+      const descEl  = article.querySelector('p');
+
+      // Prefer first usable <img> inside the article; fallback to a 1×1 transparent gif
+      const imgEl = article.querySelector('img');
+      const imgSrc = (imgEl && imgEl.getAttribute('src')) || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+
+      const bag = readFacetSpans(article);
+
+      return {
+        title: (titleEl && titleEl.textContent || 'Untitled Trip').trim(),
+        href:  (linkEl && linkEl.getAttribute('href')) || '#',
+        subtitle: (descEl && descEl.textContent || '').trim(),
+        image: imgSrc,
+        bag
+      };
+    }
+
+    // ---------- Build FeatureCard DOM (no overlay, whole card has a link + visible CTA) ----------
+    function buildFeatureCard(data) {
+      const title = data.title;
+      const subtitle = data.subtitle;
+      const image = data.image;
+      const href = data.href;
+      const bag = data.bag || {};
+
+      const wrap = document.createElement('div');
+      wrap.className = 'card-wrap relative h-full w-full';
+
+      // dataset for filtering
+      if (bag.Region)   wrap.dataset.region   = bag.Region.join('|');
+      if (bag.Country)  wrap.dataset.country  = bag.Country.join('|');
+      if (bag.TripType) wrap.dataset.triptype = bag.TripType.join('|');
 
       wrap.innerHTML = `
-        <div class="w-full rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-white/5 overflow-hidden">
-          <a href="${d.href}" class="block h-full">
-            <div class="aspect-[16/9] w-full bg-neutral-200/60 dark:bg-neutral-800/60 flex items-center justify-center">
-              <img src="${d.img}" alt="" class="h-16 opacity-90" loading="lazy" />
+        <div class="flex h-full w-full">
+          <div class="flex flex-col h-full w-full">
+            <div class="w-full h-full flex flex-col justify-between rounded-xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 overflow-hidden shadow-none">
+              <!-- CONTENT -->
+              <a href="${href}" class="block p-4">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-zinc-100 hover:underline">
+                  ${escapeHTML(title)}
+                </h3>
+                ${subtitle ? `<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">${escapeHTML(subtitle)}</p>` : ''}
+              </a>
+
+              <!-- image-bottom -->
+              <a href="${href}" class="block mt-auto">
+                <div class="aspect-[16/9] w-full bg-neutral-200/60 dark:bg-neutral-800/60 flex items-center justify-center">
+                  <img src="${image}" alt="" class="h-16 opacity-90" loading="lazy" />
+                </div>
+              </a>
+
+              <!-- Visible CTA -->
+              <div class="mt-1 mb-3 flex justify-center relative z-10">
+                <a href="${href}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium bg-sky-600 text-white hover:bg-sky-700 transition">
+                  Learn more
+                </a>
+              </div>
             </div>
-            <div class="p-4">
-              <h3 class="text-base font-semibold text-gray-900 dark:text-zinc-100">${escapeHTML(d.title)}</h3>
-              <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">${escapeHTML(d.subtitle)}</p>
-              <p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400">${[...d.region, ...d.country, ...d.triptype].join(" • ")}</p>
-            </div>
-          </a>
-        </div>`;
-      grid.appendChild(wrap);
-    });
+          </div>
+        </div>
+      `;
 
-    const state = { Region: new Set(), Country: new Set(), TripType: new Set() };
-    const btns = Array.from(bar.querySelectorAll("[data-key][data-value]"));
+      return wrap;
+    }
 
-    btns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const k = btn.getAttribute("data-key");
-        const v = btn.getAttribute("data-value");
-        const set = state[k];
-        if (set.has(v)) {
-          set.delete(v);
-          btn.classList.remove("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
-        } else {
-          set.add(v);
-          btn.classList.add("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100");
-        }
-        applyFilterFLIP(grid, state, countEl);
+    // ---------- UI render ----------
+    function renderCards(cards) {
+      const list = document.querySelector(LIST_SEL);
+      list.innerHTML = '';
+      cards.forEach((el) => list.appendChild(el));
+      updateCounts();
+    }
+
+    function makePill(label, groupKey) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = label;
+      btn.className =
+        'px-2.5 py-1.5 text-xs rounded-full border border-gray-300/70 dark:border-white/15 bg-white/70 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 transition';
+      btn.setAttribute('data-value', label);
+      btn.addEventListener('click', () => {
+        toggleFacet(groupKey, label);
+        btn.classList.toggle('ring-2');
+        btn.classList.toggle('ring-sky-300/70');
+        btn.classList.toggle('dark:ring-sky-300/40');
+        applyFilters();
       });
-    });
+      return btn;
+    }
 
-    const clearBtn = bar.querySelector("[data-action='clear']");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", () => {
-        Object.values(state).forEach((s) => s.clear());
-        btns.forEach((b) =>
-          b.classList.remove("is-active", "bg-neutral-800", "border-primary-500", "text-neutral-100")
-        );
-        applyFilterFLIP(grid, state, countEl);
+    function renderFilters() {
+      FILTER_MAP.forEach(({ key, container }) => {
+        const holder = document.querySelector(container);
+        holder.innerHTML = '';
+        const values = Array.from(state.facets.get(key) || []).sort((a, b) => a.localeCompare(b));
+        values.forEach((val) => holder.appendChild(makePill(val, key)));
       });
+
+      const clearBtn = document.getElementById('clear-filters');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          state.active.Region.clear();
+          state.active.Country.clear();
+          state.active.TripType.clear();
+          document.querySelectorAll('#trip-filters button[data-value]').forEach((b) => {
+            b.classList.remove('ring-2', 'ring-sky-300/70', 'dark:ring-sky-300/40');
+          });
+          applyFilters();
+        });
+      }
     }
 
-    applyFilterFLIP(grid, state, countEl);
-    grid.dataset.ready = "1";
-  }
-
-  async function fetchTripsHTML() {
-    const urls = ["/trips/index.html", "/trips/", "/trips"];
-    for (const u of urls) {
-      try {
-        const r = await fetch(u);
-        if (r.ok) return await r.text();
-      } catch {}
+    // ---------- Filtering ----------
+    function toggleFacet(key, value) {
+      const set = state.active[key];
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
     }
-    throw new Error("Cannot load /trips page");
-  }
 
-  function extractTripArticles(html) {
-    const dom = new DOMParser().parseFromString(html, "text/html");
-    const scope = dom.querySelector("[data-pagefind-body]") || dom;
-    return Array.from(scope.querySelectorAll("article"));
-  }
-
-  function readFacet(card, key) {
-    return Array.from(card.querySelectorAll(`[data-pagefind-filter="${key}"]`))
-      .map((x) => (x.textContent || "").trim())
-      .filter(Boolean);
-  }
-
-  function toFeatureCardData(article) {
-    const titleEl = article.querySelector("h2,h3");
-    const linkEl = titleEl ? titleEl.querySelector("a") : null;
-    const title = (titleEl ? titleEl.textContent : "Untitled Trip").trim();
-    const href = linkEl ? linkEl.getAttribute("href") : "#";
-    const descEl = article.querySelector("p");
-    const desc = descEl ? descEl.textContent.trim() : "";
-
-    return {
-      title,
-      subtitle: desc,
-      href,
-      img: feature04,
-      region: readFacet(article, "Region"),
-      country: readFacet(article, "Country"),
-      triptype: readFacet(article, "TripType")
-    };
-  }
-
-  function collectFacets(articles) {
-    const out = { Region: new Set(), Country: new Set(), TripType: new Set() };
-    articles.forEach((a) => {
-      readFacet(a, "Region").forEach((v) => out.Region.add(v));
-      readFacet(a, "Country").forEach((v) => out.Country.add(v));
-      readFacet(a, "TripType").forEach((v) => out.TripType.add(v));
-    });
-    return out;
-  }
-
-  function buildFilters(bar, facets) {
-    bar.querySelectorAll("[data-key]").forEach((n) => n.remove());
-    function mk(key, val) {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.textContent = `${key}: ${val}`;
-      b.className =
-        "px-3 py-1.5 text-sm rounded border transition border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:border-neutral-600";
-      b.setAttribute("data-key", key);
-      b.setAttribute("data-value", val);
-      return b;
-    }
-    ["Region", "Country", "TripType"].forEach((k) =>
-      Array.from(facets[k]).sort((a, b) => a.localeCompare(b)).forEach((v) => bar.appendChild(mk(k, v)))
-    );
-  }
-
-  function applyFilterFLIP(grid, state, countEl) {
-    const DURATION = 0.35, EASE = "power2.out";
-    const wraps = Array.from(grid.querySelectorAll(".card-wrap"));
-
-    const visibleBefore = new Map();
-    wraps.forEach((w) => {
-      if (w.classList.contains("hidden")) return;
-      const r = w.getBoundingClientRect();
-      visibleBefore.set(w, { x: r.left, y: r.top });
-    });
-
-    function match(w) {
-      const keys = [
-        { k: "Region", a: "region" },
-        { k: "Country", a: "country" },
-        { k: "TripType", a: "triptype" }
+    function cardMatchesActive(card) {
+      const tests = [
+        { key: 'Region',   attr: 'region'   },
+        { key: 'Country',  attr: 'country'  },
+        { key: 'TripType', attr: 'triptype' },
       ];
-      for (const { k, a } of keys) {
-        const s = state[k];
-        if (s.size === 0) continue;
-        const vals = (w.dataset[a] || "").split("|").filter(Boolean);
-        if (!vals.some((v) => s.has(v))) return false;
+      for (const t of tests) {
+        const selected = state.active[t.key];
+        if (selected.size === 0) continue;
+        const values = (card.dataset[t.attr] || '').split('|').filter(Boolean);
+        if (!values.some((v) => selected.has(v))) return false;
       }
       return true;
     }
 
-    const toShow = [], toHide = [];
-    wraps.forEach((w) => (match(w) ? toShow : toHide).push(w));
+    function applyFilters() {
+      let shown = 0;
+      state.cards.forEach((card) => {
+        const visible = cardMatchesActive(card);
+        card.style.display = visible ? '' : 'none';
+        if (visible) shown++;
+      });
+      updateCounts(shown);
+    }
 
-    toHide.forEach((w) => w.classList.add("hidden"));
-    toShow.forEach((w) => {
-      if (w.classList.contains("hidden")) {
-        w.classList.remove("hidden");
-        gsap.set(w, { opacity: 0, scale: 0.96 });
+    function updateCounts(overrideShown) {
+      const total = state.cards.length;
+      const shown = overrideShown != null
+        ? overrideShown
+        : state.cards.filter((c) => c.style.display !== 'none').length;
+
+      const el = document.querySelector(COUNT_SEL);
+      if (el) el.textContent = `${shown} of ${total} trips`;
+
+      const nr = document.querySelector(NORES_SEL);
+      if (nr) nr.classList.toggle('hidden', shown > 0);
+    }
+
+    // ---------- Boot ----------
+    async function init() {
+      try {
+        const html = await fetchTripsHTML();
+        const articles = extractArticles(html);
+
+        // Build FeatureCard DOM from each article
+        const cards = articles.map((article) => {
+          const data = articleToData(article);
+          collectFacetValues(data.bag);
+          return buildFeatureCard(data);
+        });
+
+        state.cards = cards;
+        renderFilters();
+        renderCards(cards); // show all on load
+        applyFilters();     // update counts
+      } catch (e) {
+        console.error('Trips filter init failed:', e);
+        const list = document.querySelector(LIST_SEL);
+        if (list) list.innerHTML = '<p class="text-sm text-red-600 dark:text-red-400">Failed to load trips.</p>';
       }
-    });
+    }
 
-    requestAnimationFrame(() => {
-      const visibleAfter = new Map();
-      wraps.forEach((w) => {
-        if (w.classList.contains("hidden")) return;
-        const r = w.getBoundingClientRect();
-        visibleAfter.set(w, { x: r.left, y: r.top });
-      });
-
-      wraps.forEach((w) => {
-        if (w.classList.contains("hidden")) return;
-        const a = visibleAfter.get(w);
-        const b = visibleBefore.get(w);
-        if (!b) gsap.to(w, { opacity: 1, scale: 1, duration: 0.22, ease: "power1.out" });
-        else {
-          const dx = b.x - a.x, dy = b.y - a.y;
-          if (dx || dy) gsap.fromTo(w, { x: dx, y: dy }, { x: 0, y: 0, duration: DURATION, ease: EASE });
-        }
-      });
-
-      countEl.textContent = `${toShow.length} of ${wraps.length} short-term trips`;
-    });
-  }
-
-  function escapeHTML(s) {
-    const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-    return s.replace(/[&<>"']/g, (m) => map[m]);
-  }
+    const start = () => init();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', start, { once: true });
+    } else {
+      start();
+    }
+    window.addEventListener('astro:page-load', start);
+    window.addEventListener('astro:after-swap', start);
+    window.addEventListener('pageshow', (e) => { if (e.persisted) start(); });
+  })();
 </script>
+
+<style is:global>
+  /* Filter pills accessibility focus */
+  #trip-filters button[data-value]:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.65); /* sky-400-ish */
+    outline-offset: 2px;
+  }
+</style>
