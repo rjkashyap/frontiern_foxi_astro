@@ -39,52 +39,69 @@ const header = {
 
     <!-- Main content -->
     <div class="basic-text">
-      <!-- Container that matches your site’s spacing / cards -->
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
         <!-- Pagefind UI assets -->
         <link rel="stylesheet" href="/search/pagefind-ui.css" />
-
-        <!-- IMPORTANT: force re-execution on client navigations -->
+        <!-- force the script to execute on client navigations -->
         <script src="/search/pagefind-ui.js" is:inline data-astro-reload></script>
 
         <!-- Mount point -->
         <div id="trip-search" class="pagefind-wrapper"></div>
 
-        <!-- Robust init (handles page swaps & bfcache) -->
+        <!-- Robust init + deep inert purge + fallback reload -->
         <script is:inline data-astro-reload>
           (() => {
             const MOUNT_SEL = '#trip-search';
+            const RETRY_MS = 50;
+            const MAX_RETRIES = 10;
             let mounting = false;
+            let triedReload = false;
 
-            function removeInert(el) {
-              // Remove any accidental inert ancestors (view-transition leftovers)
-              let node = el;
-              while (node) {
-                if (node.hasAttribute && node.hasAttribute('inert')) {
-                  node.removeAttribute('inert');
-                }
-                node = node.parentElement;
-              }
+            function purgeAllInert() {
+              // Remove inert from ANY element in the document (old view-transition states can leave it behind)
+              document.querySelectorAll('[inert]').forEach((n) => n.removeAttribute('inert'));
+              // Also make sure root containers allow clicks
+              document.documentElement.style.pointerEvents = 'auto';
+              document.body.style.pointerEvents = 'auto';
             }
 
             function ensureClickable(el) {
-              // Defensively allow pointer events on our UI
+              if (!el) return;
               el.style.pointerEvents = 'auto';
-              const parent = el.parentElement;
-              if (parent) parent.style.pointerEvents = 'auto';
+              let p = el.parentElement;
+              while (p) { p.style.pointerEvents = 'auto'; p = p.parentElement; }
             }
 
-            function mountPagefind() {
+            function inputLooksBlocked(input) {
+              if (!input) return true;
+              const cs = getComputedStyle(input);
+              return input.disabled || cs.pointerEvents === 'none' || input.matches('[inert]');
+            }
+
+            function findSearchInput(root = document) {
+              // Pagefind uses .pagefind-ui__search-input
+              return root.querySelector('.pagefind-ui__search-input');
+            }
+
+            function mountPagefind(tryCount = 0) {
               if (mounting) return;
               const el = document.querySelector(MOUNT_SEL);
-              if (!el || !window.PagefindUI) return;
+              if (!el) return;
+
+              purgeAllInert();
+              ensureClickable(el);
+
+              if (!window.PagefindUI) {
+                // If the script hasn’t registered yet, try again shortly.
+                if (tryCount < MAX_RETRIES) {
+                  return setTimeout(() => mountPagefind(tryCount + 1), RETRY_MS);
+                }
+                return; // give up silently; other hooks will try again
+              }
 
               mounting = true;
-
               // Clean slate
               el.innerHTML = '';
-              removeInert(el);
-              ensureClickable(el);
 
               try {
                 new window.PagefindUI({
@@ -92,42 +109,67 @@ const header = {
                   basePath: '/search/',
                   // translations: { placeholder: 'Search trips…' }
                 });
+              } catch (e) {
+                console.error('Pagefind init failed:', e);
               } finally {
-                // yield to allow DOM to settle then unlock
-                setTimeout(() => (mounting = false), 0);
+                setTimeout(() => {
+                  mounting = false;
+
+                  // After UI renders, double-check the input is focusable/clickable
+                  const input = findSearchInput();
+                  if (inputLooksBlocked(input)) {
+                    purgeAllInert();
+                    ensureClickable(input?.closest('.pagefind-wrapper') || el);
+
+                    // Try one more gentle remount if still blocked
+                    if (tryCount < MAX_RETRIES) {
+                      return setTimeout(() => mountPagefind(tryCount + 1), RETRY_MS);
+                    }
+
+                    // LAST RESORT: do a one-time hard reload to clear BFCache state
+                    if (!triedReload) {
+                      triedReload = true;
+                      location.reload();
+                    }
+                  }
+                }, 60);
               }
             }
 
             // First mount
             if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', mountPagefind, { once: true });
+              document.addEventListener('DOMContentLoaded', () => mountPagefind(), { once: true });
             } else {
               mountPagefind();
             }
 
-            // Re-mount after Astro client navigation events
-            window.addEventListener('astro:page-load', mountPagefind);
-            window.addEventListener('astro:after-swap', mountPagefind);
+            // Re-mount after client router events
+            window.addEventListener('astro:page-load', () => mountPagefind());
+            window.addEventListener('astro:after-swap', () => mountPagefind());
 
-            // Re-mount when coming back from bfcache (back/forward)
+            // Re-mount on BFCache restore (back/forward)
             window.addEventListener('pageshow', (e) => {
-              if (e.persisted) mountPagefind();
+              if (e.persisted) {
+                purgeAllInert();
+                mountPagefind();
+              }
             });
 
-            // Safety: if the page becomes visible again and search isn't interactive, try again
+            // If page becomes visible again and search is dead, try again
             document.addEventListener('visibilitychange', () => {
               if (document.visibilityState === 'visible') mountPagefind();
             });
 
-            // Safety: re-run if the script was loaded before PagefindUI finished registering
+            // Belt & suspenders: small retry window while PagefindUI registers
             if (!window.PagefindUI) {
+              let tries = 0;
               const ready = setInterval(() => {
-                if (window.PagefindUI) {
+                tries++;
+                if (window.PagefindUI || tries > MAX_RETRIES) {
                   clearInterval(ready);
                   mountPagefind();
                 }
-              }, 50);
-              setTimeout(() => clearInterval(ready), 4000);
+              }, RETRY_MS);
             }
           })();
         </script>
@@ -137,13 +179,12 @@ const header = {
 </Layout>
 
 <style is:global>
-  /* --- Dark mode + readability --- */
+  /* Dark-mode readability */
   html.dark .pagefind-wrapper,
   @media (prefers-color-scheme: dark) {
     html:not(.dark) .pagefind-wrapper { /* noop */ }
   }
 
-  /* Containers */
   html.dark .pagefind-wrapper .pagefind-ui__form,
   html.dark .pagefind-wrapper .pagefind-ui__drawer,
   html.dark .pagefind-wrapper .pagefind-ui__results-area {
@@ -152,7 +193,6 @@ const header = {
     border-color: rgba(255,255,255,0.12);
   }
 
-  /* Input */
   html.dark .pagefind-wrapper .pagefind-ui__search-input {
     background: rgba(255,255,255,0.06);
     color: #e5e7eb;
@@ -163,7 +203,6 @@ const header = {
     color: rgba(229,231,235,0.85) !important;
   }
 
-  /* Make SEARCH label/icon light */
   html.dark .pagefind-wrapper .pagefind-ui__label,
   html.dark .pagefind-wrapper label[for^="pagefind-"],
   html.dark .pagefind-wrapper .pagefind-ui__search-icon {
@@ -173,7 +212,6 @@ const header = {
     opacity: 0.95;
   }
 
-  /* Buttons / chips */
   html.dark .pagefind-wrapper .pagefind-ui__button,
   html.dark .pagefind-wrapper .pagefind-ui__filter-pill,
   html.dark .pagefind-wrapper .pagefind-ui__filter-link {
@@ -182,7 +220,7 @@ const header = {
     border: 1px solid rgba(255,255,255,0.12);
   }
 
-  /* Strong dark-mode overrides for RESULT TITLES (headings/links) */
+  /* Result titles */
   html.dark .pagefind-wrapper {
     --pf-title: #e5e7eb;
     --pf-title-hover: #bfdbfe;
@@ -203,7 +241,6 @@ const header = {
     text-underline-offset: 2px;
   }
 
-  /* Other result text & cards */
   html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
   html.dark .pagefind-wrapper .pagefind-ui__message {
     color: #e5e7eb;
@@ -213,13 +250,11 @@ const header = {
     border: 1px solid rgba(255,255,255,0.10);
   }
 
-  /* Facet headers & counts */
   html.dark .pagefind-wrapper .pagefind-ui__filter-group-title,
   html.dark .pagefind-wrapper .pagefind-ui__filter-count {
     color: #cbd5e1;
   }
 
-  /* Highlighted terms */
   html.dark .pagefind-wrapper .pagefind-ui__result-excerpt mark {
     background: rgba(250,204,21,0.25);
     color: inherit;
@@ -227,10 +262,9 @@ const header = {
     padding: 0 .1rem;
   }
 
-  /* Hide the clear (reset) button entirely */
+  /* Hide the clear (reset) button */
   .pagefind-wrapper .pagefind-ui__reset { display: none !important; }
 
-  /* Defensive: ensure the UI is always clickable after client navigations */
-  .pagefind-wrapper,
-  .pagefind-wrapper * { pointer-events: auto; }
+  /* Defensive: always allow clicks */
+  .pagefind-wrapper, .pagefind-wrapper * { pointer-events: auto; }
 </style>
