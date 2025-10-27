@@ -1,12 +1,21 @@
 ---
-/* no frontmatter needed */
----
-<main class="container mx-auto my-8">
-  <article>
-    <h1>Trips — Test</h1>
-    <p>This tiny page exists so Pagefind can index /trips/.</p>
+import Layout from '../../layouts/Layout.astro';
 
-    <!-- One hidden facet so filters can appear -->
-    <span data-pagefind-filter="Region" style="display:none">Pacific</span>
-  </article>
-</main>
+const SEO = {
+  title: 'Trips — Test',
+  description: 'Minimal trips page to scope Pagefind indexing.'
+};
+---
+
+<Layout title={SEO.title} description={SEO.description}>
+  <!-- Only this block will be indexed by Pagefind -->
+  <main data-pagefind-body class="container mx-auto my-8 prose dark:prose-invert">
+    <article>
+      <h1>Trips — Test</h1>
+      <p>This tiny page exists so Pagefind can index <code>/trips/</code> reliably.</p>
+
+      <!-- One hidden facet so filters can appear -->
+      <span data-pagefind-filter="Region" style="display:none">Pacific</span>
+    </article>
+  </main>
+</Layout>
