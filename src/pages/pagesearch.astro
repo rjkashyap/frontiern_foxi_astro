@@ -43,40 +43,92 @@ const header = {
       <section class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-sm p-4 sm:p-6 md:p-8">
         <!-- Pagefind UI assets -->
         <link rel="stylesheet" href="/search/pagefind-ui.css" />
-        <!-- keep this as a raw external script (don’t let Vite bundle it) -->
-        <script src="/search/pagefind-ui.js" is:inline></script>
+
+        <!-- IMPORTANT: force re-execution on client navigations -->
+        <script src="/search/pagefind-ui.js" is:inline data-astro-reload></script>
 
         <!-- Mount point -->
         <div id="trip-search" class="pagefind-wrapper"></div>
 
-        <!-- Robust init (handles Astro client-side navigation) -->
-        <script is:inline>
-          (function () {
-            function mountPagefind() {
-              if (!window.PagefindUI) return;
-              const el = document.querySelector('#trip-search');
-              if (!el) return;
+        <!-- Robust init (handles page swaps & bfcache) -->
+        <script is:inline data-astro-reload>
+          (() => {
+            const MOUNT_SEL = '#trip-search';
+            let mounting = false;
 
-              // Clear any previous UI so navigating away/back re-mounts cleanly
-              el.innerHTML = '';
-
-              new window.PagefindUI({
-                element: '#trip-search',
-                basePath: '/search/',
-                // translations: { placeholder: 'Search trips…' }
-              });
+            function removeInert(el) {
+              // Remove any accidental inert ancestors (view-transition leftovers)
+              let node = el;
+              while (node) {
+                if (node.hasAttribute && node.hasAttribute('inert')) {
+                  node.removeAttribute('inert');
+                }
+                node = node.parentElement;
+              }
             }
 
-            // First load
+            function ensureClickable(el) {
+              // Defensively allow pointer events on our UI
+              el.style.pointerEvents = 'auto';
+              const parent = el.parentElement;
+              if (parent) parent.style.pointerEvents = 'auto';
+            }
+
+            function mountPagefind() {
+              if (mounting) return;
+              const el = document.querySelector(MOUNT_SEL);
+              if (!el || !window.PagefindUI) return;
+
+              mounting = true;
+
+              // Clean slate
+              el.innerHTML = '';
+              removeInert(el);
+              ensureClickable(el);
+
+              try {
+                new window.PagefindUI({
+                  element: MOUNT_SEL,
+                  basePath: '/search/',
+                  // translations: { placeholder: 'Search trips…' }
+                });
+              } finally {
+                // yield to allow DOM to settle then unlock
+                setTimeout(() => (mounting = false), 0);
+              }
+            }
+
+            // First mount
             if (document.readyState === 'loading') {
               document.addEventListener('DOMContentLoaded', mountPagefind, { once: true });
             } else {
               mountPagefind();
             }
 
-            // Re-run after Astro swaps pages without full reload
+            // Re-mount after Astro client navigation events
             window.addEventListener('astro:page-load', mountPagefind);
             window.addEventListener('astro:after-swap', mountPagefind);
+
+            // Re-mount when coming back from bfcache (back/forward)
+            window.addEventListener('pageshow', (e) => {
+              if (e.persisted) mountPagefind();
+            });
+
+            // Safety: if the page becomes visible again and search isn't interactive, try again
+            document.addEventListener('visibilitychange', () => {
+              if (document.visibilityState === 'visible') mountPagefind();
+            });
+
+            // Safety: re-run if the script was loaded before PagefindUI finished registering
+            if (!window.PagefindUI) {
+              const ready = setInterval(() => {
+                if (window.PagefindUI) {
+                  clearInterval(ready);
+                  mountPagefind();
+                }
+              }, 50);
+              setTimeout(() => clearInterval(ready), 4000);
+            }
           })();
         </script>
       </section>
@@ -85,10 +137,10 @@ const header = {
 </Layout>
 
 <style is:global>
-  /* Base (light stays as-is). Only adjust dark. */
+  /* --- Dark mode + readability --- */
   html.dark .pagefind-wrapper,
   @media (prefers-color-scheme: dark) {
-    html:not(.dark) .pagefind-wrapper { /* no-op for users without the .dark class */ }
+    html:not(.dark) .pagefind-wrapper { /* noop */ }
   }
 
   /* Containers */
@@ -96,7 +148,7 @@ const header = {
   html.dark .pagefind-wrapper .pagefind-ui__drawer,
   html.dark .pagefind-wrapper .pagefind-ui__results-area {
     background: transparent;
-    color: #e5e7eb;            /* zinc-200 */
+    color: #e5e7eb;
     border-color: rgba(255,255,255,0.12);
   }
 
@@ -105,29 +157,24 @@ const header = {
     background: rgba(255,255,255,0.06);
     color: #e5e7eb;
     border: 1px solid rgba(255,255,255,0.12);
-    caret-color: #bfdbfe;           /* sky-200 */
+    caret-color: #bfdbfe;
   }
   html.dark .pagefind-wrapper .pagefind-ui__search-input::placeholder {
-    color: rgba(229,231,235,0.80) !important;
-    opacity: 1;
+    color: rgba(229,231,235,0.85) !important;
   }
 
-  /* Make the SEARCH label/icon light in dark mode */
+  /* Make SEARCH label/icon light */
   html.dark .pagefind-wrapper .pagefind-ui__label,
   html.dark .pagefind-wrapper label[for^="pagefind-"],
   html.dark .pagefind-wrapper .pagefind-ui__search-icon {
-    color: #e5e7eb !important;      /* zinc-200 */
-    fill: currentColor !important;  /* for SVG icons */
+    color: #e5e7eb !important;
+    fill: currentColor !important;
     stroke: currentColor !important;
     opacity: 0.95;
   }
 
   /* Buttons / chips */
-  html.dark .pagefind-wrapper .pagefind-ui__button {
-    background: rgba(255,255,255,0.06);
-    color: #e5e7eb;
-    border: 1px solid rgba(255,255,255,0.12);
-  }
+  html.dark .pagefind-wrapper .pagefind-ui__button,
   html.dark .pagefind-wrapper .pagefind-ui__filter-pill,
   html.dark .pagefind-wrapper .pagefind-ui__filter-link {
     background: rgba(255,255,255,0.06);
@@ -137,8 +184,8 @@ const header = {
 
   /* Strong dark-mode overrides for RESULT TITLES (headings/links) */
   html.dark .pagefind-wrapper {
-    --pf-title: #e5e7eb;        /* zinc-200 */
-    --pf-title-hover: #bfdbfe;  /* sky-200 */
+    --pf-title: #e5e7eb;
+    --pf-title-hover: #bfdbfe;
   }
   html.dark .pagefind-wrapper .pagefind-ui__result-title,
   html.dark .pagefind-wrapper .pagefind-ui__result-title *,
@@ -169,19 +216,21 @@ const header = {
   /* Facet headers & counts */
   html.dark .pagefind-wrapper .pagefind-ui__filter-group-title,
   html.dark .pagefind-wrapper .pagefind-ui__filter-count {
-    color: #cbd5e1;            /* slate-300 */
+    color: #cbd5e1;
   }
 
   /* Highlighted terms */
   html.dark .pagefind-wrapper .pagefind-ui__result-excerpt mark {
-    background: rgba(250,204,21,0.25);  /* amber-400 @ 25% */
+    background: rgba(250,204,21,0.25);
     color: inherit;
     border-radius: 0.25rem;
     padding: 0 .1rem;
   }
 
   /* Hide the clear (reset) button entirely */
-  .pagefind-wrapper .pagefind-ui__reset {
-    display: none !important;
-  }
+  .pagefind-wrapper .pagefind-ui__reset { display: none !important; }
+
+  /* Defensive: ensure the UI is always clickable after client navigations */
+  .pagefind-wrapper,
+  .pagefind-wrapper * { pointer-events: auto; }
 </style>
