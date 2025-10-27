@@ -9,7 +9,7 @@ const SEO = {
 
 <Layout title={SEO.title} description={SEO.description}>
   <!-- Only this block will be indexed by Pagefind -->
-  <main data-pagefind-body class="container mx-auto my-8 prose dark:prose-invert">
+  <main data-pagefind-root data-pagefind-body class="container mx-auto my-8 prose dark:prose-invert">
     <h1>Trips — Test</h1>
     <p>This page contains two sample “trip cards” so Pagefind UI can show filters and per-card results.</p>
 
@@ -18,7 +18,7 @@ const SEO = {
       <h2 id="vanuatu-trip">Vanuatu Vision Trip</h2>
       <p>Serve alongside local teams, host film screenings, and support follow-up.</p>
 
-      <!-- Hidden facets tied to this card (sub-result) -->
+      <!-- Hidden facets tied to this card -->
       <span data-pagefind-filter="Region" style="display:none">Pacific</span>
       <span data-pagefind-filter="Country" style="display:none">Vanuatu</span>
       <span data-pagefind-filter="TripType" style="display:none">Evangelism</span>
@@ -26,10 +26,10 @@ const SEO = {
 
     <!-- Trip card #2 -->
     <article>
-      <h2 id="thailand-teaching">Thailand Teaching & Outreach</h2>
+      <h2 id="thailand-teaching">Thailand Teaching &amp; Outreach</h2>
       <p>English teaching access ministry with evening outreach and community support.</p>
 
-      <!-- Hidden facets tied to this card (sub-result) -->
+      <!-- Hidden facets tied to this card -->
       <span data-pagefind-filter="Region" style="display:none">Asia</span>
       <span data-pagefind-filter="Country" style="display:none">Thailand</span>
       <span data-pagefind-filter="TripType" style="display:none">Teaching English</span>
