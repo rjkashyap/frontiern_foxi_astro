@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build && ./node_modules/.bin/pagefind --source dist --output-subdir search --verbose",
+    "build": "astro check && astro build && ./node_modules/.bin/pagefind --source dist --output-subdir search --glob \"trips/**\" --exclude-selectors \".site-footer,.main-nav,header,footer,nav\" --verbose",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -31,6 +31,6 @@
   "devDependencies": {
     "@astrojs/partytown": "^2.1.4",
     "@tailwindcss/typography": "^0.5.13",
-    "pagefind": "^1.1.0"
+    "pagefind": "^1.4.0"
   }
 }
