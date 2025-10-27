@@ -49,16 +49,35 @@ const header = {
         <!-- Mount point -->
         <div id="trip-search" class="pagefind-wrapper"></div>
 
-        <!-- Initialise Pagefind UI -->
+        <!-- Robust init (handles Astro client-side navigation) -->
         <script is:inline>
-          // PagefindUI is loaded by the external script above
-          if (typeof window !== "undefined" && window.PagefindUI) {
-            new window.PagefindUI({
-              element: "#trip-search",
-              basePath: "/search/",
-              // translations: { placeholder: "Search trips..." }
-            });
-          }
+          (function () {
+            function mountPagefind() {
+              if (!window.PagefindUI) return;
+              const el = document.querySelector('#trip-search');
+              if (!el) return;
+
+              // Clear any previous UI so navigating away/back re-mounts cleanly
+              el.innerHTML = '';
+
+              new window.PagefindUI({
+                element: '#trip-search',
+                basePath: '/search/',
+                // translations: { placeholder: 'Search trips…' }
+              });
+            }
+
+            // First load
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', mountPagefind, { once: true });
+            } else {
+              mountPagefind();
+            }
+
+            // Re-run after Astro swaps pages without full reload
+            window.addEventListener('astro:page-load', mountPagefind);
+            window.addEventListener('astro:after-swap', mountPagefind);
+          })();
         </script>
       </section>
     </div>
@@ -77,7 +96,7 @@ const header = {
   html.dark .pagefind-wrapper .pagefind-ui__drawer,
   html.dark .pagefind-wrapper .pagefind-ui__results-area {
     background: transparent;
-    color: #e5e7eb;            /* Tailwind zinc-200 */
+    color: #e5e7eb;            /* zinc-200 */
     border-color: rgba(255,255,255,0.12);
   }
 
@@ -86,9 +105,21 @@ const header = {
     background: rgba(255,255,255,0.06);
     color: #e5e7eb;
     border: 1px solid rgba(255,255,255,0.12);
+    caret-color: #bfdbfe;           /* sky-200 */
   }
   html.dark .pagefind-wrapper .pagefind-ui__search-input::placeholder {
-    color: rgba(229,231,235,0.55);
+    color: rgba(229,231,235,0.80) !important;
+    opacity: 1;
+  }
+
+  /* Make the SEARCH label/icon light in dark mode */
+  html.dark .pagefind-wrapper .pagefind-ui__label,
+  html.dark .pagefind-wrapper label[for^="pagefind-"],
+  html.dark .pagefind-wrapper .pagefind-ui__search-icon {
+    color: #e5e7eb !important;      /* zinc-200 */
+    fill: currentColor !important;  /* for SVG icons */
+    stroke: currentColor !important;
+    opacity: 0.95;
   }
 
   /* Buttons / chips */
@@ -110,21 +141,22 @@ const header = {
     --pf-title-hover: #bfdbfe;  /* sky-200 */
   }
   html.dark .pagefind-wrapper .pagefind-ui__result-title,
-  html.dark .pagefind-wrapper .pagefind-ui__result-title * {
+  html.dark .pagefind-wrapper .pagefind-ui__result-title *,
+  html.dark .pagefind-wrapper .pagefind-ui__result-link {
     color: var(--pf-title) !important;
   }
-  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:link, :visited, :active) {
+  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:link,:visited,:active) {
     color: var(--pf-title) !important;
     text-decoration: none;
   }
-  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:hover, :focus-visible),
-  html.dark .pagefind-wrapper .pagefind-ui__result-link:is(:hover, :focus-visible) {
+  html.dark .pagefind-wrapper .pagefind-ui__result-title a:is(:hover,:focus-visible),
+  html.dark .pagefind-wrapper .pagefind-ui__result-link:is(:hover,:focus-visible) {
     color: var(--pf-title-hover) !important;
     text-decoration: underline;
     text-underline-offset: 2px;
   }
 
-  /* Other result text */
+  /* Other result text & cards */
   html.dark .pagefind-wrapper .pagefind-ui__result-excerpt,
   html.dark .pagefind-wrapper .pagefind-ui__message {
     color: #e5e7eb;
@@ -148,36 +180,7 @@ const header = {
     padding: 0 .1rem;
   }
 
-  /* --- Dark mode: make the SEARCH text/icon in the input area light up --- */
-  html.dark .pagefind-wrapper .pagefind-ui__label,
-  html.dark .pagefind-wrapper label[for^="pagefind-"],
-  html.dark .pagefind-wrapper .pagefind-ui__search-icon,
-  html.dark .pagefind-wrapper .pagefind-ui__reset {
-    color: #e5e7eb !important;     /* zinc-200 */
-    fill: currentColor !important;  /* for SVG icons */
-    stroke: currentColor !important;
-    opacity: 0.95;
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__search-input::placeholder {
-    color: #e5e7eb !important;
-    opacity: 0.85;
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__search-input {
-    color: #e5e7eb !important;
-    caret-color: #bfdbfe;           /* sky-200 */
-  }
-  html.dark .pagefind-wrapper .pagefind-ui__search-input:focus,
-  html.dark .pagefind-wrapper .pagefind-ui__search-input:focus-visible {
-    outline: 2px solid rgba(191,219,254,0.7) !important; /* sky-200 */
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(191,219,254,0.15);
-  }
-  html.dark .pagefind-wrapper [class*="label"],
-  html.dark .pagefind-wrapper label {
-    color: #e5e7eb !important;
-  }
-
-  /* === Hide the clear (reset) button entirely === */
+  /* Hide the clear (reset) button entirely */
   .pagefind-wrapper .pagefind-ui__reset {
     display: none !important;
   }
