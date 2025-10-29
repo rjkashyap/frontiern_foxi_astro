@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>List.js Demo – Mission Trips</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    .controls { margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+    .trip-card {
+      border: 1px solid #ddd; border-radius: 8px; padding: 1rem; width: 250px;
+      display: inline-block; vertical-align: top; margin: .5rem;
+    }
+    .trip-card h3 { margin: 0 0 .25rem; }
+    .hidden { display: none; }
+  </style>
+  <!-- Load List.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+</head>
+<body>
+
+  <h1>Mission Trips</h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <input class="search" placeholder="Search trips…" />
+    <select id="continent-filter">
+      <option value="">All Continents</option>
+      <option value="asia">Asia</option>
+      <option value="pacific">Pacific</option>
+      <option value="africa">Africa</option>
+    </select>
+    <button class="sort" data-sort="trip-name">Sort by Name</button>
+  </div>
+
+  <!-- List.js container -->
+  <div id="trips">
+    <ul class="list">
+      <li class="trip-card" data-continent="asia">
+        <h3 class="trip-name">Nepal – April 2026</h3>
+        <p class="trip-desc">Short-term outreach in Kathmandu.</p>
+      </li>
+      <li class="trip-card" data-continent="pacific">
+        <h3 class="trip-name">Fiji – July 2026</h3>
+        <p class="trip-desc">Training + village evangelism.</p>
+      </li>
+      <li class="trip-card" data-continent="africa">
+        <h3 class="trip-name">Kenya – May 2026</h3>
+        <p class="trip-desc">Partnering with local churches in Nairobi.</p>
+      </li>
+      <li class="trip-card" data-continent="pacific">
+        <h3 class="trip-name">Samoa – September 2026</h3>
+        <p class="trip-desc">Discipleship & youth ministry.</p>
+      </li>
+      <li class="trip-card" data-continent="asia">
+        <h3 class="trip-name">Thailand – January 2027</h3>
+        <p class="trip-desc">Campus outreach + prayer walks.</p>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    // Initialize List.js
+    const options = { valueNames: [ 'trip-name', 'trip-desc' ] };
+    const tripList = new List('trips', options);
+
+    // Filter by continent dropdown
+    const select = document.getElementById('continent-filter');
+    select.addEventListener('change', () => {
+      const val = select.value;
+      if (!val) {
+        tripList.filter(); // show all
+      } else {
+        tripList.filter(item => item.elm.dataset.continent === val);
+      }
+    });
+  </script>
+
+</body>
+</html>
