@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>List.js Demo – Mission Trips</title>
+  <title>List.js Demo – Mission Trips (3 Filters)</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; }
     .controls { margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; }
     .trip-card {
-      border: 1px solid #ddd; border-radius: 8px; padding: 1rem; width: 250px;
+      border: 1px solid #ddd; border-radius: 8px; padding: 1rem; width: 260px;
       display: inline-block; vertical-align: top; margin: .5rem;
     }
     .trip-card h3 { margin: 0 0 .25rem; }
-    .hidden { display: none; }
+    .meta { font-size: .9rem; color: #555; }
   </style>
   <!-- Load List.js from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
@@ -21,59 +21,110 @@
 
   <h1>Mission Trips</h1>
 
-  <!-- Controls -->
+  <!-- Controls: 3 filters -->
   <div class="controls">
-    <input class="search" placeholder="Search trips…" />
+    <label for="continent-filter">Continent:</label>
     <select id="continent-filter">
-      <option value="">All Continents</option>
+      <option value="">All</option>
       <option value="asia">Asia</option>
       <option value="pacific">Pacific</option>
       <option value="africa">Africa</option>
     </select>
-    <button class="sort" data-sort="trip-name">Sort by Name</button>
+
+    <label for="month-filter">Month–Year:</label>
+    <select id="month-filter" title="YYYY-MM">
+      <option value="">All</option>
+      <option value="2026-01">2026-01 (Jan 2026)</option>
+      <option value="2026-04">2026-04 (Apr 2026)</option>
+      <option value="2026-05">2026-05 (May 2026)</option>
+      <option value="2026-07">2026-07 (Jul 2026)</option>
+      <option value="2026-09">2026-09 (Sep 2026)</option>
+      <option value="2027-01">2027-01 (Jan 2027)</option>
+    </select>
+
+    <label for="type-filter">Trip Type:</label>
+    <select id="type-filter">
+      <option value="">All</option>
+      <option value="short-term">Short-term</option>
+      <option value="training">Training</option>
+      <option value="discipleship">Discipleship</option>
+      <option value="outreach">Outreach</option>
+      <option value="campus">Campus</option>
+    </select>
   </div>
 
   <!-- List.js container -->
   <div id="trips">
     <ul class="list">
-      <li class="trip-card" data-continent="asia">
+      <li class="trip-card" data-continent="asia" data-month="2026-04" data-type="short-term">
         <h3 class="trip-name">Nepal – April 2026</h3>
         <p class="trip-desc">Short-term outreach in Kathmandu.</p>
+        <p class="meta">Continent: Asia • Month: 2026-04 • Type: Short-term</p>
       </li>
-      <li class="trip-card" data-continent="pacific">
+
+      <li class="trip-card" data-continent="pacific" data-month="2026-07" data-type="training">
         <h3 class="trip-name">Fiji – July 2026</h3>
         <p class="trip-desc">Training + village evangelism.</p>
+        <p class="meta">Continent: Pacific • Month: 2026-07 • Type: Training</p>
       </li>
-      <li class="trip-card" data-continent="africa">
+
+      <li class="trip-card" data-continent="africa" data-month="2026-05" data-type="outreach">
         <h3 class="trip-name">Kenya – May 2026</h3>
         <p class="trip-desc">Partnering with local churches in Nairobi.</p>
+        <p class="meta">Continent: Africa • Month: 2026-05 • Type: Outreach</p>
       </li>
-      <li class="trip-card" data-continent="pacific">
+
+      <li class="trip-card" data-continent="pacific" data-month="2026-09" data-type="discipleship">
         <h3 class="trip-name">Samoa – September 2026</h3>
         <p class="trip-desc">Discipleship & youth ministry.</p>
+        <p class="meta">Continent: Pacific • Month: 2026-09 • Type: Discipleship</p>
       </li>
-      <li class="trip-card" data-continent="asia">
+
+      <li class="trip-card" data-continent="asia" data-month="2027-01" data-type="campus">
         <h3 class="trip-name">Thailand – January 2027</h3>
         <p class="trip-desc">Campus outreach + prayer walks.</p>
+        <p class="meta">Continent: Asia • Month: 2027-01 • Type: Campus</p>
+      </li>
+
+      <li class="trip-card" data-continent="asia" data-month="2026-01" data-type="outreach">
+        <h3 class="trip-name">Malaysia – January 2026</h3>
+        <p class="trip-desc">City evangelism & leadership huddles.</p>
+        <p class="meta">Continent: Asia • Month: 2026-01 • Type: Outreach</p>
       </li>
     </ul>
   </div>
 
   <script>
-    // Initialize List.js
-    const options = { valueNames: [ 'trip-name', 'trip-desc' ] };
-    const tripList = new List('trips', options);
+    // List.js instance (still needed even though we only filter)
+    const tripList = new List('trips', { valueNames: ['trip-name', 'trip-desc'] });
 
-    // Filter by continent dropdown
-    const select = document.getElementById('continent-filter');
-    select.addEventListener('change', () => {
-      const val = select.value;
-      if (!val) {
-        tripList.filter(); // show all
-      } else {
-        tripList.filter(item => item.elm.dataset.continent === val);
+    const continentSel = document.getElementById('continent-filter');
+    const monthSel     = document.getElementById('month-filter');
+    const typeSel      = document.getElementById('type-filter');
+
+    function applyFilters() {
+      const c = continentSel.value;
+      const m = monthSel.value;
+      const t = typeSel.value;
+
+      // If no filters selected, clear List.js filter (show all)
+      if (!c && !m && !t) {
+        tripList.filter(); 
+        return;
       }
-    });
+
+      tripList.filter(item => {
+        const el = item.elm;
+        const okContinent = !c || el.dataset.continent === c;
+        const okMonth     = !m || el.dataset.month === m;
+        const okType      = !t || el.dataset.type === t;
+        return okContinent && okMonth && okType;
+      });
+    }
+
+    continentSel.addEventListener('change', applyFilters);
+    monthSel.addEventListener('change', applyFilters);
+    typeSel.addEventListener('change', applyFilters);
   </script>
 
 </body>
