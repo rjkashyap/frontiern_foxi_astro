@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>List.js Demo – Mission Trips (3 Filters)</title>
+  <title>List.js Demo – Mission Trips (3 Filters + Clear)</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; }
-    .controls { margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+    .controls { margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
     .trip-card {
       border: 1px solid #ddd; border-radius: 8px; padding: 1rem; width: 260px;
       display: inline-block; vertical-align: top; margin: .5rem;
     }
     .trip-card h3 { margin: 0 0 .25rem; }
     .meta { font-size: .9rem; color: #555; }
+    button[disabled] { opacity: .5; cursor: not-allowed; }
   </style>
   <!-- Load List.js from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
@@ -21,7 +22,7 @@
 
   <h1>Mission Trips</h1>
 
-  <!-- Controls: 3 filters -->
+  <!-- Controls: 3 filters + Clear -->
   <div class="controls">
     <label for="continent-filter">Continent:</label>
     <select id="continent-filter">
@@ -51,6 +52,8 @@
       <option value="outreach">Outreach</option>
       <option value="campus">Campus</option>
     </select>
+
+    <button id="clear-filters" type="button" disabled>Clear all filters</button>
   </div>
 
   <!-- List.js container -->
@@ -95,36 +98,53 @@
   </div>
 
   <script>
-    // List.js instance (still needed even though we only filter)
+    // List.js instance (filter-only)
     const tripList = new List('trips', { valueNames: ['trip-name', 'trip-desc'] });
 
     const continentSel = document.getElementById('continent-filter');
     const monthSel     = document.getElementById('month-filter');
     const typeSel      = document.getElementById('type-filter');
+    const clearBtn     = document.getElementById('clear-filters');
 
     function applyFilters() {
       const c = continentSel.value;
       const m = monthSel.value;
       const t = typeSel.value;
 
-      // If no filters selected, clear List.js filter (show all)
       if (!c && !m && !t) {
-        tripList.filter(); 
-        return;
+        tripList.filter(); // show all
+      } else {
+        tripList.filter(item => {
+          const el = item.elm;
+          const okC = !c || el.dataset.continent === c;
+          const okM = !m || el.dataset.month === m;
+          const okT = !t || el.dataset.type === t;
+          return okC && okM && okT;
+        });
       }
+      updateClearState();
+    }
 
-      tripList.filter(item => {
-        const el = item.elm;
-        const okContinent = !c || el.dataset.continent === c;
-        const okMonth     = !m || el.dataset.month === m;
-        const okType      = !t || el.dataset.type === t;
-        return okContinent && okMonth && okType;
-      });
+    function clearFilters() {
+      continentSel.value = '';
+      monthSel.value = '';
+      typeSel.value = '';
+      tripList.filter(); // show all
+      updateClearState();
+    }
+
+    function updateClearState() {
+      const hasAny = continentSel.value || monthSel.value || typeSel.value;
+      clearBtn.disabled = !hasAny;
     }
 
     continentSel.addEventListener('change', applyFilters);
     monthSel.addEventListener('change', applyFilters);
     typeSel.addEventListener('change', applyFilters);
+    clearBtn.addEventListener('click', clearFilters);
+
+    // Ensure initial button state is correct
+    updateClearState();
   </script>
 
 </body>
