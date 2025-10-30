@@ -1,40 +1,237 @@
 ---
-import Card from './BasicCard.astro'
-import Button from '../Button.astro'
+import Layout from '../layouts/Layout.astro'
+import Section from '../components/ui/Section.astro'
+import Row from '../components/ui/Row.astro'
+import Col from '../components/ui/Col.astro'
 
-type Props = {
-  title?: string
-  subtitle?: string
-  image?: any
+const SEO = {
+  title: 'Mission Trips | Frontier Nations',
+  description:
+    'Explore upcoming mission trips and training opportunities from Frontier Nations. Filter by continent, month, and trip type to find your fit.',
 }
-
-const { title, subtitle, image } = Astro.props
 ---
-<div class="relative h-full w-full">
-  <!-- Full-card invisible button triggers modal -->
-  <button
-    type="button"
-    data-modal="signup"
-    aria-label={`Open signup modal for ${title ?? 'this feature'}`}
-    class="absolute inset-0 z-10 bg-transparent cursor-pointer"
-  ></button>
 
-  <div class="flex h-full w-full">
-    <div class="flex flex-col h-full w-full">
-      <Card
-        title={title}
-        subtitle={subtitle}
-        image={image}
-        type="image-bottom"
-        classes="!bg-neutral-50 !shadow-none dark:!bg-neutral-900 h-full flex flex-col justify-between border border-neutral-100 dark:border-neutral-800"
-      >
-        <!-- Visible CTA, sits above the overlay (z-20) -->
-        <div class="mt-1 mb-2 flex justify-center relative z-20">
-          <Button modal="signup" size="sm" style="primary" classes="!py-1.5 !px-3">
-            Learn more
-          </Button>
+<Layout title={SEO.title} description={SEO.description}>
+  <Section id="mission-trips" classes="pt-20 pb-24">
+    <Row>
+      <Col span="12" align="center" classes="mb-8 max-w-4xl mx-auto">
+        <h1 class="text-pretty text-3xl sm:text-4xl font-semibold mb-3">
+          Mission Trips
+        </h1>
+        <p class="text-neutral-700 dark:text-neutral-400 text-lg">
+          Explore short-term, training, and discipleship trips across the nations.
+        </p>
+      </Col>
+    </Row>
+
+    <!-- Filter Controls -->
+    <Row>
+      <Col span="12" align="center">
+        <div
+          class="controls inline-flex flex-wrap items-center justify-center gap-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100/80 dark:bg-neutral-900/60 px-4 py-3"
+        >
+          <!-- Continent -->
+          <div class="flex flex-col sm:flex-row items-center gap-2">
+            <label for="continent-filter" class="text-sm text-neutral-700 dark:text-neutral-400">Continent:</label>
+            <select
+              id="continent-filter"
+              class="px-3 py-1.5 bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 focus:border-primary-500 focus:ring-0"
+            >
+              <option value="">All</option>
+              <option value="asia">Asia</option>
+              <option value="pacific">Pacific</option>
+              <option value="africa">Africa</option>
+            </select>
+          </div>
+
+          <!-- Month -->
+          <div class="flex flex-col sm:flex-row items-center gap-2">
+            <label for="month-filter" class="text-sm text-neutral-700 dark:text-neutral-400">Month–Year:</label>
+            <select
+              id="month-filter"
+              class="px-3 py-1.5 bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 focus:border-primary-500 focus:ring-0"
+            >
+              <option value="">All</option>
+              <option value="2026-01">Jan 2026</option>
+              <option value="2026-04">Apr 2026</option>
+              <option value="2026-05">May 2026</option>
+              <option value="2026-07">Jul 2026</option>
+              <option value="2026-09">Sep 2026</option>
+              <option value="2027-01">Jan 2027</option>
+            </select>
+          </div>
+
+          <!-- Type -->
+          <div class="flex flex-col sm:flex-row items-center gap-2">
+            <label for="type-filter" class="text-sm text-neutral-700 dark:text-neutral-400">Trip Type:</label>
+            <select
+              id="type-filter"
+              class="px-3 py-1.5 bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 focus:border-primary-500 focus:ring-0"
+            >
+              <option value="">All</option>
+              <option value="short-term">Short-term</option>
+              <option value="training">Training</option>
+              <option value="discipleship">Discipleship</option>
+              <option value="outreach">Outreach</option>
+              <option value="campus">Campus</option>
+            </select>
+          </div>
+
+          <!-- Clear -->
+          <button
+            id="clear-filters"
+            type="button"
+            disabled
+            class="px-4 py-1.5 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100 disabled:opacity-40"
+          >
+            Clear all filters
+          </button>
         </div>
-      </Card>
-    </div>
-  </div>
-</div>
+      </Col>
+    </Row>
+
+    <!-- Trip Grid -->
+    <Row>
+      <Col span="12">
+        <div id="trips" class="mt-10">
+          <ul class="list grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- Card 1 -->
+            <li
+              class="trip-card bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
+              data-continent="asia"
+              data-month="2026-04"
+              data-type="short-term"
+            >
+              <div>
+                <h3 class="trip-name text-lg font-semibold mb-1 text-neutral-900 dark:text-neutral-100">Nepal – April 2026</h3>
+                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm mb-4">
+                  Short-term outreach in Kathmandu.
+                </p>
+              </div>
+              <div class="mt-auto flex justify-center">
+                <button
+                  type="button"
+                  data-modal="signup"
+                  aria-label="Open signup modal for Nepal – April 2026"
+                  class="px-3 py-1.5 text-sm rounded-lg border border-primary-500 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                >
+                  Learn More
+                </button>
+              </div>
+              <p class="mt-3 text-xs text-neutral-600 dark:text-neutral-500">
+                Continent: Asia • Month: 2026-04 • Type: Short-term
+              </p>
+            </li>
+
+            <!-- Card 2 -->
+            <li
+              class="trip-card bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
+              data-continent="pacific"
+              data-month="2026-07"
+              data-type="training"
+            >
+              <div>
+                <h3 class="trip-name text-lg font-semibold mb-1 text-neutral-900 dark:text-neutral-100">Fiji – July 2026</h3>
+                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm mb-4">
+                  Training + village evangelism.
+                </p>
+              </div>
+              <div class="mt-auto flex justify-center">
+                <button
+                  type="button"
+                  data-modal="signup"
+                  aria-label="Open signup modal for Fiji – July 2026"
+                  class="px-3 py-1.5 text-sm rounded-lg border border-primary-500 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                >
+                  Learn More
+                </button>
+              </div>
+              <p class="mt-3 text-xs text-neutral-600 dark:text-neutral-500">
+                Continent: Pacific • Month: 2026-07 • Type: Training
+              </p>
+            </li>
+
+            <!-- Card 3 -->
+            <li
+              class="trip-card bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
+              data-continent="africa"
+              data-month="2026-05"
+              data-type="outreach"
+            >
+              <div>
+                <h3 class="trip-name text-lg font-semibold mb-1 text-neutral-900 dark:text-neutral-100">Kenya – May 2026</h3>
+                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm mb-4">
+                  Partnering with local churches in Nairobi.
+                </p>
+              </div>
+              <div class="mt-auto flex justify-center">
+                <button
+                  type="button"
+                  data-modal="signup"
+                  aria-label="Open signup modal for Kenya – May 2026"
+                  class="px-3 py-1.5 text-sm rounded-lg border border-primary-500 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                >
+                  Learn More
+                </button>
+              </div>
+              <p class="mt-3 text-xs text-neutral-600 dark:text-neutral-500">
+                Continent: Africa • Month: 2026-05 • Type: Outreach
+              </p>
+            </li>
+          </ul>
+        </div>
+      </Col>
+    </Row>
+  </Section>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js" defer></script>
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", () => {
+      const tripList = new List("trips", { valueNames: ["trip-name", "trip-desc"] });
+
+      const continentSel = document.getElementById("continent-filter");
+      const monthSel = document.getElementById("month-filter");
+      const typeSel = document.getElementById("type-filter");
+      const clearBtn = document.getElementById("clear-filters");
+
+      function applyFilters() {
+        const c = continentSel.value;
+        const m = monthSel.value;
+        const t = typeSel.value;
+
+        if (!c && !m && !t) {
+          tripList.filter();
+        } else {
+          tripList.filter((item) => {
+            const el = item.elm;
+            return (
+              (!c || el.dataset.continent === c) &&
+              (!m || el.dataset.month === m) &&
+              (!t || el.dataset.type === t)
+            );
+          });
+        }
+        updateClearState();
+      }
+
+      function clearFilters() {
+        continentSel.value = "";
+        monthSel.value = "";
+        typeSel.value = "";
+        tripList.filter();
+        updateClearState();
+      }
+
+      function updateClearState() {
+        clearBtn.disabled = !(continentSel.value || monthSel.value || typeSel.value);
+      }
+
+      continentSel.addEventListener("change", applyFilters);
+      monthSel.addEventListener("change", applyFilters);
+      typeSel.addEventListener("change", applyFilters);
+      clearBtn.addEventListener("click", clearFilters);
+      updateClearState();
+    });
+  </script>
+</Layout>
