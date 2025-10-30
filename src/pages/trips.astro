@@ -188,12 +188,28 @@ const SEO = {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js" defer></script>
   <script is:inline>
     window.addEventListener("DOMContentLoaded", () => {
+      const STORAGE_KEY = "fn_trips_filters";
+
       const tripList = new List("trips", { valueNames: ["trip-name", "trip-desc"] });
 
       const continentSel = document.getElementById("continent-filter");
       const monthSel = document.getElementById("month-filter");
       const typeSel = document.getElementById("type-filter");
       const clearBtn = document.getElementById("clear-filters");
+
+      function saveFilters() {
+        const state = { c: continentSel.value, m: monthSel.value, t: typeSel.value };
+        try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+      }
+
+      function loadFilters() {
+        try {
+          const raw = sessionStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const { c = "", m = "", t = "" } = JSON.parse(raw) || {};
+          continentSel.value = c; monthSel.value = m; typeSel.value = t;
+        } catch {}
+      }
 
       function applyFilters() {
         const c = continentSel.value;
@@ -213,6 +229,7 @@ const SEO = {
           });
         }
         updateClearState();
+        saveFilters();
       }
 
       function clearFilters() {
@@ -221,25 +238,43 @@ const SEO = {
         typeSel.value = "";
         tripList.filter();
         updateClearState();
+        saveFilters();
       }
 
       function updateClearState() {
         clearBtn.disabled = !(continentSel.value || monthSel.value || typeSel.value);
       }
 
+      // Restore last state (if any) and apply once
+      loadFilters();
+      applyFilters();
+
+      // Wire up controls
       continentSel.addEventListener("change", applyFilters);
       monthSel.addEventListener("change", applyFilters);
       typeSel.addEventListener("change", applyFilters);
       clearBtn.addEventListener("click", clearFilters);
-      updateClearState();
 
-      // 🔒 Prevent List.js refresh or page reload when clicking modal buttons
+      // Guard modal buttons in cards
       document.querySelectorAll(".trip-card [data-modal]").forEach(btn => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
         });
       });
+
+      // Re-apply filters after common modal-close side effects
+      window.addEventListener("hashchange", applyFilters, false);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) applyFilters();
+      }, false);
+      document.addEventListener("click", (e) => {
+        const target = e.target;
+        if (target && (target as HTMLElement).closest?.("[data-close]")) {
+          // modal close button clicked
+          setTimeout(applyFilters, 0);
+        }
+      }, false);
     });
   </script>
 </Layout>
