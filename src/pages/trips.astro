@@ -3,12 +3,65 @@ import Layout from '../layouts/Layout.astro'
 import Section from '../components/ui/Section.astro'
 import Row from '../components/ui/Row.astro'
 import Col from '../components/ui/Col.astro'
+import FeatureCard from '../components/ui/cards/FeatureCard.astro'
 
 const SEO = {
   title: 'Mission Trips | Frontier Nations',
   description:
     'Explore upcoming mission trips and training opportunities from Frontier Nations. Filter by continent, month, and trip type to find your fit.',
 }
+
+// Trip data (you can later move this to /src/data/trips.json or CloudCannon)
+const trips = [
+  {
+    title: 'Nepal – April 2026',
+    subtitle: 'Short-term outreach in Kathmandu.',
+    image: '/assets/trips/nepal.jpg',
+    continent: 'asia',
+    month: '2026-04',
+    type: 'short-term',
+  },
+  {
+    title: 'Fiji – July 2026',
+    subtitle: 'Training + village evangelism.',
+    image: '/assets/trips/fiji.jpg',
+    continent: 'pacific',
+    month: '2026-07',
+    type: 'training',
+  },
+  {
+    title: 'Kenya – May 2026',
+    subtitle: 'Partnering with local churches in Nairobi.',
+    image: '/assets/trips/kenya.jpg',
+    continent: 'africa',
+    month: '2026-05',
+    type: 'outreach',
+  },
+  {
+    title: 'Samoa – September 2026',
+    subtitle: 'Discipleship & youth ministry.',
+    image: '/assets/trips/samoa.jpg',
+    continent: 'pacific',
+    month: '2026-09',
+    type: 'discipleship',
+  },
+  {
+    title: 'Thailand – January 2027',
+    subtitle: 'Campus outreach + prayer walks.',
+    image: '/assets/trips/thailand.jpg',
+    continent: 'asia',
+    month: '2027-01',
+    type: 'campus',
+  },
+  {
+    title: 'Malaysia – January 2026',
+    subtitle: 'City evangelism & leadership huddles.',
+    image: '/assets/trips/malaysia.jpg',
+    continent: 'asia',
+    month: '2026-01',
+    type: 'outreach',
+  },
+]
 ---
 
 <Layout title={SEO.title} description={SEO.description}>
@@ -95,57 +148,16 @@ const SEO = {
       <Col span="12">
         <div id="trips" class="mt-10">
           <ul class="list grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <!-- Trip Cards -->
-            <li
-              class="trip-card bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
-              data-continent="asia"
-              data-month="2026-04"
-              data-type="short-term"
-            >
-              <div>
-                <h3 class="trip-name text-lg font-semibold mb-1">Nepal – April 2026</h3>
-                <p class="trip-desc text-neutral-400 text-sm mb-3">
-                  Short-term outreach in Kathmandu.
-                </p>
-              </div>
-              <p class="text-xs text-neutral-500">
-                Continent: Asia • Month: 2026-04 • Type: Short-term
-              </p>
-            </li>
-
-            <li
-              class="trip-card bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
-              data-continent="pacific"
-              data-month="2026-07"
-              data-type="training"
-            >
-              <div>
-                <h3 class="trip-name text-lg font-semibold mb-1">Fiji – July 2026</h3>
-                <p class="trip-desc text-neutral-400 text-sm mb-3">
-                  Training + village evangelism.
-                </p>
-              </div>
-              <p class="text-xs text-neutral-500">
-                Continent: Pacific • Month: 2026-07 • Type: Training
-              </p>
-            </li>
-
-            <li
-              class="trip-card bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
-              data-continent="africa"
-              data-month="2026-05"
-              data-type="outreach"
-            >
-              <div>
-                <h3 class="trip-name text-lg font-semibold mb-1">Kenya – May 2026</h3>
-                <p class="trip-desc text-neutral-400 text-sm mb-3">
-                  Partnering with local churches in Nairobi.
-                </p>
-              </div>
-              <p class="text-xs text-neutral-500">
-                Continent: Africa • Month: 2026-05 • Type: Outreach
-              </p>
-            </li>
+            {trips.map((t) => (
+              <li
+                class="trip-card flex flex-col"
+                data-continent={t.continent}
+                data-month={t.month}
+                data-type={t.type}
+              >
+                <FeatureCard title={t.title} subtitle={t.subtitle} image={t.image} />
+              </li>
+            ))}
           </ul>
         </div>
       </Col>
@@ -199,7 +211,6 @@ const SEO = {
       monthSel.addEventListener("change", applyFilters);
       typeSel.addEventListener("change", applyFilters);
       clearBtn.addEventListener("click", clearFilters);
-
       updateClearState();
     });
   </script>
