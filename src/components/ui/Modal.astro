@@ -1,19 +1,7 @@
 ---
-// Modal
-// ------------
-// Description: the modal component is a ui element that displays a dialog box that appears on top of the current page.
-// Properties:
-// - Id: the id of the modal (use this id in the "modal" prop of the button)
-// - Title: the title of the modal
-// - classes: additional classes
-// Reference: https://wind-ui.com/components/modals/
-
-// Components
-// - UI
 import Button from './Button.astro'
 import { Icon } from 'astro-icon/components'
 
-// Props
 type Props = {
   id?: string
   title?: string
@@ -38,14 +26,14 @@ const { id, title, classes } = Astro.props
 </div>
 
 <style>
-  /* Overlay: keep Foxi’s original behavior (hidden until .open) */
+  /* Overlay */
   .modal {
     @apply fixed left-0 top-0 z-30 flex h-0 w-full items-center justify-center overflow-hidden
            bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50
            [&.open]:h-full;
   }
 
-  /* Popup: width 80vw on phones, 50vw from md+; cap height at 80vh (shrinks if content is shorter) */
+  /* Popup */
   .modal__popup {
     @apply m-6 flex w-[80vw] md:w-[50vw] max-w-full max-h-[80vh]
            translate-y-6 flex-col overflow-hidden rounded border border-neutral-100
@@ -63,33 +51,24 @@ const { id, title, classes } = Astro.props
     @apply mb-0 truncate text-lg text-neutral-900 dark:text-neutral-50;
   }
 
-  /* Scroll area: 10% top/bottom padding, themed scrollbar; no flex-1 so modal can shrink */
   .modal__body {
     @apply overflow-y-auto px-6 py-[10%];
   }
 
-  /* Custom scrollbar (neutral — works in light & dark) */
-  .modal__body::-webkit-scrollbar {
-    width: 8px;
-  }
+  .modal__body::-webkit-scrollbar { width: 8px; }
   .modal__body::-webkit-scrollbar-thumb {
-    background-color: rgb(163 163 163 / 0.5); /* neutral-400 with transparency */
+    background-color: rgb(163 163 163 / 0.5);
     border-radius: 4px;
   }
   .modal__body::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(115 115 115 / 0.7); /* neutral-500 hover */
-  }
-  .modal__body::-webkit-scrollbar-track {
-    background: transparent;
+    background-color: rgb(115 115 115 / 0.7);
   }
 
-  .modal__close {
-    @apply !rounded-full !px-2.5;
-  }
+  .modal__close { @apply !rounded-full !px-2.5; }
 </style>
 
 <script is:inline>
-  // Back-button close + scroll lock, without changing Foxi’s overlay logic
+  // Handles scroll-lock & history state for modals (no page reloads)
   document.addEventListener('astro:page-load', () => {
     const modals = document.querySelectorAll('.modal');
 
@@ -99,33 +78,29 @@ const { id, title, classes } = Astro.props
       const onClassChange = () => {
         const isOpen = modal.classList.contains('open');
 
-        // Body scroll lock
+        // Lock / unlock body scroll
         document.body.style.overflow = isOpen ? 'hidden' : '';
 
-        // History push on open (once)
+        // Push dummy state on open
         if (isOpen && !pushedForThisOpen) {
           history.pushState({ modalOpen: true }, '');
           pushedForThisOpen = true;
         }
 
-        // If user closes the modal (via close button or clicking overlay in LocalScripts),
-        // and we had pushed a state for it, pop that state so Back behaves normally.
+        // Safe close: remove dummy state without triggering navigation
         if (!isOpen && pushedForThisOpen && history.state && history.state.modalOpen) {
           pushedForThisOpen = false;
-          // Pop only our dummy state; stays on the same page
-          history.back();
+          history.replaceState({}, '');
         }
       };
 
-      // Observe changes to the modal's class attribute (open/close).
+      // Observe open/close class changes
       const observer = new MutationObserver(onClassChange);
       observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
 
       // Close modal on browser Back
       window.addEventListener('popstate', () => {
-        if (modal.classList.contains('open')) {
-          modal.classList.remove('open');
-        }
+        if (modal.classList.contains('open')) modal.classList.remove('open');
       });
     });
   });
