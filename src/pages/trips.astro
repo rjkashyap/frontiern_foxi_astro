@@ -232,6 +232,14 @@ const SEO = {
       typeSel.addEventListener("change", applyFilters);
       clearBtn.addEventListener("click", clearFilters);
       updateClearState();
+
+      // 🔒 Prevent List.js refresh or page reload when clicking modal buttons
+      document.querySelectorAll(".trip-card [data-modal]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      });
     });
   </script>
 </Layout>
