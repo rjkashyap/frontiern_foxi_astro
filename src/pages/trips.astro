@@ -245,17 +245,17 @@ const SEO = {
         clearBtn.disabled = !(continentSel.value || monthSel.value || typeSel.value);
       }
 
-      // Restore last state (if any) and apply once
+      // Restore previous state
       loadFilters();
       applyFilters();
 
-      // Wire up controls
+      // Hook up filter controls
       continentSel.addEventListener("change", applyFilters);
       monthSel.addEventListener("change", applyFilters);
       typeSel.addEventListener("change", applyFilters);
       clearBtn.addEventListener("click", clearFilters);
 
-      // Guard modal buttons in cards
+      // Prevent modal buttons from interfering
       document.querySelectorAll(".trip-card [data-modal]").forEach(btn => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
@@ -263,15 +263,14 @@ const SEO = {
         });
       });
 
-      // Re-apply filters after common modal-close side effects
+      // Reapply filters after modal close or soft refresh
       window.addEventListener("hashchange", applyFilters, false);
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) applyFilters();
       }, false);
       document.addEventListener("click", (e) => {
-        const target = e.target;
-        if (target && (target as HTMLElement).closest?.("[data-close]")) {
-          // modal close button clicked
+        const el = e.target instanceof Element ? e.target : null;
+        if (el && el.closest("[data-close]")) {
           setTimeout(applyFilters, 0);
         }
       }, false);
