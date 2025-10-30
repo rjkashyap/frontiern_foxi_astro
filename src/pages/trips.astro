@@ -27,7 +27,7 @@ const SEO = {
       </Col>
     </Row>
 
-    <!-- Filter Controls -->
+    <!-- Filter Controls (selects only) -->
     <Row>
       <Col span="12" align="center">
         <div
@@ -79,17 +79,21 @@ const SEO = {
               <option value="campus">Campus</option>
             </select>
           </div>
-
-          <!-- Clear -->
-          <button
-            id="clear-filters"
-            type="button"
-            disabled
-            class="px-4 py-1.5 text-sm font-bold tracking-wide rounded-lg border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100 disabled:opacity-40"
-          >
-            Clear All Filters
-          </button>
         </div>
+      </Col>
+    </Row>
+
+    <!-- Clear All Filters on its own row -->
+    <Row>
+      <Col span="12" align="center" classes="mt-3">
+        <button
+          id="clear-filters"
+          type="button"
+          disabled
+          class="px-4 py-2 text-sm font-bold tracking-wide uppercase rounded-lg border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100 disabled:opacity-40"
+        >
+          Clear All Filters
+        </button>
       </Col>
     </Row>
 
@@ -212,6 +216,7 @@ const SEO = {
         const state = { c: continentSel.value, m: monthSel.value, t: typeSel.value };
         try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
       }
+
       function loadFilters() {
         try {
           const raw = sessionStorage.getItem(STORAGE_KEY);
