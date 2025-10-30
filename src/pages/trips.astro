@@ -3,6 +3,9 @@ import Layout from '../layouts/Layout.astro'
 import Section from '../components/ui/Section.astro'
 import Row from '../components/ui/Row.astro'
 import Col from '../components/ui/Col.astro'
+import Button from '../components/ui/Button.astro'
+
+import feature02 from '../../assets/cards/feature-02.svg'
 
 const SEO = {
   title: 'Mission Trips | Frontier Nations',
@@ -95,95 +98,95 @@ const SEO = {
       <Col span="12">
         <div id="trips" class="mt-10">
           <ul class="list grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <!-- Card 1 -->
+            <!-- Card Template -->
             <li
-              class="trip-card bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
+              class="trip-card flex flex-col bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden hover:border-primary-500 transition"
               data-continent="asia"
               data-month="2026-04"
               data-type="short-term"
             >
-              <div>
-                <h3 class="trip-name text-lg font-semibold mb-1 text-neutral-900 dark:text-neutral-100">Nepal – April 2026</h3>
-                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm">
+              <img src={feature02.src} alt="Nepal Mission Trip" class="w-full h-48 object-cover" />
+              <div class="flex flex-col flex-grow p-6">
+                <h3 class="trip-name text-lg font-semibold mb-2 text-neutral-900 dark:text-neutral-100">
+                  Nepal – April 2026
+                </h3>
+                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm mb-4 flex-grow">
                   Short-term outreach in Kathmandu.
                 </p>
+                <div class="mt-auto pt-4">
+                  <Button
+                    size="base"
+                    style="primary"
+                    modal="signup"
+                    classes="w-full !text-neutral-900 !bg-primary-500 hover:!bg-neutral-300 dark:hover:!bg-neutral-600 focus:!ring-2 focus:!ring-primary-500/40"
+                  >
+                    Learn More
+                  </Button>
+                </div>
+                <p class="mt-3 text-xs text-neutral-600 dark:text-neutral-500">
+                  Continent: Asia • Month: 2026-04 • Type: Short-term
+                </p>
               </div>
-
-              <!-- Button area: anchored bottom with extra spacing -->
-              <div class="mt-auto pt-4 pb-3 flex justify-center">
-                <button
-                  type="button"
-                  data-modal="signup"
-                  aria-label="Open signup modal for Nepal – April 2026"
-                  class="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
-                >
-                  Learn More
-                </button>
-              </div>
-
-              <p class="mt-4 text-xs text-neutral-600 dark:text-neutral-500">
-                Continent: Asia • Month: 2026-04 • Type: Short-term
-              </p>
             </li>
 
-            <!-- Card 2 -->
             <li
-              class="trip-card bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
+              class="trip-card flex flex-col bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden hover:border-primary-500 transition"
               data-continent="pacific"
               data-month="2026-07"
               data-type="training"
             >
-              <div>
-                <h3 class="trip-name text-lg font-semibold mb-1 text-neutral-900 dark:text-neutral-100">Fiji – July 2026</h3>
-                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm">
+              <img src={feature02.src} alt="Fiji Mission Trip" class="w-full h-48 object-cover" />
+              <div class="flex flex-col flex-grow p-6">
+                <h3 class="trip-name text-lg font-semibold mb-2 text-neutral-900 dark:text-neutral-100">
+                  Fiji – July 2026
+                </h3>
+                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm mb-4 flex-grow">
                   Training + village evangelism.
                 </p>
+                <div class="mt-auto pt-4">
+                  <Button
+                    size="base"
+                    style="primary"
+                    modal="signup"
+                    classes="w-full !text-neutral-900 !bg-primary-500 hover:!bg-neutral-300 dark:hover:!bg-neutral-600 focus:!ring-2 focus:!ring-primary-500/40"
+                  >
+                    Learn More
+                  </Button>
+                </div>
+                <p class="mt-3 text-xs text-neutral-600 dark:text-neutral-500">
+                  Continent: Pacific • Month: 2026-07 • Type: Training
+                </p>
               </div>
-
-              <div class="mt-auto pt-4 pb-3 flex justify-center">
-                <button
-                  type="button"
-                  data-modal="signup"
-                  aria-label="Open signup modal for Fiji – July 2026"
-                  class="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
-                >
-                  Learn More
-                </button>
-              </div>
-
-              <p class="mt-4 text-xs text-neutral-600 dark:text-neutral-500">
-                Continent: Pacific • Month: 2026-07 • Type: Training
-              </p>
             </li>
 
-            <!-- Card 3 -->
             <li
-              class="trip-card bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 flex flex-col justify-between hover:border-primary-500 transition"
+              class="trip-card flex flex-col bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden hover:border-primary-500 transition"
               data-continent="africa"
               data-month="2026-05"
               data-type="outreach"
             >
-              <div>
-                <h3 class="trip-name text-lg font-semibold mb-1 text-neutral-900 dark:text-neutral-100">Kenya – May 2026</h3>
-                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm">
+              <img src={feature02.src} alt="Kenya Mission Trip" class="w-full h-48 object-cover" />
+              <div class="flex flex-col flex-grow p-6">
+                <h3 class="trip-name text-lg font-semibold mb-2 text-neutral-900 dark:text-neutral-100">
+                  Kenya – May 2026
+                </h3>
+                <p class="trip-desc text-neutral-700 dark:text-neutral-400 text-sm mb-4 flex-grow">
                   Partnering with local churches in Nairobi.
                 </p>
+                <div class="mt-auto pt-4">
+                  <Button
+                    size="base"
+                    style="primary"
+                    modal="signup"
+                    classes="w-full !text-neutral-900 !bg-primary-500 hover:!bg-neutral-300 dark:hover:!bg-neutral-600 focus:!ring-2 focus:!ring-primary-500/40"
+                  >
+                    Learn More
+                  </Button>
+                </div>
+                <p class="mt-3 text-xs text-neutral-600 dark:text-neutral-500">
+                  Continent: Africa • Month: 2026-05 • Type: Outreach
+                </p>
               </div>
-
-              <div class="mt-auto pt-4 pb-3 flex justify-center">
-                <button
-                  type="button"
-                  data-modal="signup"
-                  aria-label="Open signup modal for Kenya – May 2026"
-                  class="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
-                >
-                  Learn More
-                </button>
-              </div>
-
-              <p class="mt-4 text-xs text-neutral-600 dark:text-neutral-500">
-                Continent: Africa • Month: 2026-05 • Type: Outreach
-              </p>
             </li>
           </ul>
         </div>
@@ -196,9 +199,7 @@ const SEO = {
   <script is:inline>
     window.addEventListener("DOMContentLoaded", () => {
       const STORAGE_KEY = "fn_trips_filters";
-
       const tripList = new List("trips", { valueNames: ["trip-name", "trip-desc"] });
-
       const continentSel = document.getElementById("continent-filter");
       const monthSel = document.getElementById("month-filter");
       const typeSel = document.getElementById("type-filter");
@@ -206,78 +207,38 @@ const SEO = {
 
       function saveFilters() {
         const state = { c: continentSel.value, m: monthSel.value, t: typeSel.value };
-        try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       }
-
       function loadFilters() {
-        try {
-          const raw = sessionStorage.getItem(STORAGE_KEY);
-          if (!raw) return;
-          const { c = "", m = "", t = "" } = JSON.parse(raw) || {};
-          continentSel.value = c; monthSel.value = m; typeSel.value = t;
-        } catch {}
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const { c = "", m = "", t = "" } = JSON.parse(raw);
+        continentSel.value = c; monthSel.value = m; typeSel.value = t;
       }
-
       function applyFilters() {
-        const c = continentSel.value;
-        const m = monthSel.value;
-        const t = typeSel.value;
-
-        if (!c && !m && !t) {
-          tripList.filter();
-        } else {
-          tripList.filter((item) => {
-            const el = item.elm;
-            return (
-              (!c || el.dataset.continent === c) &&
-              (!m || el.dataset.month === m) &&
-              (!t || el.dataset.type === t)
-            );
-          });
-        }
-        updateClearState();
-        saveFilters();
+        const c = continentSel.value, m = monthSel.value, t = typeSel.value;
+        tripList.filter(item => {
+          const el = item.elm;
+          return (
+            (!c || el.dataset.continent === c) &&
+            (!m || el.dataset.month === m) &&
+            (!t || el.dataset.type === t)
+          );
+        });
+        updateClearState(); saveFilters();
       }
-
       function clearFilters() {
-        continentSel.value = "";
-        monthSel.value = "";
-        typeSel.value = "";
-        tripList.filter();
-        updateClearState();
-        saveFilters();
+        continentSel.value = monthSel.value = typeSel.value = "";
+        tripList.filter(); updateClearState(); saveFilters();
       }
-
       function updateClearState() {
         clearBtn.disabled = !(continentSel.value || monthSel.value || typeSel.value);
       }
-
-      // Restore previous state
-      loadFilters();
-      applyFilters();
-
+      loadFilters(); applyFilters();
       continentSel.addEventListener("change", applyFilters);
       monthSel.addEventListener("change", applyFilters);
       typeSel.addEventListener("change", applyFilters);
       clearBtn.addEventListener("click", clearFilters);
-
-      document.querySelectorAll(".trip-card [data-modal]").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        });
-      });
-
-      window.addEventListener("hashchange", applyFilters, false);
-      document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) applyFilters();
-      }, false);
-      document.addEventListener("click", (e) => {
-        const el = e.target instanceof Element ? e.target : null;
-        if (el && el.closest("[data-close]")) {
-          setTimeout(applyFilters, 0);
-        }
-      }, false);
     });
   </script>
 </Layout>
