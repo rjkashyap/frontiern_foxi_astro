@@ -146,60 +146,61 @@ const SEO = {
                 Continent: Africa • Month: 2026-05 • Type: Outreach
               </p>
             </li>
-
-            <!-- Add more trips here -->
           </ul>
         </div>
       </Col>
     </Row>
   </Section>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js" defer></script>
   <script is:inline>
-    const tripList = new List("trips", { valueNames: ["trip-name", "trip-desc"] });
+    window.addEventListener("DOMContentLoaded", () => {
+      const tripList = new List("trips", { valueNames: ["trip-name", "trip-desc"] });
 
-    const continentSel = document.getElementById("continent-filter");
-    const monthSel = document.getElementById("month-filter");
-    const typeSel = document.getElementById("type-filter");
-    const clearBtn = document.getElementById("clear-filters");
+      const continentSel = document.getElementById("continent-filter");
+      const monthSel = document.getElementById("month-filter");
+      const typeSel = document.getElementById("type-filter");
+      const clearBtn = document.getElementById("clear-filters");
 
-    function applyFilters() {
-      const c = continentSel.value;
-      const m = monthSel.value;
-      const t = typeSel.value;
+      function applyFilters() {
+        const c = continentSel.value;
+        const m = monthSel.value;
+        const t = typeSel.value;
 
-      if (!c && !m && !t) {
-        tripList.filter();
-      } else {
-        tripList.filter((item) => {
-          const el = item.elm;
-          const okC = !c || el.dataset.continent === c;
-          const okM = !m || el.dataset.month === m;
-          const okT = !t || el.dataset.type === t;
-          return okC && okM && okT;
-        });
+        if (!c && !m && !t) {
+          tripList.filter();
+        } else {
+          tripList.filter((item) => {
+            const el = item.elm;
+            return (
+              (!c || el.dataset.continent === c) &&
+              (!m || el.dataset.month === m) &&
+              (!t || el.dataset.type === t)
+            );
+          });
+        }
+        updateClearState();
       }
+
+      function clearFilters() {
+        continentSel.value = "";
+        monthSel.value = "";
+        typeSel.value = "";
+        tripList.filter();
+        updateClearState();
+      }
+
+      function updateClearState() {
+        clearBtn.disabled = !(continentSel.value || monthSel.value || typeSel.value);
+      }
+
+      continentSel.addEventListener("change", applyFilters);
+      monthSel.addEventListener("change", applyFilters);
+      typeSel.addEventListener("change", applyFilters);
+      clearBtn.addEventListener("click", clearFilters);
+
       updateClearState();
-    }
-
-    function clearFilters() {
-      continentSel.value = "";
-      monthSel.value = "";
-      typeSel.value = "";
-      tripList.filter();
-      updateClearState();
-    }
-
-    function updateClearState() {
-      const hasAny = continentSel.value || monthSel.value || typeSel.value;
-      clearBtn.disabled = !hasAny;
-    }
-
-    continentSel.addEventListener("change", applyFilters);
-    monthSel.addEventListener("change", applyFilters);
-    typeSel.addEventListener("change", applyFilters);
-    clearBtn.addEventListener("click", clearFilters);
-
-    updateClearState();
+    });
   </script>
 </Layout>
