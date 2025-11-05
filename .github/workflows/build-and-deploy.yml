@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,7 +34,11 @@ jobs:
       - name: Deploy to CloudCannon branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: cloudcannon-build     # CloudCannon hosts this branch
-          folder: dist                  # change to _site if not Astro
+          branch: cloudcannon-build      # CloudCannon hosts this branch
+          folder: dist                   # change to _site if not Astro
           clean: true
           commit-message: "Automated build: ${{ github.sha }}"
+          exclude: |
+            cloudcannon.config.yml
+            .cloudcannon/**
+            _cloudcannon/**
