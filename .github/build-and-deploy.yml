@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: cloudcannon-deploy
+      cancel-in-progress: true
 
     steps:
       - name: Checkout Source
@@ -17,9 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Site
         run: npm run build
@@ -27,5 +31,7 @@ jobs:
       - name: Deploy to CloudCannon branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: cloudcannon-build
-          folder: dist
+          branch: cloudcannon-build     # CloudCannon hosts this branch
+          folder: dist                  # change to _site if not Astro
+          clean: true
+          commit-message: "Automated build: ${{ github.sha }}"
