@@ -31,26 +31,21 @@ jobs:
       - name: Build Site
         run: npm run build
 
-      # Optional: include CloudCannon config in the built output
-      - name: Copy CloudCannon config into output
-        if: ${{ hashFiles('cloudcannon.config.yml') != '' }}
-        run: cp cloudcannon.config.yml dist/_cloudcannon.config.yml
-
-      - name: Deploy built files to CloudCannon branch
+      - name: Deploy to CloudCannon branch (built files)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: cloudcannon-build
           folder: dist
           clean: true
-          clean-exclude: |
-            .cloudcannon/**
-            _cloudcannon/**
           commit-message: "Automated build: ${{ github.sha }}"
 
-      # Trigger CloudCannon to refresh & publish that branch
+      # Explicitly tell CloudCannon to refresh from the branch we just pushed
       - name: Trigger CloudCannon deploy
+        env:
+          CC_SITE_ID: "143789"
+          CC_TOKEN: ${{ secrets.CLOUDCANNON_TOKEN }}
         run: |
-          curl -sS -X POST "https://api.cloudcannon.com/api/v1/sites/143789/builds" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDCANNON_TOKEN }}" \
+          curl -sS -X POST "https://api.cloudcannon.com/api/v1/sites/${CC_SITE_ID}/builds" \
+            -H "Authorization: Bearer ${CC_TOKEN}" \
             -H "Content-Type: application/json" \
             -d '{"branch":"cloudcannon-build"}'
