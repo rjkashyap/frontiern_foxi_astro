@@ -37,8 +37,8 @@ jobs:
           branch: cloudcannon-build
           folder: dist
           clean: true
-          commit-message: "Automated build: ${{ github.sha }}"
-          exclude: |
+          clean-exclude: |
             cloudcannon.config.yml
             .cloudcannon/**
             _cloudcannon/**
+          commit-message: "Automated build: ${{ github.sha }}"
