@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
       - name: Install Dependencies
         run: npm ci
@@ -31,7 +31,12 @@ jobs:
       - name: Build Site
         run: npm run build
 
-      - name: Deploy to CloudCannon branch (built files)
+      # Optional: include CloudCannon config with the built files
+      - name: Copy CloudCannon config into output (if present)
+        if: ${{ hashFiles('cloudcannon.config.yml') != '' }}
+        run: cp cloudcannon.config.yml dist/cloudcannon.config.yml
+
+      - name: Deploy built files to cloudcannon-build
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: cloudcannon-build
@@ -39,7 +44,7 @@ jobs:
           clean: true
           commit-message: "Automated build: ${{ github.sha }}"
 
-      # Explicitly tell CloudCannon to refresh from the branch we just pushed
+      # Explicit trigger so CloudCannon refreshes immediately
       - name: Trigger CloudCannon deploy
         env:
           CC_SITE_ID: "143789"
