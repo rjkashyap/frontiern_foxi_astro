@@ -57,10 +57,11 @@ export default {
           500: "#64748b",
           600: "#475569",
           700: "#334155",
-          800: "#1e293b",
-          900: "#0f172a",
-          950: "#020617",
+          800: "#1B1C20", // elevated surface
+          900: "#161A22", // mid surface
+          950: "#101115", // base background
         },
+
 
         // ✅ NEW DARK THEME TOKENS (your palette)
         dark: {
