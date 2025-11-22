@@ -6,14 +6,8 @@ paths:
 # LAYER 1 — HIDE EVERYTHING EXCEPT BLOG + UPLOADS
 # -----------------------------------------
 file_editor:
-  include:
-    - src/content/blog/**
-    - public/uploads/**
   exclude:
-    - src/**
-    - public/**
     - "*"
-  # Re-include the allowed paths after global exclude
   include:
     - src/content/blog/**
     - public/uploads/**
@@ -24,7 +18,7 @@ file_editor:
 editable_regions: []
 
 # -----------------------------------------
-# LAYER 3 — DISABLE SOURCE EDITOR
+# LAYER 3 — DISABLE VISUAL + SOURCE EDITOR
 # -----------------------------------------
 editor:
   source_editor:
@@ -33,15 +27,8 @@ editor:
     enabled: false
 
 # -----------------------------------------
-# LAYER 4 — PREVENT FILE OPERATIONS OUTSIDE BLOG/UPLOADS
+# LAYER 4 — BLOG COLLECTION
 # -----------------------------------------
-file_actions:
-  create: false
-  delete: false
-  move: false
-  rename: false
-
-# Allow blog creation ONLY via collection
 collections_config:
   blog:
     name: Blog Posts
@@ -57,38 +44,21 @@ collections_config:
         type: auto
 
 # -----------------------------------------
-# LAYER 5 — BLOG IS THE ONLY COLLECTION
+# LAYER 5 — FORCE BLOG TO APPEAR IN SIDEBAR
 # -----------------------------------------
 collections:
   blog:
-    name: Blog Posts
-    icon: note
+    name: Blog
+    icon: article
 
-# -----------------------------------------
-# LAYER 6 — LOCK IMAGE UPLOADS TO ONE FOLDER
-# -----------------------------------------
-inputs:
-  image:
-    uploads_dir: public/uploads
-
-# -----------------------------------------
-# LAYER 7 — PREVENT CLOUDCANNON FROM TREATING OTHER .md FILES AS CONTENT
-# -----------------------------------------
 collection_groups:
   - heading: Content
     collections:
       - blog
 
 # -----------------------------------------
-# LAYER 8 — HIDE CLOUDCANNON CONFIG ITSELF
+# LAYER 6 — LOCK IMAGE UPLOADS
 # -----------------------------------------
-file_editor:
-  exclude:
-    - cloudcannon.config.yml
-    - .cloudcannon/**
-    - cloudcannon/**
-
-# Re-include allowed paths again to override exclusions
-  include:
-    - src/content/blog/**
-    - public/uploads/**
+inputs:
+  image:
+    uploads_dir: public/uploads
