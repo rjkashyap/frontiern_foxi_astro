@@ -2,16 +2,93 @@ paths:
   static: public
   uploads: public/uploads
 
-collections_config:
-  pages:
-    path: src/pages
-    output: true
-    _editing:
-      content: true
-      front_matter: true
+# -----------------------------------------
+# LAYER 1 — HIDE EVERYTHING EXCEPT BLOG + UPLOADS
+# -----------------------------------------
+file_editor:
+  include:
+    - src/content/blog/**
+    - public/uploads/**
+  exclude:
+    - src/**
+    - public/**
+    - "*"
+  # Re-include the allowed paths after global exclude
+  include:
+    - src/content/blog/**
+    - public/uploads/**
 
-editable_regions:
-  - selector: "main, h1, h2, h3, p, li, span"
-    type: text
-  - selector: "img"
-    type: image
+# -----------------------------------------
+# LAYER 2 — DISABLE INLINE EDITING
+# -----------------------------------------
+editable_regions: []
+
+# -----------------------------------------
+# LAYER 3 — DISABLE SOURCE EDITOR
+# -----------------------------------------
+editor:
+  source_editor:
+    enabled: false
+  visual_editor:
+    enabled: false
+
+# -----------------------------------------
+# LAYER 4 — PREVENT FILE OPERATIONS OUTSIDE BLOG/UPLOADS
+# -----------------------------------------
+file_actions:
+  create: false
+  delete: false
+  move: false
+  rename: false
+
+# Allow blog creation ONLY via collection
+collections_config:
+  blog:
+    name: Blog Posts
+    path: src/content/blog
+    output: true
+    allow_add: true
+    allow_delete: true
+    _editor:
+      edit: true
+      remove: true
+    _inputs:
+      "*":
+        type: auto
+
+# -----------------------------------------
+# LAYER 5 — BLOG IS THE ONLY COLLECTION
+# -----------------------------------------
+collections:
+  blog:
+    name: Blog Posts
+    icon: note
+
+# -----------------------------------------
+# LAYER 6 — LOCK IMAGE UPLOADS TO ONE FOLDER
+# -----------------------------------------
+inputs:
+  image:
+    uploads_dir: public/uploads
+
+# -----------------------------------------
+# LAYER 7 — PREVENT CLOUDCANNON FROM TREATING OTHER .md FILES AS CONTENT
+# -----------------------------------------
+collection_groups:
+  - heading: Content
+    collections:
+      - blog
+
+# -----------------------------------------
+# LAYER 8 — HIDE CLOUDCANNON CONFIG ITSELF
+# -----------------------------------------
+file_editor:
+  exclude:
+    - cloudcannon.config.yml
+    - .cloudcannon/**
+    - cloudcannon/**
+
+# Re-include allowed paths again to override exclusions
+  include:
+    - src/content/blog/**
+    - public/uploads/**
