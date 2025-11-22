@@ -1,21 +1,26 @@
 ---
-title: 'Enhancing Team Collaboration'
+title: Enhancing Team Collaboration
 pubDate: 2024-06-04T05:00:00Z
-description: 'At Foxi, we believe that effective team collaboration is key to achieving great results. Our latest update introduces new features designed to enhance how your team works together.'
-author: 'Eleni K'
-image: '/blog/post-05-cover.png'
-tags: ['app', 'announcement']
+description: >-
+  At Foxi, we believe that effective team collaboration is key to achieving
+  great results. Our latest update introduces new features designed to enhance
+  how your team works together.
+author: Eleni K
+image: >-
+  /uploads/freepik-oil-painting-artistic-crossroads-in-a-meadow-one-p-84961-1.png
+tags:
+  - app
+  - announcement
 ---
-
-![Foxi is here.](/blog/post-05.png)
+<img src="/uploads/freepik-oil-painting-artistic-crossroads-in-a-meadow-one-p-84961.png" alt="Foxi is here." loading="lazy" />
 
 At Foxi, we believe that effective team collaboration is key to achieving great results. Our latest update introduces new features designed to enhance how your team works together.
 
 ### New Collaboration Features
 
-- **Shared Task Lists**: Create and share task lists with your team. Keep everyone on the same page and ensure that no task is overlooked.
-- **Team Messaging Enhancements**: We've improved our in-app messaging with new features like message threading, mentions, and file sharing to make communication smoother and more organized.
-- **Collaborative Notes**: Take notes during meetings and brainstorming sessions, and share them with your team instantly. Everyone can contribute and stay updated.
+* **Shared Task Lists**: Create and share task lists with your team. Keep everyone on the same page and ensure that no task is overlooked.
+* **Team Messaging Enhancements**: We've improved our in-app messaging with new features like message threading, mentions, and file sharing to make communication smoother and more organized.
+* **Collaborative Notes**: Take notes during meetings and brainstorming sessions, and share them with your team instantly. Everyone can contribute and stay updated.
 
 #### Why Collaboration Matters
 
