@@ -1,7 +1,4 @@
 ---
-import Button from './Button.astro'
-import { Icon } from 'astro-icon/components'
-
 type Props = {
   id: string
   title?: string
@@ -11,18 +8,18 @@ type Props = {
 const { id, title, classes } = Astro.props
 ---
 
-<!-- Root container required by MicroModal -->
-<div 
+<!-- MicroModal outer container -->
+<div
   id={id}
-  class:list={["modal micromodal-slide", classes]}
+  class:list={['modal micromodal-slide', classes]}
   aria-hidden="true"
 >
 
-  <!-- Overlay – MUST contain data-micromodal-close -->
+  <!-- Overlay -->
   <div class="modal__overlay" tabindex="-1" data-micromodal-close>
 
-    <!-- Dialog -->
-    <div 
+    <!-- Popup -->
+    <div
       class="modal__container"
       role="dialog"
       aria-modal="true"
@@ -31,26 +28,18 @@ const { id, title, classes } = Astro.props
 
       <!-- Header -->
       <header class="modal__header">
-        {title && (
-          <h2 class="modal__title" id={`${id}-title`}>
-            {title}
-          </h2>
-        )}
-
-        <Button
-          size="sm"
-          style="neutral"
-          classes="modal__close"
-          variation="link"
+        {title && <h2 class="modal__title" id={`${id}-title`}>{title}</h2>}
+        <button
+          class="modal__close"
+          aria-label="Close modal"
           data-micromodal-close
         >
-          <Icon name="x-mark" />
-          <span class="sr-only">Close</span>
-        </Button>
+          ✕
+        </button>
       </header>
 
       <!-- Body -->
-      <main class="modal__body" id={`${id}-content`}>
+      <main class="modal__content" id={`${id}-content`}>
         <slot />
       </main>
 
@@ -58,9 +47,8 @@ const { id, title, classes } = Astro.props
   </div>
 </div>
 
-
-<!-- Styles (kept close to your existing look) -->
 <style>
+  /* REQUIRED structure for MicroModal */
   .modal {
     display: none;
   }
@@ -69,28 +57,42 @@ const { id, title, classes } = Astro.props
   }
 
   .modal__overlay {
-    @apply fixed inset-0 bg-white/50 dark:bg-neutral-900/60 flex items-center justify-center;
+    background: rgba(0,0,0,0.55);
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
   }
 
   .modal__container {
-    @apply mx-6 w-[80vw] md:w-[50vw] max-w-full max-h-[80vh]
-           bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200
-           rounded shadow-xl overflow-hidden;
+    background: white;
+    color: black;
+    border-radius: 10px;
+    max-width: 600px;
+    width: 100%;
+    padding: 2rem;
+    position: relative;
   }
 
   .modal__header {
-    @apply flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-700;
-  }
-
-  .modal__title {
-    @apply text-lg font-semibold;
-  }
-
-  .modal__body {
-    @apply px-6 py-6 overflow-y-auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
   }
 
   .modal__close {
-    @apply !rounded-full !px-2.5;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .modal__content {
+    max-height: 70vh;
+    overflow-y: auto;
   }
 </style>
