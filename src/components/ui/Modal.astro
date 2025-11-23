@@ -10,41 +10,74 @@ type Props = {
 const { id, title, classes } = Astro.props
 ---
 
-<div {...(id ? { id } : {})} class:list={['modal', { [`${classes}`]: classes }]}>
-  <div class="modal__popup">
-    <div class="modal__header">
-      {title && <h2 class="modal__title">{title}</h2>}
-      <Button size="sm" style="neutral" classes="modal__close" variation="link">
-        <Icon name="x-mark" class="dark:text-neutral-50" />
-        <span class="sr-only">Close</span>
-      </Button>
-    </div>
-    <div class="modal__body">
-      <slot />
+<!-- MicroModal expects:
+     - aria-hidden="true"
+     - modal-overlay with data-micromodal-close
+     - close button with data-micromodal-close
+-->
+<div 
+  {...(id ? { id } : {})} 
+  class:list={['modal micromodal-slide', { [`${classes}`]: classes }]}
+  aria-hidden="true"
+>
+
+  <!-- OVERLAY -->
+  <div class="modal__overlay" data-micromodal-close tabindex="-1">
+
+    <!-- POPUP -->
+    <div class="modal__popup" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`}>
+
+      <div class="modal__header">
+        {title && <h2 id={`${id}-title`} class="modal__title">{title}</h2>}
+
+        <Button 
+          size="sm" 
+          style="neutral" 
+          classes="modal__close" 
+          variation="link" 
+          data-micromodal-close
+        >
+          <Icon name="x-mark" class="dark:text-neutral-50" />
+          <span class="sr-only">Close</span>
+        </Button>
+      </div>
+
+      <div class="modal__body">
+        <slot />
+      </div>
+
     </div>
   </div>
 </div>
 
+<!-- Your existing Tailwind styling stays the same -->
 <style>
   /* Overlay */
   .modal {
-    @apply fixed left-0 top-0 z-30 flex h-0 w-full items-center justify-center overflow-hidden
-           bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50
-           [&.open]:h-full;
+    @apply fixed left-0 top-0 z-30 flex h-full w-full items-center justify-center 
+           overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50;
+  }
+
+  .modal__overlay {
+    @apply absolute inset-0 flex items-center justify-center;
   }
 
   /* Popup */
   .modal__popup {
-    @apply m-6 flex w-[80vw] md:w-[50vw] max-w-full max-h-[80vh]
+    @apply relative m-6 flex w-[80vw] md:w-[50vw] max-w-full max-h-[80vh]
            translate-y-6 flex-col overflow-hidden rounded border border-neutral-100
            bg-white text-neutral-500 opacity-0 shadow-xl shadow-neutral-700/5
-           transition-all duration-500
-           dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50
-           [.open_&]:translate-y-0 [.open_&]:opacity-100;
+           transition-all duration-300
+           dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50;
+  }
+
+  .micromodal-slide.is-open .modal__popup {
+    @apply opacity-100 translate-y-0;
   }
 
   .modal__header {
-    @apply flex items-center justify-between gap-6 border-b border-neutral-100 px-6 py-3 text-lg font-medium dark:border-neutral-800;
+    @apply flex items-center justify-between gap-6 border-b border-neutral-100 
+           px-6 py-3 text-lg font-medium dark:border-neutral-800;
   }
 
   .modal__title {
@@ -55,53 +88,19 @@ const { id, title, classes } = Astro.props
     @apply overflow-y-auto px-6 py-[10%];
   }
 
-  .modal__body::-webkit-scrollbar { width: 8px; }
-  .modal__body::-webkit-scrollbar-thumb {
-    background-color: rgb(163 163 163 / 0.5);
-    border-radius: 4px;
-  }
-  .modal__body::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(115 115 115 / 0.7);
-  }
-
   .modal__close { @apply !rounded-full !px-2.5; }
 </style>
 
 <script is:inline>
-  // Handles scroll-lock & history state for modals (no page reloads)
+  import '/vendor/micromodal.min.js';
+
   document.addEventListener('astro:page-load', () => {
-    const modals = document.querySelectorAll('.modal');
-
-    modals.forEach((modal) => {
-      let pushedForThisOpen = false;
-
-      const onClassChange = () => {
-        const isOpen = modal.classList.contains('open');
-
-        // Lock / unlock body scroll
-        document.body.style.overflow = isOpen ? 'hidden' : '';
-
-        // Push dummy state on open
-        if (isOpen && !pushedForThisOpen) {
-          history.pushState({ modalOpen: true }, '');
-          pushedForThisOpen = true;
-        }
-
-        // Safe close: remove dummy state without triggering navigation
-        if (!isOpen && pushedForThisOpen && history.state && history.state.modalOpen) {
-          pushedForThisOpen = false;
-          history.replaceState({}, '');
-        }
-      };
-
-      // Observe open/close class changes
-      const observer = new MutationObserver(onClassChange);
-      observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
-
-      // Close modal on browser Back
-      window.addEventListener('popstate', () => {
-        if (modal.classList.contains('open')) modal.classList.remove('open');
-      });
+    // Initialize MicroModal globally (safe to run multiple times)
+    MicroModal.init({
+      openClass: 'is-open',
+      disableScroll: true,
+      awaitOpenAnimation: true,
+      awaitCloseAnimation: true
     });
   });
 </script>
