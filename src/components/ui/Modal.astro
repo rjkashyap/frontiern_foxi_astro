@@ -3,104 +3,94 @@ import Button from './Button.astro'
 import { Icon } from 'astro-icon/components'
 
 type Props = {
-  id?: string
+  id: string
   title?: string
   classes?: string
 }
+
 const { id, title, classes } = Astro.props
 ---
 
-<!-- MicroModal expects:
-     - aria-hidden="true"
-     - modal-overlay with data-micromodal-close
-     - close button with data-micromodal-close
--->
+<!-- Root container required by MicroModal -->
 <div 
-  {...(id ? { id } : {})} 
-  class:list={['modal micromodal-slide', { [`${classes}`]: classes }]}
+  id={id}
+  class:list={["modal micromodal-slide", classes]}
   aria-hidden="true"
 >
 
-  <!-- OVERLAY -->
-  <div class="modal__overlay" data-micromodal-close tabindex="-1">
+  <!-- Overlay – MUST contain data-micromodal-close -->
+  <div class="modal__overlay" tabindex="-1" data-micromodal-close>
 
-    <!-- POPUP -->
-    <div class="modal__popup" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`}>
+    <!-- Dialog -->
+    <div 
+      class="modal__container"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`${id}-title`}
+    >
 
-      <div class="modal__header">
-        {title && <h2 id={`${id}-title`} class="modal__title">{title}</h2>}
+      <!-- Header -->
+      <header class="modal__header">
+        {title && (
+          <h2 class="modal__title" id={`${id}-title`}>
+            {title}
+          </h2>
+        )}
 
-        <Button 
-          size="sm" 
-          style="neutral" 
-          classes="modal__close" 
-          variation="link" 
+        <Button
+          size="sm"
+          style="neutral"
+          classes="modal__close"
+          variation="link"
           data-micromodal-close
         >
-          <Icon name="x-mark" class="dark:text-neutral-50" />
+          <Icon name="x-mark" />
           <span class="sr-only">Close</span>
         </Button>
-      </div>
+      </header>
 
-      <div class="modal__body">
+      <!-- Body -->
+      <main class="modal__body" id={`${id}-content`}>
         <slot />
-      </div>
+      </main>
 
     </div>
   </div>
 </div>
 
-<!-- Your existing Tailwind styling stays the same -->
+
+<!-- Styles (kept close to your existing look) -->
 <style>
-  /* Overlay */
   .modal {
-    @apply fixed left-0 top-0 z-30 flex h-full w-full items-center justify-center 
-           overflow-hidden bg-white/50 lg:backdrop-blur-sm dark:bg-neutral-900/50;
+    display: none;
+  }
+  .modal.is-open {
+    display: block;
   }
 
   .modal__overlay {
-    @apply absolute inset-0 flex items-center justify-center;
+    @apply fixed inset-0 bg-white/50 dark:bg-neutral-900/60 flex items-center justify-center;
   }
 
-  /* Popup */
-  .modal__popup {
-    @apply relative m-6 flex w-[80vw] md:w-[50vw] max-w-full max-h-[80vh]
-           translate-y-6 flex-col overflow-hidden rounded border border-neutral-100
-           bg-white text-neutral-500 opacity-0 shadow-xl shadow-neutral-700/5
-           transition-all duration-300
-           dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-neutral-950/50;
-  }
-
-  .micromodal-slide.is-open .modal__popup {
-    @apply opacity-100 translate-y-0;
+  .modal__container {
+    @apply mx-6 w-[80vw] md:w-[50vw] max-w-full max-h-[80vh]
+           bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200
+           rounded shadow-xl overflow-hidden;
   }
 
   .modal__header {
-    @apply flex items-center justify-between gap-6 border-b border-neutral-100 
-           px-6 py-3 text-lg font-medium dark:border-neutral-800;
+    @apply flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-700;
   }
 
   .modal__title {
-    @apply mb-0 truncate text-lg text-neutral-900 dark:text-neutral-50;
+    @apply text-lg font-semibold;
   }
 
   .modal__body {
-    @apply overflow-y-auto px-6 py-[10%];
+    @apply px-6 py-6 overflow-y-auto;
   }
 
-  .modal__close { @apply !rounded-full !px-2.5; }
+  .modal__close {
+    @apply !rounded-full !px-2.5;
+  }
 </style>
-
-<script is:inline>
-  import '/vendor/micromodal.min.js';
-
-  document.addEventListener('astro:page-load', () => {
-    // Initialize MicroModal globally (safe to run multiple times)
-    MicroModal.init({
-      openClass: 'is-open',
-      disableScroll: true,
-      awaitOpenAnimation: true,
-      awaitCloseAnimation: true
-    });
-  });
-</script>
